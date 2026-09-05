@@ -2024,10 +2024,12 @@ GuziczakModules.define('config/sequence', [], () => {
         ['mould-seat', 8.36, 11], ['gold-drop', 9.33, 12], ['eject', 12.58, 13], ['signature', 14.88, 14]
     ].map(([id, at, voice]) => Object.freeze({ id, at, voice })));
     const cues = Object.freeze({
-        vesselFade: [14.03, 14.64], cameraSettled: 14.56,
-        // These preserve the supplied baseline. The desired longer shaded-cup hold is a
-        // separate art-direction change, not silently folded into this architecture pass.
-        canvasFade: [16.10, 16.95], dock: [16.95, 18.55],
+        // The vessel keeps the exact final transform authored by scene/assembly. Only its
+        // visibility is held longer; no duplicate cup and no replacement transform exists.
+        vesselFade: [19.18, 19.58], cameraSettled: 14.56,
+        // The flying mark is now independent from the WebGL canvas. This is what allows the
+        // real cup to remain in the lower shadow while mark + word + claim arrive above it.
+        markReveal: [16.10, 16.82], canvasFade: [19.18, 19.58], dock: [16.95, 18.55],
         hero: [18.00, 19.45], header: [18.75, 19.30], handoff: 16.85,
         word: [14.80, 15.19], claimIn: [14.95, 15.29], claimOut: [15.68, 16.28],
         captionOut: [13.70, 14.40], progressOut: [14.60, 15.80], brandOut: [13.50, 14.30]
@@ -2035,7 +2037,7 @@ GuziczakModules.define('config/sequence', [], () => {
     const mix = Object.freeze({ music: .98, effects: .42, master: .80, foleyMaster: .60, pourBase: .105, pourPressure: .10 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
     const durations = Object.freeze({}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-1', referenceDuration: 19.6 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-2', referenceDuration: 19.6 };
 });
 
 
@@ -3785,8 +3787,11 @@ GuziczakModules.define("scene/signature", ["math", "scene/curves", "config/vocab
         if (t >= 12.57) {
             const scale = mix(.79, .83, lift), y = mix(-2.1388 + .19 * breakSeal, .66, lift), z = mix(1.08, 0, lift) + Math.sin(lift * PI) * 1.05;
             castTransform = C(M.T(0, y, z), M.Rx(-(1 - turn) * PI / 2), M.S(scale));
-            push(meshes.signatureA, castTransform, 0, [0, 0, 0], [0, 0, 0], false, 1);
-            push(meshes.signatureB, castTransform, 0, [0, 0, 0], [0, 0, 0], false, 1);
+            const castVisibility = 1 - ease(16.10, 16.82, t);
+            if (castVisibility > .001) {
+                push(meshes.signatureA, castTransform, 0, [0, 0, 0], [0, 0, 0], false, castVisibility);
+                push(meshes.signatureB, castTransform, 0, [0, 0, 0], [0, 0, 0], false, castVisibility);
+            }
             if (t < 13.42) {
                 for (const [x, z] of [[-.47, .17], [.51, .58]])
                     push(meshes.ejector, C(moldRoot, M.T(x, -.327 + .19 * breakSeal - .215 * ease(13.02, 13.38, t), z)), 0, [0, 0, 0], [0, 0, 0], false, moldLight);
@@ -3889,7 +3894,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
         let markRect = null;
         function render(frame, packet, project, viewport) {
             const metrics = { rect: $('header-logo').getBoundingClientRect(), wr: $('header-word').getBoundingClientRect() };
-            const t = frame.time, mobile = viewport.width < 651, tail = ease(...cues.canvasFade, t), dock = ease(...cues.dock, t), hero = ease(...cues.hero, t), header = ease(...cues.header, t);
+            const t = frame.time, mobile = viewport.width < 651, markReveal = ease(...cues.markReveal, t), tail = ease(...cues.canvasFade, t), dock = ease(...cues.dock, t), hero = ease(...cues.hero, t), header = ease(...cues.header, t);
             const castTransform = packet.castTransform;
             $('intro-controls').style.opacity = '1';
             const caption = [frame.phaseNumber, frame.caption];
@@ -3916,7 +3921,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             flying.style.top = y + 'px';
             flying.style.width = mix(r.w, rect.width, dock) + 'px';
             flying.style.height = mix(r.h, rect.height, dock) + 'px';
-            flying.style.opacity = String(tail * (1 - header));
+            flying.style.opacity = String(markReveal * (1 - header));
             const wf = mobile ? clamp(viewport.width * .074, 25, 40) : clamp(viewport.width * .036, 36, 54), wfEnd = mobile ? 11 : 14, wy = Math.min(viewport.height * .64, r.y + r.h * .5 + 48);
             word.style.left = mix(viewport.width * .5, wr.left + wr.width / 2, dock) + 'px';
             word.style.top = (mix(wy, wr.top + wr.height / 2, dock) - Math.sin(dock * PI) * viewport.height * .04) + 'px';
