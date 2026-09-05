@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment VIII · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment IX · Przekuwam AI w wartość.</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d0e;--fg:#e9e7e0;--muted:#9b9d98;--gold:#cbb382;--line:#eee6cc20;--pad:clamp(24px,3.5vw,64px);--safe:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}body.intro{overflow:hidden}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;color:inherit}button,a{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:7px}button{border:0;background:none}button:disabled{opacity:.4;cursor:default}::selection{background:#cbb382;color:#111}
@@ -377,7 +377,7 @@ meshes.cup=build(b=>{
  for(let j=0;j<96;j++){const a=j*TAU/96;b.at(C(M.Ry(a),M.T(0,.93,1.149)),()=>cube(b,j%8===0?.011:.005,j%8===0?.032:.016,.004,1));}
 });
 meshes.cupBadge=build(b=>{
- b.at(C(M.Rx(.60),M.S(.10)),()=>{for(const p of LOGO_POLYGONS)extrudeLogo(b,p,.038,.009,1);});
+ b.at(C(M.Rx(.60),M.S(.155)),()=>{for(const p of LOGO_POLYGONS)extrudeLogo(b,p,.038,.009,1);});
 });
 meshes.coffeeSurface=build(b=>disk(b,1.091,4,160,34));
 meshes.coffeeStream=build(b=>paramTube(b,4,150,18));
@@ -971,7 +971,7 @@ function objects(){
  const elevation=.64*(1-lower),set=C(M.T(0,elevation-depart*1.8,-ease(12.87,14.05,t)*2.4));
  const seat=ease(.04,1.07,t),seatHit=t>1.07?.008*Math.exp(-(t-1.07)*19)*Math.sin((t-1.07)*50):0;
  const cup=C(set,M.T(0,(1-seat)*1.55-seatHit,0),M.Ry((1-seat)*.34));
- if(t>.02){push(meshes.pedestal,M.T(0,-(1-ease(.20,1.18,t))*.24,0),0,[0,0,0],[0,0,0],false,state.stage*ease(.2,.95,t));push(meshes.cup,cup);push(meshes.cupBadge,C(cup,M.T(0,.30,.906)));push(meshes.receiver,cup);}
+ if(t>.02){push(meshes.pedestal,M.T(0,-(1-ease(.20,1.18,t))*.24,0),0,[0,0,0],[0,0,0],false,state.stage*ease(.2,.95,t));push(meshes.cup,cup);push(meshes.cupBadge,C(cup,M.T(0,.235,.928)));push(meshes.receiver,cup);}
  // The cassette is already full-size. Nothing materialises by scaling up.
  // It first finds the keys, waits against a hard stop, then travels along the Y rail.
  const align=ease(.83,1.58,t),ram=ease(1.85,2.075,t),detent=t>2.075?.009*Math.exp(-(t-2.075)*29)*Math.sin((t-2.075)*64):0;
@@ -1179,16 +1179,16 @@ function draw(o,prog=meshProg,prefix=null){
 function filter(src,dst,dx,dy,threshold=0){bind(dst);gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(filterProg.p);texture(filterProg,'uTex',src.t,0);f2(filterProg,'uDir',dx,dy);f1(filterProg,'uThreshold',threshold);screen(filterProg);}
 function project(p){const q=M.point(VP,p),w=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];return[(q[0]/w*.5+.5)*innerWidth,(-q[1]/w*.5+.5)*innerHeight,w];}
 function updateUI(){
- const t=time,mobile=innerWidth<651,tail=ease(20.80,21.60,t),dock=ease(21.80,22.90,t),hero=ease(22.40,23.35,t),header=ease(22.90,23.50,t);
+ const t=time,mobile=innerWidth<651,tail=ease(21.10,21.95,t),dock=ease(22.10,23.10,t),hero=ease(22.65,23.45,t),header=ease(23.05,23.55,t);
  $('intro-controls').style.opacity='1';
- const caption=t<3?['01','Rygiel.']:t<4.5?['02','Energia.']:t<8.3?['03','To, co niewidzialne.']:t<9.34?['04','Forma.']:t<12.57?['05','Odlew.']:['06','Podpis.'];
- $('caption-n').textContent=caption[0];$('caption-name').textContent=caption[1];$('intro-caption').style.opacity=String(ease(.8,1.5,t)*(1-ease(13.70,14.4,t))*.76);
- $('intro-progress').style.opacity=String(1-ease(14.6,15.8,t));$('progress-fill').style.transform=`scaleX(${Math.min(1,t/TOTAL)})`;
- document.querySelector('.intro-brand').style.opacity=String((1-ease(13.5,14.3,t))*.48);
- body.classList.toggle('handoff',t>21.55);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
+ const caption=t<3?['01','Rygiel.']:t<4.5?['02','Energia.']:t<8.3?['03','To, co niewidzialne.']:t<9.34?['04','Forma.']:t<16.10?['05','Odlew i stygnięcie.']:['06','Podpis.'];
+ $('caption-n').textContent=caption[0];$('caption-name').textContent=caption[1];$('intro-caption').style.opacity=String(ease(.8,1.5,t)*(1-ease(20.85,21.55,t))*.76);
+ $('intro-progress').style.opacity=String(1-ease(21.2,22.2,t));$('progress-fill').style.transform=`scaleX(${Math.min(1,t/TOTAL)})`; 
+ document.querySelector('.intro-brand').style.opacity=String((1-ease(20.7,21.4,t))*.48);
+ body.classList.toggle('handoff',t>21.95);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
  canvas.style.opacity=String((1-tail)*ease(0,.45,t));$('cinema-shade').style.opacity=String(1-tail);
  const flying=$('flying-mark'),word=$('flying-word'),rect=$('header-logo').getBoundingClientRect(),wr=$('header-word').getBoundingClientRect();
- if(castTransform&&t>14.0){
+ if(castTransform&&t>15.0){
   const tl=project(M.point(castTransform,[-1.1,1.12,.08])),br=project(M.point(castTransform,[1.1,-1.12,.08]));
   markRect={x:(tl[0]+br[0])/2,y:(tl[1]+br[1])/2,w:Math.abs(br[0]-tl[0]),h:Math.abs(br[1]-tl[1])};
  }
@@ -1196,8 +1196,8 @@ function updateUI(){
  const r=markRect,x=mix(r.x,rect.left+rect.width/2,dock),y=mix(r.y,rect.top+rect.height/2,dock)-Math.sin(dock*PI)*innerHeight*.055;
  flying.style.left=x+'px';flying.style.top=y+'px';flying.style.width=mix(r.w,rect.width,dock)+'px';flying.style.height=mix(r.h,rect.height,dock)+'px';flying.style.opacity=String(tail*(1-header));
  const wf=mobile?clamp(innerWidth*.074,25,40):clamp(innerWidth*.036,36,54),wfEnd=mobile?11:14,wy=Math.min(innerHeight*.64,r.y+r.h*.5+48);
- word.style.left=mix(innerWidth*.5,wr.left+wr.width/2,dock)+'px';word.style.top=(mix(wy,wr.top+wr.height/2,dock)-Math.sin(dock*PI)*innerHeight*.04)+'px';word.style.fontSize=mix(wf,wfEnd,dock)+'px';word.style.opacity=String(ease(14.80,15.19,t)*(1-header));
- $('signature-line').style.top=(wy+46)+'px';$('signature-line').style.opacity=String(ease(14.95,15.29,t)*(1-ease(15.68,16.28,t)));
+ word.style.left=mix(innerWidth*.5,wr.left+wr.width/2,dock)+'px';word.style.top=(mix(wy,wr.top+wr.height/2,dock)-Math.sin(dock*PI)*innerHeight*.04)+'px';word.style.fontSize=mix(wf,wfEnd,dock)+'px';word.style.opacity=String(ease(18.95,19.45,t)*(1-header));
+ $('signature-line').style.top=(wy+46)+'px';$('signature-line').style.opacity=String(ease(19.05,19.45,t)*(1-ease(20.35,20.95,t)));
 }
 
 function render(){
@@ -1234,9 +1234,9 @@ function frame(ms){
  updateState();state.dirty=false;
  try{
   // Rendering stops after the handoff. The remaining page is ordinary HTML, not a GPU loop.
-  if(time<15.38||firstFrame||state.frozen)render();
+  if(time<TOTAL||firstFrame||state.frozen)render();
   updateUI();
-  if(firstFrame){firstFrame=false;body.classList.remove('booting');window.__renderReady=true;previous=performance.now();soundDirector.ready();console.info('GUZICZAK — brand moment V / PRZESMYK ready.',triangleCount,'triangles.');}
+  if(firstFrame){firstFrame=false;body.classList.remove('booting');window.__renderReady=true;previous=performance.now();soundDirector.ready();console.info('GUZICZAK — brand moment IX / PRZESMYK ready.',triangleCount,'triangles.');}
   frameNumber++;window.__frameNumber=frameNumber;
   if(audio)audio.update(state);
   if(!state.frozen&&time>=TOTAL){showPage();return;}
@@ -1248,7 +1248,7 @@ function frame(ms){
 function createAudio(ctx,destination=ctx.destination){
  const A={ctx,events:new Set(),lastDrop:-10,restarted:false};
  const input=ctx.createGain(),dry=ctx.createGain(),send=ctx.createGain(),reverb=ctx.createConvolver(),wet=ctx.createGain(),comp=ctx.createDynamicsCompressor(),master=ctx.createGain();
- input.gain.value=2.35;dry.gain.value=.72;send.gain.value=.22;wet.gain.value=.16;master.gain.value=0;
+ input.gain.value=1.82;dry.gain.value=.66;send.gain.value=.18;wet.gain.value=.12;master.gain.value=0;
  input.connect(dry);input.connect(send);send.connect(reverb);reverb.connect(wet);dry.connect(comp);wet.connect(comp);comp.connect(master);master.connect(destination);A.master=master;
  comp.threshold.value=-20;comp.knee.value=14;comp.ratio.value=4;comp.attack.value=.006;comp.release.value=.28;
  let rs=42081;const rnd=()=>{rs=(Math.imul(rs,1664525)+1013904223)>>>0;return rs/4294967296;};
@@ -1276,20 +1276,20 @@ function createAudio(ctx,destination=ctx.destination){
    else if(id===5){friction(.040,.12,1800,-.22);tone(520,.05,.005);}
    else if(id===6){friction(.072,.022,2500,-.30);tone(620,.055,.007);}
    else if(id===7){friction(.068,.026,2100,.31);tone(432,.06,.008);}
-   else if(id===8){tone(846,.060,.015,-.4);}
-   else if(id===9){friction(.026,.82,560,.52);tone(174,.92,.004,.48);}
-   else if(id===10){friction(.014,.28,1500,.38);}
-   else if(id===11){friction(.015,.30,160);}
-   else if(id===12){friction(.034,.28,365);}
-   else if(id===13){friction(.020,.14,610);}
+   else if(id===8){tone(846,.060,.009,-.4);}
+   else if(id===9){friction(.015,.82,560,.52);tone(174,.92,.0026,.48);}
+   else if(id===10){friction(.009,.28,1500,.38);}
+   else if(id===11){friction(.010,.30,160);}
+   else if(id===12){friction(.021,.28,365);}
+   else if(id===13){friction(.012,.14,610);}
    else{friction(.018,.17,980);}
   };
 
  A.stop=()=>{for(const {o} of A.events)try{o.stop(ctx.currentTime+.02);}catch(e){}stream.gain.setTargetAtTime(0,ctx.currentTime,.12);coilGain.gain.setTargetAtTime(0,ctx.currentTime,.1);};
  A.update=s=>{
   const t=ctx.currentTime,on=audioEnabled&&windowFocused&&!document.hidden&&!s.finished&&!s.frozen;
-  master.gain.setTargetAtTime(on?.60:0,t,.12);
-  stream.gain.setTargetAtTime(on?ease(4.62,5.02,s.time)*(1-ease(7.52,8.10,s.time))*(.105+jetPressureCPU(s.time)*.10):0,t,.035);
+  master.gain.setTargetAtTime(on?.50:0,t,.12);
+  stream.gain.setTargetAtTime(on?ease(4.62,5.02,s.time)*(1-ease(7.52,8.10,s.time))*(.050+jetPressureCPU(s.time)*.050):0,t,.040);
   coilGain.gain.setTargetAtTime(0,t,.09);coilOsc.frequency.setTargetAtTime(94+s.energy*13,t,.2);lp.frequency.setTargetAtTime(1200+jetPressureCPU(s.time)*720,t,.08);hp.frequency.setTargetAtTime(260+jetNoiseCPU(s.time*3.1)*170,t,.09);
   if(on){for(let i=0;i<eventTimes.length;i++)if(s.time>=eventTimes[i]&&!playedEvents.has(i)){playedEvents.add(i);if(s.time-eventTimes[i]<.36)A.cue(i);}}
  };
