@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment VII · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment VIII · Przekuwam AI w wartość.</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d0e;--fg:#e9e7e0;--muted:#9b9d98;--gold:#cbb382;--line:#eee6cc20;--pad:clamp(24px,3.5vw,64px);--safe:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}body.intro{overflow:hidden}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;color:inherit}button,a{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:7px}button{border:0;background:none}button:disabled{opacity:.4;cursor:default}::selection{background:#cbb382;color:#111}
@@ -382,7 +382,7 @@ meshes.cupBadge=build(b=>{
 meshes.coffeeSurface=build(b=>disk(b,1.091,4,160,34));
 meshes.coffeeStream=build(b=>paramTube(b,4,150,18));
 meshes.goldStream=build(b=>paramTube(b,5,100,18));
-meshes.dropCoffee=build(b=>b.sphere(1,4,12,16));meshes.dropGold=build(b=>b.sphere(1,5,12,16));
+meshes.dropCoffee=build(b=>b.sphere(1,4,12,16));meshes.dropGold=build(b=>b.sphere(1,5,12,16));meshes.dropMetal=build(b=>b.sphere(1,23,12,16));meshes.sprueStub=build(b=>{b.tube([[0,-.02,0],[0,.16,0]],.028,23,10);b.at(M.T(0,.16,0),()=>b.sphere(.034,23,10,14));});meshes.stain=build(b=>disk(b,1,17,48,5));
 // Central circulation chamber and the actual helical metal winding.
 meshes.neck=build(b=>{
  b.lathe([[.12,-.64],[.18,-.60],[.185,-.34],[.213,-.30],[.226,-.265],[.21,-.23]],2,96);
@@ -751,6 +751,7 @@ void main(){
   outColor=vec4(vec3(.22,.27,.27)*uObjectLight,fog*.26);return;
  }
  else if(id>21.5&&id<22.5){base=vec3(.009,.013,.015)*(macro*.4+.8);metal=.055;rough=.72;occ=.88;}
+ else if(id>22.5&&id<24.5){float oxide=.5+.5*fbm(q*14.);base=mix(vec3(.55,.44,.22),vec3(.35,.28,.17),oxide);base*=.88+.08*sin(q.x*28.+q.z*17.);metal=.96;rough=.34+macro*.08;occ=.94;}
  else if(id>14.5&&id<15.5){
   bool side=abs(q.x)>1.105&&abs(q.z)<1.18;float along=side?q.z:q.x,across=side?q.x:q.z;
   float warp=noise3(vec3(along*.81,across*5.,q.y*5.));
@@ -890,7 +891,7 @@ function resize(){
 function inverse4(m){const a=Array.from({length:4},(_,r)=>[m[r],m[4+r],m[8+r],m[12+r],...Array.from({length:4},(_,c)=>r===c?1:0)]);for(let k=0;k<4;k++){let p=k;for(let r=k+1;r<4;r++)if(Math.abs(a[r][k])>Math.abs(a[p][k]))p=r;[a[k],a[p]]=[a[p],a[k]];let d=a[k][k];if(Math.abs(d)<1e-12)return M.I();for(let j=0;j<8;j++)a[k][j]/=d;for(let r=0;r<4;r++)if(r!==k){d=a[r][k];for(let j=0;j<8;j++)a[r][j]-=a[k][j]*d;}}return new Float32Array(Array.from({length:16},(_,i)=>a[i%4][4+Math.floor(i/4)]));}
 // DIRECTOR. All motion is a function of one clock; no independent looping scene.
 const ease=(a,b,t)=>{t=clamp((t-a)/(b-a),0,1);return t*t*t*(t*(t*6-15)+10);};
-const TOTAL=19.6;
+const TOTAL=23.6;
 const state={time:0,flow:0,energy:0,pulse:0,wave:0,phase:'vessel',frozen:params.has('t'),dirty:true,finished:!autoPlay&&!params.has('t'),stage:1,steam:0,reveal:0};
 let time=params.has('t')?clamp(Number(params.get('t'))||0,0,TOTAL):0,flow=0,previous=performance.now(),firstFrame=true,gpuSync=null,view,projection,VP,cam,frameNumber=0,rafPending=false,castTransform=null,markRect=null;
 let audio=null,audioEnabled=false,windowFocused=true,previousSoundTime=0;
@@ -936,7 +937,7 @@ function updateState(){
  state.pulse=ease(8.95,9.14,time)*Math.exp(-Math.max(0,time-9.12)*1.65);state.wave=Math.max(0,time-9.00)*1.25;
  state.stage=1-ease(14.03,14.64,time);state.reveal=1;
  state.steam=ease(4.94,5.8,time)*(1-ease(8.45,10.55,time));
- state.phase=time<3?'assembly':time<4.5?'coffee':time<8.3?'intelligence':time<9.34?'mould':time<11.62?'casting':time<12.57?'cooling':time<14.6?'extraction':time<15.35?'signature':time<TOTAL?'handoff':'page';
+ state.phase=time<3?'assembly':time<4.5?'coffee':time<8.3?'intelligence':time<9.34?'mould':time<13.60?'casting':time<16.10?'cooling':time<18.60?'extraction':time<21.55?'signature':time<TOTAL?'handoff':'page';
 }
 // A closer latch shot with a short dwell; the camera eases out only once locked.
 const shots=[
@@ -1035,7 +1036,7 @@ function objects(){
  }
  // The flask arrives before the pour. Its sand is genuinely recessed, including
  // the pouring well, two feeders and both negative impressions of the signature.
- const moldIn=ease(7.68,8.36,t),withdraw=ease(13.66,14.68,t);
+ const moldIn=ease(7.68,8.36,t),withdraw=ease(16.30,17.80,t);
  const moldRoot=C(M.T(0,-2.055-withdraw*1.0,.88+(1-moldIn)*3.2-withdraw*2.15));
  const moldLight=state.stage*ease(7.66,7.88,t);
  if(t>7.66){
@@ -1050,89 +1051,84 @@ function objects(){
  const gb=clamp((t-11.23)/.30,0,1),ge=clamp((t-9.18)/.30,0,1);
  if(ge>gb+.001&&t<11.54)push(meshes.goldStream,M.I(),3,outlet,well,false,state.stage,gb,ge);
  for(const birth of [11.30,11.40]){const s=(t-birth)/.30;if(s>=0&&s<1){const p=curvePoint(outlet,well,s*s,0);push(meshes.dropGold,C(M.T(...p),M.S(.018,.029,.018)));}}
- const breakSeal=ease(12.57,12.88,t),lift=ease(12.88,14.56,t),turn=ease(13.28,14.56,t);
+ const breakSeal=ease(15.10,15.52,t),lift=ease(15.52,18.60,t),turn=ease(16.40,18.60,t);
  if(t>9.30){
   push(meshes.meltFeed,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);
-  if(t<12.57){push(meshes.meltA,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);push(meshes.meltB,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);}
+  if(t<15.10){push(meshes.meltA,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);push(meshes.meltB,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);}
  }
- // Overflow must look caused, not spawned: it leaves the fuller cavity first,
- // snakes over the sand, breaches the front board, then settles into connected puddles.
+ // Overflow is slower and viscous: it fills, crowns, overtops the front, then settles and cools.
  const B=(a,b,c,d,u)=>{const v=1-u,v2=v*v,u2=u*u;return[
   a[0]*v2*v+3*b[0]*v2*u+3*c[0]*v*u2+d[0]*u2*u,
   a[1]*v2*v+3*b[1]*v2*u+3*c[1]*v*u2+d[1]*u2*u,
   a[2]*v2*v+3*b[2]*v2*u+3*c[2]*v*u2+d[2]*u2*u
  ];};
- const flowTrail=(pts,birth,dur,baseR,endR,puddles)=>{
-  const age=t-birth;if(age<0)return;const prog=clamp(age/dur,0,1),cool=ease(dur*.82,dur+1.18,age);
-  const world=pts.map(p=>M.point(moldRoot,p));
-  for(let i=0;i<42;i++){
-   const u=i/41;if(u>prog)break;const p=B(world[0],world[1],world[2],world[3],u);
-   const tail=clamp((prog-u)/.30,0,1),head=1-clamp((prog-u)/.13,0,1),settle=ease(.06,.78,tail),heat=1-cool;
-   p[1]+=(1-settle)*.016*Math.sin(u*PI);
-   const r=mix(baseR,endR,u)+head*.010+settle*.004;
-   const sx=r*(1+.95*settle+head*.28),sy=r*(1.12-.62*settle+.12*head),sz=r*(.96+.75*settle+.10*head);
-   const mesh=cool>.06?meshes.dropMetal:meshes.spill;
-   push(mesh,C(M.T(...p),M.Ry(u*5.4+i*.19),M.S(sx,sy,sz)),0,[0,0,0],[0,0,0],false,moldLight*(.92+.08*heat));
+ const flowTrail=(pts,birth,dur,baseR,endR,coolOut)=>{
+  const age=t-birth;if(age<0)return {prog:0,cool:0};
+  const prog=clamp(age/dur,0,1),cool=ease(dur+.7,coolOut,age),world=pts.map(p=>M.point(moldRoot,p));
+  for(let i=0;i<84;i++){
+   const u=i/83;if(u>prog)break;const p=B(world[0],world[1],world[2],world[3],u);
+   const lag=clamp((prog-u)/.24,0,1),head=1-clamp((prog-u)/.08,0,1),settle=ease(.10,1.0,lag);
+   p[1]+=(1-settle)*.012*Math.sin(u*PI);
+   const r=mix(baseR,endR,u)+head*.012+settle*.008;
+   const sx=r*(1+.55*settle+head*.28),sy=r*(1.28-.72*settle),sz=r*(1.06+.88*settle);
+   const mesh=cool>.05?meshes.dropMetal:meshes.spill;
+   push(mesh,C(M.T(...p),M.Ry(u*4.2+i*.11),M.S(sx,sy,sz)),0,[0,0,0],[0,0,0],false,moldLight);
   }
-  for(const [u0,dx,dz,size,spread] of puddles){
-   const g=clamp((prog-u0)/.16,0,1);if(g<=0)continue;const p=B(world[0],world[1],world[2],world[3],Math.min(.999,u0));
-   p[0]+=dx*g;p[2]+=dz*g;p[1]-=.004;const mesh=cool>.05?meshes.dropMetal:meshes.spill;
-   push(mesh,C(M.T(...p),M.Ry((u0+spread)*8.2),M.S(size*(.78+g*spread),size*(.55-g*.08),size*(.84+g*spread*.92))),0,[0,0,0],[0,0,0],false,moldLight);
-  }
-  return prog;
+  return {prog,cool};
  };
- const mainProg=flowTrail([
-  [.18,-.012,.03],[.42,.030,.18],[.73,-.010,.56],[.61,-.016,.93]
- ],10.76,1.34,.016,.027,[
-  [.24,.04,.01,.028,1.2],[.42,.08,.04,.038,1.7],[.56,.12,.08,.050,2.2],[.70,.16,.10,.062,2.6],[.83,.18,.16,.074,3.0]
- ])||0;
- const sideProg=flowTrail([
-  [-.12,-.012,-.06],[-.30,.020,.00],[-.55,-.010,.20],[-.72,-.016,.47]
- ],11.04,1.08,.013,.021,[
-  [.36,-.05,.03,.024,1.1],[.58,-.08,.05,.030,1.4],[.78,-.10,.07,.035,1.7]
- ])||0;
- // After the main channel reaches the front rim, metal spills over the board and pools below it.
- if(mainProg>.72){
-  const o=clamp((mainProg-.72)/.28,0,1),cool=ease(12.02,13.24,t);
-  const a=M.point(moldRoot,[.61,-.016,.93]),b=M.point(moldRoot,[.58,.020,1.12]),c=M.point(moldRoot,[.46,-.082,1.34]),d=M.point(moldRoot,[.34,-.156,1.52]);
-  for(let i=0;i<20;i++){
-   const u=(i/19)*o,p=B(a,b,c,d,u),mesh=cool>.06?meshes.dropMetal:meshes.spill;
-   const thick=.028*(1-u*.30),flat=.40+.60*u;
-   push(mesh,C(M.T(...p),M.Rx(.28),M.S(thick*(1+u*.7),thick*(1.25-flat*.55),thick*(1.55+u*.55))),0,[0,0,0],[0,0,0],false,moldLight);
-  }
-  const lip=B(a,b,c,d,o);if(o>.15){
-   const mesh=cool>.06?meshes.dropMetal:meshes.spill;
-   push(mesh,C(M.T(lip[0],lip[1]-.02,lip[2]+.03),M.S(.050*(.6+o*1.8),.020+.040*o,.060*(.6+o*1.4))),0,[0,0,0],[0,0,0],false,moldLight);
-  }
-  if(o>.46){
-   const mesh=cool>.06?meshes.dropMetal:meshes.spill,spread=clamp((o-.46)/.54,0,1),p=M.point(moldRoot,[.30,-.166,1.55]);
-   push(mesh,C(M.T(...p),M.Ry(.35),M.S(.09+.18*spread,.020+.010*spread,.08+.14*spread)),0,[0,0,0],[0,0,0],false,moldLight);
-   push(mesh,C(M.T(p[0]-.17*spread,p[1]-.002,p[2]+.03*spread),M.Ry(-.42),M.S(.05+.11*spread,.016+.008*spread,.05+.09*spread)),0,[0,0,0],[0,0,0],false,moldLight);
+ const main=flowTrail([[.18,-.012,.03],[.38,.018,.18],[.63,-.010,.53],[.64,-.016,.90]],10.70,3.25,.018,.032,5.4);
+ const side=flowTrail([[-.10,-.012,-.05],[-.26,.012,.00],[-.51,-.010,.21],[-.69,-.016,.48]],11.45,2.45,.015,.024,4.6);
+ if(main.prog>.60){
+  const over=clamp((main.prog-.60)/.40,0,1),cool=ease(15.0,17.3,t);
+  const a=M.point(moldRoot,[.64,-.016,.90]),b=M.point(moldRoot,[.61,.012,1.08]),c=M.point(moldRoot,[.50,-.060,1.26]),d=M.point(moldRoot,[.38,-.150,1.44]);
+  for(let i=0;i<38;i++){
+   const u=(i/37)*over,p=B(a,b,c,d,u),mesh=cool>.05?meshes.dropMetal:meshes.spill;
+   const thick=.034*(1-u*.18),sheet=.52+.48*u;
+   push(mesh,C(M.T(...p),M.Rx(.34),M.S(thick*(1+u*.75),thick*(1.22-sheet*.42),thick*(1.72+u*.95))),0,[0,0,0],[0,0,0],false,moldLight);
   }
  }
- // A shallow connected sheen forms between both overspills as the metal levels out.
- if(t>11.48){
-  const merge=ease(11.48,12.34,t),cool=ease(12.30,13.30,t),mesh=cool>.04?meshes.dropMetal:meshes.spill;
-  for(const [x,z,sx,sz] of [[.10,.38,.11,.08],[-.03,.28,.08,.06],[.24,.18,.10,.07]]){
-   const p=M.point(moldRoot,[x,-.014,z]);
-   push(mesh,C(M.T(...p),M.Ry(x*3.7),M.S(sx*merge,.010+.012*merge,sz*merge)),0,[0,0,0],[0,0,0],false,moldLight*.92);
-  }
+ for(const [x,y,z,sx,sy,sz,rot,begin,growEnd,coolAt,stainAt] of [
+  [.32,-.158,1.52,.23,.024,.18,.24,13.10,15.90,16.20,16.80],
+  [.08,-.156,1.44,.17,.020,.13,-.18,13.55,16.20,16.50,17.00],
+  [-.10,-.150,1.31,.12,.016,.10,.14,14.00,16.40,16.80,17.20],
+  [.02,-.016,.98,.12,.014,.09,.04,14.10,16.60,16.95,17.35],
+  [.25,-.016,.66,.11,.013,.08,.38,14.45,16.85,17.15,17.50],
+  [-.19,-.016,.37,.09,.012,.07,-.31,14.55,16.95,17.20,17.65],
+  [-.47,-.016,.46,.11,.013,.09,-.22,14.85,17.20,17.45,17.90]
+ ]){
+  const grow=ease(begin,growEnd,t); if(grow<=0)continue; const cool=ease(coolAt,coolAt+1.1,t); const p=M.point(moldRoot,[x,y,z]);
+  push(cool>.05?meshes.dropMetal:meshes.spill,C(M.T(...p),M.Ry(rot),M.S(sx*(.34+grow*1.0),sy*(.48+grow*.34),sz*(.34+grow*1.0))),0,[0,0,0],[0,0,0],false,moldLight);
+  const stain=ease(stainAt,stainAt+1.0,t); if(stain>.001)push(meshes.stain,C(M.T(p[0]+.008,p[1]-.0030,p[2]+.004),M.Rx(-PI/2),M.Rz(rot*.7),M.S(sx*(.52+stain*1.55),1,sz*(.52+stain*1.55))),0,[0,0,0],[0,0,0],false,moldLight*.84);
  }
- // Eject vertically first. The cast cannot rotate or move through the sand.
+ // a faint bridge of cooled metal remains near the channel mouths, then the break becomes visible.
+ for(const [x,z,sx,sy,sz,rot] of [[.11,.18,.08,.010,.06,.22],[-.10,.02,.06,.010,.05,-.18]]){
+  const g=ease(14.30,15.80,t),fade=ease(16.40,17.10,t); if(g<=0||fade>=1)continue; const p=M.point(moldRoot,[x,-.014,z]);
+  push((fade>.35?meshes.dropMetal:meshes.spill),C(M.T(...p),M.Ry(rot),M.S(sx*g,sy*(.7+g*.5),sz*g)),0,[0,0,0],[0,0,0],false,moldLight*(1-fade*.4));
+ }
+// Eject vertically first. The cast cannot rotate or move through the sand.
  castTransform=null;
- if(t>=12.57){
-  const scale=mix(.79,.83,lift),y=mix(-2.1388+.19*breakSeal,.66,lift),z=mix(1.08,0,lift)+Math.sin(lift*PI)*1.05;
+ if(t>=15.10){
+  const scale=mix(.79,.835,lift),y=mix(-2.1388+.19*breakSeal,.66,lift),z=mix(1.08,0,lift)+Math.sin(lift*PI)*1.05;
   castTransform=C(M.T(0,y,z),M.Rx(-(1-turn)*PI/2),M.S(scale));
   push(meshes.signatureA,castTransform,0,[0,0,0],[0,0,0],false,1);push(meshes.signatureB,castTransform,0,[0,0,0],[0,0,0],false,1);
-  if(t<13.42){for(const [x,z] of [[-.47,.17],[.51,.58]])push(meshes.ejector,C(moldRoot,M.T(x,-.327+.19*breakSeal-.215*ease(13.02,13.38,t),z)),0,[0,0,0],[0,0,0],false,moldLight);}
-  // A few adhering sand grains release under gravity, showing the separation.
+  const snap=ease(17.45,18.20,t);
+  if(snap<1){
+   push(meshes.sprueStub,C(castTransform,M.T(-.22,.11,.07),M.Rz(.24),M.Rx(.18),M.S(1,.92,1)),0,[0,0,0],[0,0,0],false,1);
+   push(meshes.sprueStub,C(castTransform,M.T(.27,.10,.13),M.Rz(-.22),M.Rx(-.16),M.S(1,.88,1)),0,[0,0,0],[0,0,0],false,1);
+  }
+  if(snap>0&&snap<1){
+   const d=snap*.28;
+   push(meshes.sprueStub,C(castTransform,M.T(-.22-d,.08-d*.45,.09+d*.25),M.Rz(.65),M.Rx(.58),M.S(.70,.62,.70)),0,[0,0,0],[0,0,0],false,1);
+   push(meshes.sprueStub,C(castTransform,M.T(.27+d,.07-d*.38,.16+d*.18),M.Rz(-.58),M.Rx(.44),M.S(.66,.58,.66)),0,[0,0,0],[0,0,0],false,1);
+  }
+  if(t<15.88){for(const [x,z] of [[-.47,.17],[.51,.58]])push(meshes.ejector,C(moldRoot,M.T(x,-.327+.19*breakSeal-.215*ease(15.36,15.84,t),z)),0,[0,0,0],[0,0,0],false,moldLight);}
   for(let i=0;i<11;i++){
-   const age=t-(12.79+i*.020);if(age<0||age>.53)continue;
+   const age=t-(17.62+i*.020);if(age<0||age>.53)continue;
    const x=(i%2?1:-1)*(.27+(i%3)*.089),z=.18+(i%4)*.16,y=.003+age*.18-age*age*1.8;
    push(meshes.grain,C(moldRoot,M.T(x,y,z),M.Rx(i+age*2),M.Rz(i*.6)),0,[0,0,0],[0,0,0],false,moldLight);
   }
  }
- state.foundry={arrived:moldIn,fill:ease(9.35,11.38,t),cool:ease(11.62,12.52,t),eject:breakSeal,lift};
+state.foundry={arrived:moldIn,fill:ease(9.35,13.60,t),cool:ease(13.60,16.10,t),eject:breakSeal,lift};
  state.tokenCount=letterInstances.length;
  return{objs};
 }
@@ -1183,13 +1179,13 @@ function draw(o,prog=meshProg,prefix=null){
 function filter(src,dst,dx,dy,threshold=0){bind(dst);gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(filterProg.p);texture(filterProg,'uTex',src.t,0);f2(filterProg,'uDir',dx,dy);f1(filterProg,'uThreshold',threshold);screen(filterProg);}
 function project(p){const q=M.point(VP,p),w=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];return[(q[0]/w*.5+.5)*innerWidth,(-q[1]/w*.5+.5)*innerHeight,w];}
 function updateUI(){
- const t=time,mobile=innerWidth<651,tail=ease(16.10,16.95,t),dock=ease(16.95,18.55,t),hero=ease(18.00,19.45,t),header=ease(18.75,19.30,t);
+ const t=time,mobile=innerWidth<651,tail=ease(20.80,21.60,t),dock=ease(21.80,22.90,t),hero=ease(22.40,23.35,t),header=ease(22.90,23.50,t);
  $('intro-controls').style.opacity='1';
  const caption=t<3?['01','Rygiel.']:t<4.5?['02','Energia.']:t<8.3?['03','To, co niewidzialne.']:t<9.34?['04','Forma.']:t<12.57?['05','Odlew.']:['06','Podpis.'];
  $('caption-n').textContent=caption[0];$('caption-name').textContent=caption[1];$('intro-caption').style.opacity=String(ease(.8,1.5,t)*(1-ease(13.70,14.4,t))*.76);
  $('intro-progress').style.opacity=String(1-ease(14.6,15.8,t));$('progress-fill').style.transform=`scaleX(${Math.min(1,t/TOTAL)})`;
  document.querySelector('.intro-brand').style.opacity=String((1-ease(13.5,14.3,t))*.48);
- body.classList.toggle('handoff',t>16.85);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
+ body.classList.toggle('handoff',t>21.55);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
  canvas.style.opacity=String((1-tail)*ease(0,.45,t));$('cinema-shade').style.opacity=String(1-tail);
  const flying=$('flying-mark'),word=$('flying-word'),rect=$('header-logo').getBoundingClientRect(),wr=$('header-word').getBoundingClientRect();
  if(castTransform&&t>14.0){
