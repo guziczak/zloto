@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment III · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment IV · Przekuwam AI w wartość.</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d0e;--fg:#e9e7e0;--muted:#9b9d98;--gold:#cbb382;--line:#eee6cc20;--pad:clamp(24px,3.5vw,64px);--safe:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}body.intro{overflow:hidden}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;color:inherit}button,a{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:7px}button{border:0;background:none}button:disabled{opacity:.4;cursor:default}::selection{background:#cbb382;color:#111}
@@ -28,7 +28,7 @@
 </style>
 </head>
 <body>
-<canvas id="scene" aria-label="Sekwencja marki Guziczak. Kawa i tokeny AI trafiają do kielicha; złoto przechodzi przez cewkę i formuje monogram G ukośnik." role="img"></canvas>
+<canvas id="scene" aria-label="Sekwencja marki Guziczak. Kawa i tokeny AI trafiają do kielicha; złoto przechodzi przez cewkę i wypełnia formę odlewniczą, z której wyłania się sygnet marki." role="img"></canvas>
 <div id="cinema-shade" aria-hidden="true"></div>
 <div class="intro-brand" aria-hidden="true">GUITS / GUZICZAK</div>
 <div id="intro-controls"><button class="sound" id="sound" type="button" aria-label="Włącz dźwięk" aria-pressed="false" title="Lux in tenebris · muzyka i efekty · M"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 4 5 7H2v6h3l4 3Z"/><path id="sound-path" d="m13 7 5 6m0-6-5 6"/></svg><span class="sound-label" id="sound-label">Dotknij, by usłyszeć</span></button><button class="skip" id="skip" type="button">Pomiń<span>↗</span></button></div>
@@ -382,7 +382,15 @@ meshes.cupBadge=build(b=>{
 meshes.coffeeSurface=build(b=>disk(b,1.091,4,160,34));
 meshes.coffeeStream=build(b=>paramTube(b,4,150,18));
 meshes.goldStream=build(b=>paramTube(b,5,100,18));
-meshes.dropCoffee=build(b=>b.sphere(1,4,12,16));meshes.dropGold=build(b=>b.sphere(1,5,12,16));
+meshes.dropCoffee=build(b=>b.sphere(1,4,12,16));meshes.dropGold=build(b=>b.sphere(1,5,12,16));meshes.dropMetal=build(b=>b.sphere(1,1,12,16));
+meshes.moldBed=build(b=>{bevelBox(b,2.18,.18,1.44,.035,16,16);});
+meshes.moldFrame=build(b=>{
+ const w=2.42,d=1.68,h=.15,t=.14;
+ b.at(C(M.T(0,.03,d*.5-t*.5),M.Rz(.012)),()=>bevelBox(b,w,h,t,.02,15,15));
+ b.at(C(M.T(0,.03,-d*.5+t*.5),M.Rz(-.01)),()=>bevelBox(b,w,h,t,.02,15,15));
+ b.at(C(M.T(-w*.5+t*.5,.03,0),M.Rx(.01)),()=>bevelBox(b,t,h,d-2*t,.02,15,15));
+ b.at(C(M.T(w*.5-t*.5,.03,0),M.Rx(-.013)),()=>bevelBox(b,t,h,d-2*t,.02,15,15));
+});
 // Central circulation chamber and the actual helical metal winding.
 meshes.neck=build(b=>{
  b.lathe([[.12,-.64],[.18,-.60],[.185,-.34],[.213,-.30],[.226,-.265],[.21,-.23]],2,96);
@@ -446,8 +454,13 @@ meshes.bayonet=build(b=>{
 // No processor: a lenticular incision in space. Its edges are actual fine tubes;
 // the folded inner surface has its own dark optical material, not a picture.
 function seamPoint(s,side){
- const y=mix(-.82,.90,s),w=Math.pow(Math.sin(s*PI),1.40)*(.205+.020*Math.sin(s*23.));
- return[side*w+.038*Math.sin(s*PI*2)+.009*Math.sin(s*PI)*Math.sin(s*61.),y,.042*Math.sin(s*PI)*(side===1?1:-1)];
+ const y=mix(-.88,.96,s)+.018*Math.sin(s*PI*4.1)+.008*Math.sin(s*PI*9.7+1.2);
+ const bell=Math.pow(Math.sin(s*PI),1.22);
+ const ragged=1.+.18*Math.sin(s*PI*3.2+.4)+.14*Math.sin(s*PI*7.4+1.1)+.08*Math.sin(s*PI*15.2);
+ const w=(.035+.205*bell)*ragged*(side===1?1.07:.94);
+ const kink=.050*Math.sin(s*PI*1.7-.55)+.022*Math.sin(s*PI*5.8+1.6);
+ const depth=.05*Math.sin(s*PI)*(side===1?1:-1)+.013*Math.sin(s*PI*6.0+(side===1?0.0:1.7));
+ return[side*w+kink+.010*Math.sin(s*PI)*Math.sin(s*57.+side),y,depth];
 }
 meshes.aperture=build(b=>{
  for(let j=0;j<80;j++){
@@ -515,6 +528,8 @@ function extrudeLogo(b,input,depth,bevel,mat){
 }
 
 
+meshes.moldCavityA=build(b=>extrudeLogo(b,LOGO_POLYGONS[0],.10,.012,11));
+meshes.moldCavityB=build(b=>extrudeLogo(b,LOGO_POLYGONS[1],.10,.012,11));
 meshes.signatureA=build(b=>extrudeLogo(b,LOGO_POLYGONS[0],.16,.018,12));
 meshes.signatureB=build(b=>extrudeLogo(b,LOGO_POLYGONS[1],.16,.018,13));
 const triangleCount=Object.values(meshes).reduce((n,m)=>n+m.count/3,0);
@@ -624,7 +639,21 @@ void main(){
  float warm=exp(-dot(pp-vec2(0.,-.15),pp-vec2(0.,-.15))*9.);bg+=vec3(.009,.0045,.0007)*warm*(1.+uEnergy*.4);
  c=mix(c,bg,smoothstep(8.,32.,r));outColor=vec4(c,1.);return;
  }
- if(id>13.5){
+ if(id>15.5){
+  float grain=fbm(vec3(q.xz*7.5,q.y*4.2))+noise3(q*95.)*.08;
+  base=mix(vec3(.36,.34,.30),vec3(.60,.58,.54),smoothstep(.20,.82,grain));
+  metal=.02;rough=.84;
+  float pits=smoothstep(.62,.88,noise3(q*vec3(65.,12.,65.)));
+  base-=pits*.05;
+ }
+ else if(id>14.5){
+  float rings=.5+.5*sin(q.x*34.+q.z*9.);
+  float longGrain=fbm(vec3(q.x*6.0+q.z*1.2,q.y*18.,q.z*2.4));
+  base=mix(vec3(.23,.14,.07),vec3(.49,.31,.14),longGrain*.92);
+  base+=vec3(.08,.045,.01)*pow(rings,8.)*.24;
+  metal=.01;rough=.78;
+ }
+ else if(id>13.5){
   float fissure=pow(max(0.,1.-abs(q.x)/.33),2.0);
   float strata=fbm(vec3(q.xy*12.,q.z*8.+uTime*.12));
   vec3 c=vec3(.0002,.0005,.0007)+vec3(.006,.017,.020)*pow(1.-nv,4.);
@@ -917,15 +946,28 @@ function objects(){
   const fading=ease(0,.13,s)*(1-ease(.91,1,s));
   letterInstances.push({p,alpha:fading*state.stage,scale:(mobile?.83:1)*(.86+(i%4)*.07),tilt:-.12+s*.20+lane*.055,yaw:Math.sin(s*PI)*.16,word:i%WORDS.length,heat:ease(.72,1,s)*.55});
  }
- const goldFill=ease(9.01,9.87,t);
- if(goldFill>.001)push(meshes.goldPool,C(set,M.T(0,-2.216+goldFill*.097,0),M.S(Math.max(.008,goldFill),1,Math.max(.008,goldFill))),4);
+ const moldIn=ease(8.86,9.28,t),goldFill=ease(9.18,10.18,t);
+ const moldBlock=C(set,M.T(0,-2.214,.52+(1-moldIn)*.22),M.S(.88,1,.88));
+ const moldTop=C(moldBlock,M.T(0,.108,0));
+ if(moldIn>.001){
+  push(meshes.moldBed,moldBlock,0,[0,0,0],[0,0,0],false,state.stage*moldIn);
+  push(meshes.moldFrame,moldTop,0,[0,0,0],[0,0,0],false,state.stage*moldIn);
+  const cavity=C(moldTop,M.T(0,-.025,0),M.Rx(-PI/2),M.S(.77,.77,.58));
+  push(meshes.moldCavityA,cavity,0,[0,0,0],[0,0,0],false,state.stage*moldIn);
+  push(meshes.moldCavityB,cavity,0,[0,0,0],[0,0,0],false,state.stage*moldIn);
+ }
  if(t>8.67&&t<9.06){const s=(t-8.67)/.39,p=M.point(set,[0,-1.683-.455*s*s,0]),r=.038-.011*s;push(meshes.dropGold,C(M.T(...p),M.S(r,r*(1.2+s),r)));}
- const gb=clamp((t-10.20)/.25,0,1),ge=clamp((t-9.02)/.25,0,1);
- if(ge>gb+.001&&t<10.46)push(meshes.goldStream,set,3,[0,-1.681,0],[0,-2.119,0],false,state.stage,gb,ge);
+ const sprueTo=[0,-2.03,.52],gb=clamp((t-10.20)/.25,0,1),ge=clamp((t-9.10)/.30,0,1);
+ if(ge>gb+.001&&t<10.55)push(meshes.goldStream,set,3,[0,-1.681,0],sprueTo,false,state.stage,gb,ge);
+ const spillPts=[[.72,.31,.030,9.54],[.59,-.46,.022,9.68],[-.66,.36,.026,9.78],[-.73,-.28,.020,9.92],[.16,.64,.015,10.00],[-.08,-.62,.017,10.08]];
+ for(const [sx,sz,sc,birth] of spillPts){
+  const appear=ease(birth,birth+.20,t),cool=ease(10.86,11.52,t),up=M.point(moldTop,[sx,.04,sz]);
+  if(appear>.001){const mesh=cool>.04?meshes.dropMetal:meshes.dropGold;const s=sc*(.18+.82*appear);push(mesh,C(M.T(up[0],up[1]+Math.sin(appear*PI)*.01,up[2]),M.S(s,s*(1.15-.2*cool),s)),0,[0,0,0],[0,0,0],false,state.stage);}
+ }
  castTransform=null;
  if(t>=9.39){
-  const lift=ease(10.74,11.96,t),scale=mix(.73,.83,lift),turn=-(1-lift)*PI/2;
-  castTransform=C(M.T(0,mix(-2.145,.66,lift),mix(.14,0,lift)+Math.sin(lift*PI)*1.48),M.Ry((1-lift)*.13),M.Rx(turn),M.S(scale));
+  const extract=ease(10.72,11.96,t),scale=mix(.74,.84,extract);
+  castTransform=C(M.T(0,mix(-2.11,.66,extract),mix(.52,0,extract)+Math.sin(extract*PI)*1.32),M.Ry((1-extract)*.10),M.Rx(mix(-PI/2,0,extract)),M.S(scale));
   push(meshes.signatureA,castTransform,0,[0,0,0],[0,0,0],false,1);push(meshes.signatureB,castTransform,0,[0,0,0],[0,0,0],false,1);
  }
  state.tokenCount=letterInstances.length;
