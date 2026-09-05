@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment · ARCH 1 · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment · ARCH 3 · Przekuwam AI w wartość.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -83,6 +83,17 @@ button:disabled {
   pointer-events:none;
   background:linear-gradient(#05060665,transparent 17%,transparent 80%,#05060655);
   opacity:0
+}
+#vessel-shadow {
+  position:fixed;
+  inset:0;
+  z-index:22;
+  pointer-events:none;
+  opacity:0;
+  background:
+    radial-gradient(ellipse 42% 31% at 50% 71%, rgba(0,0,0,.74) 0%, rgba(0,0,0,.58) 36%, rgba(0,0,0,.18) 67%, transparent 84%),
+    linear-gradient(to bottom, transparent 50%, rgba(2,3,3,.18) 61%, rgba(2,3,3,.42) 100%);
+  will-change:opacity
 }
 .intro #cinema-shade {
   opacity:1
@@ -558,7 +569,7 @@ h2 {
   pointer-events:none;
   transform:translate(-50%,-50%);
   will-change:width,height,top,left;
-  filter:drop-shadow(0 4px 15px #b792440b)
+  filter:drop-shadow(0 9px 26px #00000045) drop-shadow(0 0 20px #b7924414)
 }
 #flying-mark svg {
   width:100%;
@@ -571,11 +582,14 @@ h2 {
   z-index:28;
   pointer-events:none;
   transform:translate(-50%,-50%);
-  font-size:48px;
-  font-weight:500;
-  letter-spacing:.205em;
+  font-family:"Helvetica Neue",Arial,sans-serif;
+  font-size:42px;
+  font-weight:300;
+  letter-spacing:.285em;
+  color:#e8e3d9;
+  text-shadow:0 2px 20px rgba(0,0,0,.62),0 0 34px rgba(184,145,74,.07);
   white-space:nowrap;
-  line-height:1.15;
+  line-height:1.05;
   will-change:transform,top,left,font-size
 }
 #signature-line {
@@ -585,11 +599,12 @@ h2 {
   right:0;
   text-align:center;
   z-index:27;
-  font:italic 17px Georgia,serif;
-  color:#c3b494;
+  font:italic 16px Georgia,serif;
+  color:#bca982;
+  text-shadow:0 2px 16px rgba(0,0,0,.72);
   opacity:0;
   pointer-events:none;
-  letter-spacing:.015em
+  letter-spacing:.035em
 }
 .intro .site {
   visibility:hidden;
@@ -927,6 +942,7 @@ noscript {
 <body>
 <canvas id="scene" aria-label="Sekwencja marki Guziczak: kawa i tokeny z przestrzennej wyrwy trafiają do kielicha. Płynne złoto wypełnia piaskową formę w drewnianej ramie, stygnie i zostaje wyjęte jako znak marki." role="img"></canvas>
 <div id="cinema-shade" aria-hidden="true"></div>
+<div id="vessel-shadow" aria-hidden="true"></div>
 <div class="intro-brand" aria-hidden="true">GUITS / GUZICZAK</div>
 <div id="intro-controls"><button class="sound" id="sound" type="button" aria-label="Włącz dźwięk" aria-pressed="false" title="Lux in tenebris · muzyka i efekty · M"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 4 5 7H2v6h3l4 3Z"/><path id="sound-path" d="m13 7 5 6m0-6-5 6"/></svg><span class="sound-label" id="sound-label">Dotknij, by usłyszeć</span></button><button class="skip" id="skip" type="button">Pomiń<span>↗</span></button></div>
 <div id="intro-caption" aria-hidden="true"><span class="caption-n" id="caption-n">01</span><span class="caption-name" id="caption-name">Energia.</span></div>
@@ -2029,15 +2045,15 @@ GuziczakModules.define('config/sequence', [], () => {
         vesselFade: [19.18, 19.58], cameraSettled: 14.56,
         // The flying mark is now independent from the WebGL canvas. This is what allows the
         // real cup to remain in the lower shadow while mark + word + claim arrive above it.
-        markReveal: [16.10, 16.82], canvasFade: [19.18, 19.58], dock: [16.95, 18.55],
+        markReveal: [16.10, 16.82], canvasFade: [19.18, 19.58], dock: [17.18, 18.62],
         hero: [18.00, 19.45], header: [18.75, 19.30], handoff: 16.85,
-        word: [14.80, 15.19], claimIn: [14.95, 15.29], claimOut: [15.68, 16.28],
+        vesselShadow: [14.45, 15.15], word: [14.92, 15.32], claimIn: [15.16, 15.58], claimOut: [16.42, 16.88],
         captionOut: [13.70, 14.40], progressOut: [14.60, 15.80], brandOut: [13.50, 14.30]
     });
     const mix = Object.freeze({ music: .98, effects: .42, master: .80, foleyMaster: .60, pourBase: .105, pourPressure: .10 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
     const durations = Object.freeze({}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-2', referenceDuration: 19.6 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-3', referenceDuration: 19.6 };
 });
 
 
@@ -3888,7 +3904,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
                 throw Error('Missing required DOM element: ' + id);
             cache.set(id, e);
         } return cache.get(id); };
-        for (const id of ['scene', 'site', 'header', 'header-logo', 'header-word', 'flying-mark', 'flying-word', 'signature-line', 'intro-caption', 'caption-n', 'caption-name', 'intro-progress', 'progress-fill', 'intro-controls', 'cinema-shade', 'skip', 'replay', 'fallback', 'fallback-message', 'error-detail', 'close-fallback'])
+        for (const id of ['scene', 'site', 'header', 'header-logo', 'header-word', 'flying-mark', 'flying-word', 'signature-line', 'intro-caption', 'caption-n', 'caption-name', 'intro-progress', 'progress-fill', 'intro-controls', 'cinema-shade', 'vessel-shadow', 'skip', 'replay', 'fallback', 'fallback-message', 'error-detail', 'close-fallback'])
             $(id);
         const canvas = $('scene');
         let markRect = null;
@@ -3909,6 +3925,8 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             body.style.setProperty('--header-reveal', header.toFixed(5));
             canvas.style.opacity = String((1 - tail) * ease(0, .45, t));
             $('cinema-shade').style.opacity = String(1 - tail);
+            const vesselShadow = ease(...cues.vesselShadow, t) * (1 - tail);
+            $('vessel-shadow').style.opacity = String(vesselShadow * .92);
             const flying = $('flying-mark'), word = $('flying-word'), { rect, wr } = metrics;
             if (castTransform && t > 14.0) {
                 const tl = project(M.point(castTransform, [-1.1, 1.12, .08])), br = project(M.point(castTransform, [1.1, -1.12, .08]));
@@ -3922,12 +3940,17 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             flying.style.width = mix(r.w, rect.width, dock) + 'px';
             flying.style.height = mix(r.h, rect.height, dock) + 'px';
             flying.style.opacity = String(markReveal * (1 - header));
-            const wf = mobile ? clamp(viewport.width * .074, 25, 40) : clamp(viewport.width * .036, 36, 54), wfEnd = mobile ? 11 : 14, wy = Math.min(viewport.height * .64, r.y + r.h * .5 + 48);
+            const wf = mobile ? clamp(viewport.width * .060, 22, 31) : clamp(viewport.width * .027, 30, 42), wfEnd = mobile ? 11 : 14;
+            // Final lockup lives in the negative space BETWEEN the mark and the vessel.
+            // It never uses the cup rim as a baseline, so the vessel remains a background relic.
+            const markBottom = r.y + r.h * .5;
+            const desiredWordY = mobile ? Math.min(viewport.height * .555, markBottom + 58) : Math.min(viewport.height * .565, markBottom + 64);
+            const desiredClaimY = desiredWordY + (mobile ? 48 : 52);
             word.style.left = mix(viewport.width * .5, wr.left + wr.width / 2, dock) + 'px';
-            word.style.top = (mix(wy, wr.top + wr.height / 2, dock) - Math.sin(dock * PI) * viewport.height * .04) + 'px';
+            word.style.top = (mix(desiredWordY, wr.top + wr.height / 2, dock) - Math.sin(dock * PI) * viewport.height * .032) + 'px';
             word.style.fontSize = mix(wf, wfEnd, dock) + 'px';
             word.style.opacity = String(ease(...cues.word, t) * (1 - header));
-            $('signature-line').style.top = (wy + 46) + 'px';
+            $('signature-line').style.top = desiredClaimY + 'px';
             $('signature-line').style.opacity = String(ease(...cues.claimIn, t) * (1 - ease(...cues.claimOut, t)));
         }
         function enter(boot = false) { markRect = null; body.classList.add('intro'); body.classList.remove('handoff'); body.classList.toggle('booting', boot); $('site').inert = true; $('header').inert = true; canvas.style.display = 'block'; canvas.style.opacity = '1'; }
@@ -3939,7 +3962,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             $('header').inert = false;
             canvas.style.display = 'none';
             $('intro-controls').style.opacity = '1';
-            for (const id of ['cinema-shade', 'intro-caption', 'intro-progress', 'signature-line'])
+            for (const id of ['cinema-shade', 'vessel-shadow', 'intro-caption', 'intro-progress', 'signature-line'])
                 $(id).style.opacity = '0';
             document.querySelector('.intro-brand').style.opacity = '0';
         }
