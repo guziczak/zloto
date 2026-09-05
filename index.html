@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment V · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment VI · Przekuwam AI w wartość.</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d0e;--fg:#e9e7e0;--muted:#9b9d98;--gold:#cbb382;--line:#eee6cc20;--pad:clamp(24px,3.5vw,64px);--safe:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}body.intro{overflow:hidden}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;color:inherit}button,a{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:7px}button{border:0;background:none}button:disabled{opacity:.4;cursor:default}::selection{background:#cbb382;color:#111}
@@ -67,7 +67,7 @@ window.GUZICZAK_SOUND=(()=>{
  let muted=false;try{muted=localStorage.getItem(PREF)==='1';}catch(_){}
  let ctx=null,master=null,fxBus=null,themeBus=null,themeOutput=null,musicAnalyser=null;
  let fxFactory=null,fx=null,unlocked=false,ready=false,disposed=false,blocked=false,timelinePaused=false;
- let intro=true,volume=.80,musicLevel=.92,fxLevel=.64,scoreState='loading',errorText='',sources=[];
+ let intro=true,volume=.80,musicLevel=.98,fxLevel=.42,scoreState='loading',errorText='',sources=[];
  let original=null,variation=null,notes=[],duration=0,musicPlaying=false,musicEverStarted=false;
  let musicAnchor=0,offset=0,index=0,timer=null,loopAt=Infinity,loading=null,epoch=0,lastWheel=0;
  const voices=new Set();const activeOscillators=new Set();let scheduled=0,stopped=0,starts=0;
@@ -446,11 +446,13 @@ meshes.bayonet=build(b=>{
 // A folded, asymmetric membrane surrounding a real recessed throat.
 // There is no diamond primitive and no flat outline pasted on the background.
 function riftPoint(a,r){
- const irregular=1+.135*Math.sin(a*3+.7)+.086*Math.sin(a*5-1.0)+.033*Math.sin(a*11+.9)+.014*Math.sin(a*19);
- const x=.392*irregular*Math.cos(a)+.054*Math.sin(a*2+.65);
- const y=.79*irregular*Math.sin(a)+.044*Math.cos(a*3-.8);
- const z=-.55*Math.pow(Math.max(0,1-r),.72)+.053*Math.sin(a*5+.8)*Math.pow(r,5)+.018*Math.cos(a*9)*r*r;
- return[x*r+.03*(1-r),y*r-.025*(1-r),z];
+ const slit=.34+.27*Math.pow(Math.sin(a),2.0);
+ const rag=1.+.18*Math.sin(a*2.7+.4)+.12*Math.sin(a*5.4-1.2)+.06*Math.sin(a*11.0+.7);
+ const pinch=.42+.58*Math.pow(Math.abs(Math.sin(a)),.72);
+ const x=(.15+.17*slit*pinch)*rag*Math.cos(a)+.022*Math.sin(a*4.8+.4);
+ const y=(.82+.16*Math.cos(a*2.1-.6))*rag*Math.sin(a)+.035*Math.cos(a*3.3-.8);
+ const z=-.86*Math.pow(Math.max(0,1-r),.64)-.07*slit+.038*Math.sin(a*4.4+.9)*Math.pow(r,.9)+.032*Math.cos(a*8.0-1.3)*Math.pow(r,.7);
+ return[x*r+.02*(1-r),y*r,-.03+z];
 }
 meshes.aperture=build(b=>{
  const N=192,R=24;
@@ -888,7 +890,7 @@ function resize(){
 function inverse4(m){const a=Array.from({length:4},(_,r)=>[m[r],m[4+r],m[8+r],m[12+r],...Array.from({length:4},(_,c)=>r===c?1:0)]);for(let k=0;k<4;k++){let p=k;for(let r=k+1;r<4;r++)if(Math.abs(a[r][k])>Math.abs(a[p][k]))p=r;[a[k],a[p]]=[a[p],a[k]];let d=a[k][k];if(Math.abs(d)<1e-12)return M.I();for(let j=0;j<8;j++)a[k][j]/=d;for(let r=0;r<4;r++)if(r!==k){d=a[r][k];for(let j=0;j<8;j++)a[r][j]-=a[k][j]*d;}}return new Float32Array(Array.from({length:16},(_,i)=>a[i%4][4+Math.floor(i/4)]));}
 // DIRECTOR. All motion is a function of one clock; no independent looping scene.
 const ease=(a,b,t)=>{t=clamp((t-a)/(b-a),0,1);return t*t*t*(t*(t*6-15)+10);};
-const TOTAL=18.0;
+const TOTAL=19.6;
 const state={time:0,flow:0,energy:0,pulse:0,wave:0,phase:'vessel',frozen:params.has('t'),dirty:true,finished:!autoPlay&&!params.has('t'),stage:1,steam:0,reveal:0};
 let time=params.has('t')?clamp(Number(params.get('t'))||0,0,TOTAL):0,flow=0,previous=performance.now(),firstFrame=true,gpuSync=null,view,projection,VP,cam,frameNumber=0,rafPending=false,castTransform=null,markRect=null;
 let audio=null,audioEnabled=false,windowFocused=true,previousSoundTime=0;
@@ -1053,16 +1055,31 @@ function objects(){
   push(meshes.meltFeed,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);
   if(t<12.57){push(meshes.meltA,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);push(meshes.meltB,moldRoot,5,[0,0,0],[0,0,0],false,moldLight);}
  }
- // Small, time-continuous spills land on the sand. They flatten and cool; none orbit.
- for(const [i,birth,sx,sz,dx,dz,size] of [[0,11.12,.737,.24,.37,.15,.020],[1,11.24,-.673,.49,-.31,.27,.014],[2,11.29,.588,.76,.23,.39,.017],[3,11.38,.025,-.735,-.23,.12,.012]]){
-  const age=t-birth;if(age<0)continue;const f=clamp(age/.29,0,1),p=M.point(moldRoot,[sx+dx*f,-.013+Math.sin(f*PI)*.065+.021*f,sz+dz*f]);
-  const flat=ease(.25,.46,age);push(meshes.spill,C(M.T(...p),M.Ry(i*1.7),M.S(size*(1+flat*.36),size*(1.1-flat*.60),size)),0,[0,0,0],[0,0,0],false,moldLight);
+ // Overflow is now a real messy foundry moment: several puddles spread over the sand
+ // and a hotter overrun escapes past the front board before cooling.
+ for(const [i,birth,sx,sz,dx,dz,size,spread] of [
+   [0,10.96,.74,.22,.42,.18,.030,1.9],[1,11.04,-.69,.44,-.35,.28,.024,1.7],[2,11.10,.57,.74,.29,.46,.028,1.8],
+   [3,11.18,.08,-.72,-.28,.18,.019,1.5],[4,11.26,-.34,-.18,-.24,-.08,.021,1.6],[5,11.34,.29,.08,.20,.05,.016,1.4],
+   [6,11.42,-.08,.58,-.10,.20,.017,1.5],[7,11.50,.46,-.39,.22,-.10,.015,1.35],[8,11.58,-.53,-.48,-.18,-.12,.016,1.35]
+ ]){
+  const age=t-birth;if(age<0)continue;
+  const fly=clamp(age/.26,0,1),settle=ease(.18,.62,age),cool=ease(.96,1.85,age);
+  const p=M.point(moldRoot,[sx+dx*fly,-.012+Math.sin(fly*PI)*.072+.025*fly,sz+dz*fly]);
+  const sxz=size*(1+settle*spread), sy=size*(1.15-settle*.88);
+  const mesh=cool>.04?meshes.dropMetal:meshes.spill;
+  push(mesh,C(M.T(...p),M.Ry(i*1.37),M.S(sxz,sy,size*(1+settle*(spread*.55)))),0,[0,0,0],[0,0,0],false,moldLight);
  }
- // One tiny overrun crosses the front board, then clings to its outside edge.
- if(t>11.27){
-  const age=t-11.27,f=clamp(age/.24,0,1),roll=ease(.24,.53,age),drip=ease(.53,.88,age);
-  const p=M.point(moldRoot,[-.255+.048*f,-.017+Math.sin(f*PI)*.083+.064*f-drip*.245,.88+.345*f+.169*roll]);
-  push(meshes.spill,C(M.T(...p),M.S(.015,.017+drip*.025,.016)),0,[0,0,0],[0,0,0],false,moldLight);
+ for(const [i,birth,sx,sz,size] of [[0,11.54,.19,.21,.052],[1,11.66,-.26,.10,.045],[2,11.76,.06,-.08,.038]]){
+  const age=t-birth;if(age<0)continue;const appear=ease(0,.30,age),cool=ease(1.05,2.0,age),p=M.point(moldRoot,[sx,-.011,sz]);
+  const mesh=cool>.03?meshes.dropMetal:meshes.spill;
+  push(mesh,C(M.T(...p),M.Ry(i*.9),M.S(size*(1+appear*2.2),size*(.62-appear*.28),size*(1+appear*1.55))),0,[0,0,0],[0,0,0],false,moldLight);
+ }
+ // A richer overrun crosses the front board and gathers as a hanging lip.
+ if(t>11.14){
+  const age=t-11.14,f=clamp(age/.34,0,1),roll=ease(.18,.64,age),drip=ease(.60,1.04,age);
+  const p=M.point(moldRoot,[-.285+.11*f,-.014+Math.sin(f*PI)*.090+.075*f-drip*.255,.82+.56*f+.22*roll]);
+  const cool=ease(1.00,1.95,age); const mesh=cool>.04?meshes.dropMetal:meshes.spill;
+  push(mesh,C(M.T(...p),M.S(.026*(1+roll*1.6),.020+.028*drip,.031*(1+roll*1.1))),0,[0,0,0],[0,0,0],false,moldLight);
  }
  // Eject vertically first. The cast cannot rotate or move through the sand.
  castTransform=null;
@@ -1129,13 +1146,13 @@ function draw(o,prog=meshProg,prefix=null){
 function filter(src,dst,dx,dy,threshold=0){bind(dst);gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(filterProg.p);texture(filterProg,'uTex',src.t,0);f2(filterProg,'uDir',dx,dy);f1(filterProg,'uThreshold',threshold);screen(filterProg);}
 function project(p){const q=M.point(VP,p),w=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];return[(q[0]/w*.5+.5)*innerWidth,(-q[1]/w*.5+.5)*innerHeight,w];}
 function updateUI(){
- const t=time,mobile=innerWidth<651,tail=ease(14.65,15.24,t),dock=ease(15.26,17.24,t),hero=ease(16.22,18.0,t),header=ease(17.02,17.83,t);
+ const t=time,mobile=innerWidth<651,tail=ease(16.10,16.95,t),dock=ease(16.95,18.55,t),hero=ease(18.00,19.45,t),header=ease(18.75,19.30,t);
  $('intro-controls').style.opacity='1';
  const caption=t<3?['01','Rygiel.']:t<4.5?['02','Energia.']:t<8.3?['03','To, co niewidzialne.']:t<9.34?['04','Forma.']:t<12.57?['05','Odlew.']:['06','Podpis.'];
  $('caption-n').textContent=caption[0];$('caption-name').textContent=caption[1];$('intro-caption').style.opacity=String(ease(.8,1.5,t)*(1-ease(13.70,14.4,t))*.76);
  $('intro-progress').style.opacity=String(1-ease(14.6,15.8,t));$('progress-fill').style.transform=`scaleX(${Math.min(1,t/TOTAL)})`;
  document.querySelector('.intro-brand').style.opacity=String((1-ease(13.5,14.3,t))*.48);
- body.classList.toggle('handoff',t>15.38);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
+ body.classList.toggle('handoff',t>16.85);body.style.setProperty('--hero-reveal',hero.toFixed(5));body.style.setProperty('--header-reveal',header.toFixed(5));
  canvas.style.opacity=String((1-tail)*ease(0,.45,t));$('cinema-shade').style.opacity=String(1-tail);
  const flying=$('flying-mark'),word=$('flying-word'),rect=$('header-logo').getBoundingClientRect(),wr=$('header-word').getBoundingClientRect();
  if(castTransform&&t>14.0){
@@ -1198,7 +1215,7 @@ function frame(ms){
 function createAudio(ctx,destination=ctx.destination){
  const A={ctx,events:new Set(),lastDrop:-10,restarted:false};
  const input=ctx.createGain(),dry=ctx.createGain(),send=ctx.createGain(),reverb=ctx.createConvolver(),wet=ctx.createGain(),comp=ctx.createDynamicsCompressor(),master=ctx.createGain();
- input.gain.value=3.2;dry.gain.value=.83;send.gain.value=.32;wet.gain.value=.23;master.gain.value=0;
+ input.gain.value=2.35;dry.gain.value=.72;send.gain.value=.22;wet.gain.value=.16;master.gain.value=0;
  input.connect(dry);input.connect(send);send.connect(reverb);reverb.connect(wet);dry.connect(comp);wet.connect(comp);comp.connect(master);master.connect(destination);A.master=master;
  comp.threshold.value=-20;comp.knee.value=14;comp.ratio.value=4;comp.attack.value=.006;comp.release.value=.28;
  let rs=42081;const rnd=()=>{rs=(Math.imul(rs,1664525)+1013904223)>>>0;return rs/4294967296;};
@@ -1218,21 +1235,21 @@ function createAudio(ctx,destination=ctx.destination){
  }
  const strike=(f,amp)=>{for(const[r,a,d]of[[1,1,1.1],[1.487,.24,.78],[2.773,.09,.43],[4.107,.035,.20]])tone(f*r,d,amp*a);};
   A.cue=(id)=>{
-   if(id===0){friction(.20,.105,240);tone(138,.27,.049);tone(341,.42,.009);}
-   else if(id===1){friction(.080,.29,1100,.20);tone(211,.12,.008);}
-   else if(id===2){friction(.11,.045,1820);tone(401,.055,.015);}
-   else if(id===3){friction(.13,.19,920,.05);}
-   else if(id===4){friction(.26,.078,420);tone(91,.25,.090);tone(267,.16,.020);friction(.051,.037,3200);}
-   else if(id===5){friction(.073,.16,2100,-.22);tone(580,.07,.010);}
-   else if(id===6){friction(.19,.029,2900,-.30);tone(672,.09,.015);}
-   else if(id===7){friction(.17,.032,2400,.31);tone(488,.075,.018);tone(145,.21,.025,0,.026);}
-   else if(id===8){tone(846,.071,.030,-.4);tone(1164,.09,.007,-.3,.02);}
-   else if(id===9){friction(.047,.90,590,.52);tone(174,1.2,.008,.48);}
-   else if(id===10){friction(.025,.32,1700,.38);}
-   else if(id===11){friction(.026,.40,160);}
-   else if(id===12){friction(.061,.35,365);}
-   else if(id===13){friction(.039,.17,610);}
-   else{friction(.033,.21,980);}
+   if(id===0){friction(.085,.085,220);tone(138,.20,.018);}
+   else if(id===1){friction(.040,.22,980,.16);}
+   else if(id===2){friction(.050,.036,1650);tone(312,.045,.006);}
+   else if(id===3){friction(.055,.14,760,.04);}
+   else if(id===4){friction(.095,.060,380);tone(92,.18,.028);}
+   else if(id===5){friction(.040,.12,1800,-.22);tone(520,.05,.005);}
+   else if(id===6){friction(.072,.022,2500,-.30);tone(620,.055,.007);}
+   else if(id===7){friction(.068,.026,2100,.31);tone(432,.06,.008);}
+   else if(id===8){tone(846,.060,.015,-.4);}
+   else if(id===9){friction(.026,.82,560,.52);tone(174,.92,.004,.48);}
+   else if(id===10){friction(.014,.28,1500,.38);}
+   else if(id===11){friction(.015,.30,160);}
+   else if(id===12){friction(.034,.28,365);}
+   else if(id===13){friction(.020,.14,610);}
+   else{friction(.018,.17,980);}
   };
 
  A.stop=()=>{for(const {o} of A.events)try{o.stop(ctx.currentTime+.02);}catch(e){}stream.gain.setTargetAtTime(0,ctx.currentTime,.12);coilGain.gain.setTargetAtTime(0,ctx.currentTime,.1);};
