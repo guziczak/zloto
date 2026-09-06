@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment · ARCH 5 · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment · ARCH 6 · Przekuwam AI w wartość.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -84,10 +84,71 @@ button:disabled {
   background:linear-gradient(#05060665,transparent 17%,transparent 80%,#05060655);
   opacity:0
 }
+
+#score-bridge{
+  position:fixed;
+  left:0;
+  right:0;
+  top:61%;
+  height:142px;
+  z-index:22;
+  pointer-events:none;
+  opacity:0;
+  overflow:hidden;
+  transform:translateY(-50%) rotate(-.45deg);
+  transform-origin:50% 50%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  filter:drop-shadow(0 0 12px rgba(187,151,84,.08));
+  will-change:opacity,transform
+}
+#score-bridge .score-track{
+  position:absolute;
+  left:0;
+  top:50%;
+  width:2800px;
+  height:126px;
+  transform:translate3d(var(--score-x,0px),-50%,0);
+  will-change:transform
+}
+#score-bridge .staff-line{
+  stroke:#c9ab70;
+  stroke-width:.72;
+  opacity:.36;
+  vector-effect:non-scaling-stroke
+}
+#score-bridge .bar{
+  stroke:#b99b64;
+  stroke-width:.72;
+  opacity:.18;
+  vector-effect:non-scaling-stroke
+}
+#score-bridge .note{
+  fill:#d3b77c;
+  opacity:.30
+}
+#score-bridge .stem,#score-bridge .beam{
+  stroke:#d3b77c;
+  stroke-width:1.05;
+  opacity:.27;
+  vector-effect:non-scaling-stroke
+}
+#score-bridge .ghost{
+  opacity:.13
+}
+@media(max-width:650px){
+  #score-bridge{
+    top:64%;
+    height:112px;
+    transform:translateY(-50%) rotate(-.35deg)
+  }
+  #score-bridge .score-track{height:104px}
+}
+
 #vessel-shadow {
   position:fixed;
   inset:0;
-  z-index:22;
+  z-index:23;
   pointer-events:none;
   opacity:0;
   background:
@@ -943,6 +1004,11 @@ noscript {
 <canvas id="scene" aria-label="Sekwencja marki Guziczak: kawa i tokeny z przestrzennej wyrwy trafiają do kielicha. Płynne złoto wypełnia piaskową formę w drewnianej ramie, stygnie i zostaje wyjęte jako znak marki." role="img"></canvas>
 <div id="cinema-shade" aria-hidden="true"></div>
 <div id="vessel-shadow" aria-hidden="true"></div>
+<div id="score-bridge" aria-hidden="true">
+<svg class="score-track" viewBox="0 0 2800 126" preserveAspectRatio="none">
+<path class="staff-line" d="M0 38H2800"/><path class="staff-line" d="M0 50H2800"/><path class="staff-line" d="M0 62H2800"/><path class="staff-line" d="M0 74H2800"/><path class="staff-line" d="M0 86H2800"/><path class="bar" d="M80 34V90"/><path class="bar" d="M360 34V90"/><path class="bar" d="M640 34V90"/><path class="bar" d="M920 34V90"/><path class="bar" d="M1200 34V90"/><path class="bar" d="M1480 34V90"/><path class="bar" d="M1760 34V90"/><path class="bar" d="M2040 34V90"/><path class="bar" d="M2320 34V90"/><path class="bar" d="M2600 34V90"/><ellipse class="note ghost" cx="115" cy="54" rx="6.2" ry="4.1" transform="rotate(-18 115 54)"/><path class="stem" d="M120 53V25"/><ellipse class="note" cx="178" cy="42" rx="5.6" ry="4.1" transform="rotate(-18 178 42)"/><path class="stem" d="M173 43V71"/><ellipse class="note" cx="245" cy="66" rx="5.6" ry="4.1" transform="rotate(-18 245 66)"/><path class="stem" d="M250 65V37"/><ellipse class="note" cx="322" cy="48" rx="5.6" ry="4.1" transform="rotate(-18 322 48)"/><path class="stem" d="M327 47V19"/><ellipse class="note" cx="382" cy="36" rx="5.6" ry="4.1" transform="rotate(-18 382 36)"/><path class="stem" d="M377 37V65"/><ellipse class="note" cx="472" cy="60" rx="6.2" ry="4.1" transform="rotate(-18 472 60)"/><path class="stem" d="M477 59V31"/><ellipse class="note" cx="548" cy="42" rx="5.6" ry="4.1" transform="rotate(-18 548 42)"/><path class="stem" d="M553 41V13"/><ellipse class="note ghost" cx="618" cy="72" rx="5.6" ry="4.1" transform="rotate(-18 618 72)"/><path class="stem" d="M613 73V101"/><ellipse class="note" cx="694" cy="54" rx="5.6" ry="4.1" transform="rotate(-18 694 54)"/><path class="stem" d="M699 53V25"/><ellipse class="note" cx="785" cy="36" rx="5.6" ry="4.1" transform="rotate(-18 785 36)"/><path class="stem" d="M790 35V7"/><ellipse class="note" cx="858" cy="48" rx="6.2" ry="4.1" transform="rotate(-18 858 48)"/><path class="stem" d="M853 49V77"/><ellipse class="note" cx="930" cy="66" rx="5.6" ry="4.1" transform="rotate(-18 930 66)"/><path class="stem" d="M935 65V37"/><ellipse class="note" cx="1015" cy="42" rx="5.6" ry="4.1" transform="rotate(-18 1015 42)"/><path class="stem" d="M1020 41V13"/><ellipse class="note" cx="1092" cy="60" rx="5.6" ry="4.1" transform="rotate(-18 1092 60)"/><path class="stem" d="M1087 61V89"/><ellipse class="note ghost" cx="1180" cy="30" rx="5.6" ry="4.1" transform="rotate(-18 1180 30)"/><path class="stem" d="M1185 29V1"/><ellipse class="note" cx="1260" cy="54" rx="6.2" ry="4.1" transform="rotate(-18 1260 54)"/><path class="stem" d="M1265 53V25"/><ellipse class="note" cx="1342" cy="72" rx="5.6" ry="4.1" transform="rotate(-18 1342 72)"/><path class="stem" d="M1337 73V101"/><ellipse class="note" cx="1428" cy="48" rx="5.6" ry="4.1" transform="rotate(-18 1428 48)"/><path class="stem" d="M1433 47V19"/><ellipse class="note" cx="1510" cy="36" rx="5.6" ry="4.1" transform="rotate(-18 1510 36)"/><path class="stem" d="M1515 35V7"/><ellipse class="note" cx="1602" cy="60" rx="5.6" ry="4.1" transform="rotate(-18 1602 60)"/><path class="stem" d="M1597 61V89"/><ellipse class="note" cx="1694" cy="42" rx="6.2" ry="4.1" transform="rotate(-18 1694 42)"/><path class="stem" d="M1699 41V13"/><ellipse class="note ghost" cx="1782" cy="66" rx="5.6" ry="4.1" transform="rotate(-18 1782 66)"/><path class="stem" d="M1787 65V37"/><ellipse class="note" cx="1870" cy="54" rx="5.6" ry="4.1" transform="rotate(-18 1870 54)"/><path class="stem" d="M1865 55V83"/><ellipse class="note" cx="1958" cy="30" rx="5.6" ry="4.1" transform="rotate(-18 1958 30)"/><path class="stem" d="M1963 29V1"/><ellipse class="note" cx="2044" cy="48" rx="5.6" ry="4.1" transform="rotate(-18 2044 48)"/><path class="stem" d="M2049 47V19"/><ellipse class="note" cx="2138" cy="72" rx="6.2" ry="4.1" transform="rotate(-18 2138 72)"/><path class="stem" d="M2133 73V101"/><ellipse class="note" cx="2228" cy="42" rx="5.6" ry="4.1" transform="rotate(-18 2228 42)"/><path class="stem" d="M2233 41V13"/><ellipse class="note" cx="2315" cy="60" rx="5.6" ry="4.1" transform="rotate(-18 2315 60)"/><path class="stem" d="M2320 59V31"/><ellipse class="note ghost" cx="2402" cy="36" rx="5.6" ry="4.1" transform="rotate(-18 2402 36)"/><path class="stem" d="M2397 37V65"/><ellipse class="note" cx="2495" cy="54" rx="5.6" ry="4.1" transform="rotate(-18 2495 54)"/><path class="stem" d="M2500 53V25"/><ellipse class="note" cx="2584" cy="66" rx="6.2" ry="4.1" transform="rotate(-18 2584 66)"/><path class="stem" d="M2579 67V95"/><ellipse class="note" cx="2670" cy="42" rx="5.6" ry="4.1" transform="rotate(-18 2670 42)"/><path class="stem" d="M2675 41V13"/><path class="beam" d="M183 13L236 17"/><path class="beam" d="M553 13L606 17"/><path class="beam" d="M1020 13L1073 17"/><path class="beam" d="M1433 19L1486 23"/><path class="beam" d="M2049 19L2102 23"/><path class="beam" d="M2407 7L2460 11"/>
+</svg>
+</div>
 <div class="intro-brand" aria-hidden="true">GUITS / GUZICZAK</div>
 <div id="intro-controls"><button class="sound" id="sound" type="button" aria-label="Włącz dźwięk" aria-pressed="false" title="Lux in tenebris · muzyka i efekty · M"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 4 5 7H2v6h3l4 3Z"/><path id="sound-path" d="m13 7 5 6m0-6-5 6"/></svg><span class="sound-label" id="sound-label">Dotknij, by usłyszeć</span></button><button class="skip" id="skip" type="button">Pomiń<span>↗</span></button></div>
 <div id="intro-caption" aria-hidden="true"><span class="caption-n" id="caption-n">01</span><span class="caption-name" id="caption-name">Energia.</span></div>
@@ -2061,13 +2127,13 @@ GuziczakModules.define('config/sequence', [], () => {
         vesselFade:[22.05,22.68],cameraSettled:16.70,
         markReveal:[19.84,20.24],canvasFade:[22.05,22.68],dock:[20.25,21.94],
         hero:[21.10,22.55],header:[21.94,22.62],handoff:20.00,
-        vesselShadow:[16.12,16.70],word:[17.0,17.43],claimIn:[17.28,17.68],claimOut:[19.94,20.28],
+        vesselShadow:[16.12,16.70],scoreIn:[16.55,17.45],scoreOut:[22.05,22.68],word:[17.0,17.43],claimIn:[17.28,17.68],claimOut:[19.94,20.28],
         captionOut:[16.1,16.7],progressOut:[20.,20.8],brandOut:[16.1,16.7]
     });
     const mix = Object.freeze({ music: .98, effects: .42, master: .80, foleyMaster: .60, pourBase: .105, pourPressure: .10 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
     const durations = Object.freeze({cooling:1.8,breakoff:2.15}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-5', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-6', referenceDuration: 22.70 };
 });
 
 
@@ -3961,7 +4027,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
                 throw Error('Missing required DOM element: ' + id);
             cache.set(id, e);
         } return cache.get(id); };
-        for (const id of ['scene', 'site', 'header', 'header-logo', 'header-word', 'flying-mark', 'flying-word', 'signature-line', 'intro-caption', 'caption-n', 'caption-name', 'intro-progress', 'progress-fill', 'intro-controls', 'cinema-shade', 'vessel-shadow', 'skip', 'replay', 'fallback', 'fallback-message', 'error-detail', 'close-fallback'])
+        for (const id of ['scene', 'site', 'header', 'header-logo', 'header-word', 'flying-mark', 'flying-word', 'signature-line', 'intro-caption', 'caption-n', 'caption-name', 'intro-progress', 'progress-fill', 'intro-controls', 'cinema-shade', 'vessel-shadow', 'score-bridge', 'skip', 'replay', 'fallback', 'fallback-message', 'error-detail', 'close-fallback'])
             $(id);
         const canvas = $('scene');
         let markRect = null;
@@ -3984,6 +4050,14 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             $('cinema-shade').style.opacity = String(1 - tail);
             const vesselShadow = ease(...cues.vesselShadow, t) * (1 - tail);
             $('vessel-shadow').style.opacity = String(vesselShadow * .98);
+            const scoreIn = ease(...cues.scoreIn, t), scoreOut = ease(...cues.scoreOut, t);
+            const scoreOpacity = scoreIn * (1 - scoreOut);
+            const score = $('score-bridge');
+            score.style.opacity = String(scoreOpacity * (mobile ? .72 : .64));
+            const scoreTravel = mobile ? 360 : 520;
+            const scoreBase = mobile ? -690 : -430;
+            const scoreX = scoreBase - scoreTravel * clamp((t - cues.scoreIn[0]) / (cues.scoreOut[1] - cues.scoreIn[0]), 0, 1);
+            score.style.setProperty('--score-x', scoreX.toFixed(2) + 'px');
             const flying = $('flying-mark'), word = $('flying-word'), { rect, wr } = metrics;
             if (castTransform && t > 14.0) {
                 const tl = project(M.point(castTransform, [-1.1, 1.12, .08])), br = project(M.point(castTransform, [1.1, -1.12, .08]));
@@ -4032,7 +4106,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             $('header').inert = false;
             canvas.style.display = 'none';
             $('intro-controls').style.opacity = '1';
-            for (const id of ['cinema-shade', 'vessel-shadow', 'intro-caption', 'intro-progress', 'signature-line'])
+            for (const id of ['cinema-shade', 'vessel-shadow', 'score-bridge', 'intro-caption', 'intro-progress', 'signature-line'])
                 $(id).style.opacity = '0';
             document.querySelector('.intro-brand').style.opacity = '0';
         }
