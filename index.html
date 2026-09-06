@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — Brand moment · ARCH 3 · Przekuwam AI w wartość.</title>
+<title>GUZICZAK — Brand moment · ARCH 4 · Przekuwam AI w wartość.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -91,7 +91,7 @@ button:disabled {
   pointer-events:none;
   opacity:0;
   background:
-    radial-gradient(ellipse 42% 31% at 50% 71%, rgba(0,0,0,.74) 0%, rgba(0,0,0,.58) 36%, rgba(0,0,0,.18) 67%, transparent 84%),
+    radial-gradient(ellipse 43% 32% at 50% 71%, rgba(0,0,0,.82) 0%, rgba(0,0,0,.68) 38%, rgba(0,0,0,.25) 68%, transparent 86%),
     linear-gradient(to bottom, transparent 50%, rgba(2,3,3,.18) 61%, rgba(2,3,3,.42) 100%);
   will-change:opacity
 }
@@ -1015,7 +1015,7 @@ GuziczakModules.define('app/engine', [
         const timeline = timelines.createTimeline({ ...config.durations, ...options.durations }), clock = timelines.createClock(timeline);
         const scope = scopes.createScope(), ui = interfaces.createUI(document), canvas = ui.$('scene');
         const params = new URLSearchParams(window.location.search);
-        const seenKey = 'guziczak.przesmyk.arch1.seen';
+        const seenKey = 'guziczak.przesmyk.arch4.seen';
         let seen = false;
         try {
             seen = window.sessionStorage.getItem(seenKey) === '1';
@@ -2029,8 +2029,9 @@ GuziczakModules.define('config/sequence', [], () => {
         ['mould', 8.30, 9.34, '04', 'Forma.'],
         ['casting', 9.34, 11.62, '05', 'Odlew.'],
         ['cooling', 11.62, 12.57, '05', 'Odlew.'],
-        ['extraction', 12.57, 14.56, '06', 'Podpis.'],
-        ['signature', 14.56, 16.85, '06', 'Podpis.'],
+        ['extraction', 12.57, 14.48, '06', 'Wyjęcie.'],
+        ['breakoff', 14.48, 15.86, '06', 'Odłamanie.'],
+        ['signature', 15.86, 16.85, '06', 'Podpis.'],
         ['handoff', 16.85, 19.60, '06', 'Podpis.']
     ].map(([id, from, to, number, caption]) => Object.freeze({ id, from, to, duration: to - from, number, caption })));
     const events = Object.freeze([
@@ -2045,15 +2046,15 @@ GuziczakModules.define('config/sequence', [], () => {
         vesselFade: [19.18, 19.58], cameraSettled: 14.56,
         // The flying mark is now independent from the WebGL canvas. This is what allows the
         // real cup to remain in the lower shadow while mark + word + claim arrive above it.
-        markReveal: [16.10, 16.82], canvasFade: [19.18, 19.58], dock: [17.18, 18.62],
+        markReveal: [16.72, 17.34], canvasFade: [19.18, 19.58], dock: [17.46, 18.72],
         hero: [18.00, 19.45], header: [18.75, 19.30], handoff: 16.85,
-        vesselShadow: [14.45, 15.15], word: [14.92, 15.32], claimIn: [15.16, 15.58], claimOut: [16.42, 16.88],
-        captionOut: [13.70, 14.40], progressOut: [14.60, 15.80], brandOut: [13.50, 14.30]
+        vesselShadow: [16.68, 17.18], word: [17.02, 17.40], claimIn: [17.34, 17.70], claimOut: [18.62, 18.96],
+        captionOut: [16.10, 16.72], progressOut: [17.00, 18.20], brandOut: [16.00, 16.62]
     });
     const mix = Object.freeze({ music: .98, effects: .42, master: .80, foleyMaster: .60, pourBase: .105, pourPressure: .10 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
     const durations = Object.freeze({}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-3', referenceDuration: 19.6 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-4', referenceDuration: 19.6 };
 });
 
 
@@ -3367,7 +3368,7 @@ void main(){
  else if(id>20.5&&id<21.5){
   float hot=1.-smoothstep(11.64,12.50,uTime);base=vec3(.79,.525,.213);metal=.996;rough=mix(.18,.07,hot);emission=vec3(.65,.23,.026)*hot*.14;
  }
- else if(id>11.5){base=vec3(.79,.525,.213);metal=.996;rough=.135+micro*.015;emission=vec3(3.8,1.64,.34)*castEdge+vec3(.8,.31,.04)*uHeat*.07;}
+ else if(id>11.5){base=vec3(.79,.525,.213);metal=.996;rough=.135+micro*.015;emission=vec3(2.45,1.02,.20)*castEdge+vec3(.58,.21,.025)*uHeat*.05;}
  else {float tool=sin(length(q.xz)*550.);base=mix(vec3(.012,.017,.019),vec3(.024,.031,.033),macro);rough=.37+macro*.15+tool*.004;metal=.18;}
  // Microgeometry affects the reflection normals, not an image pasted over a surface.
  float height=(micro-.5)*.000006+(macro-.5)*.000035;
@@ -3602,7 +3603,7 @@ GuziczakModules.define("scene/foundry", ["math", "scene/curves", "config/vocabul
         const { t, e, mobile, meshes, push, state, letterInstances, set, cup, cartridge, liquidY } = ctx;
         // The flask arrives before the pour. Its sand is genuinely recessed, including
         // the pouring well, two feeders and both negative impressions of the signature.
-        const moldIn = ease(7.68, 8.36, t), withdraw = ease(13.66, 14.68, t);
+        const moldIn = ease(7.68, 8.36, t), withdraw = ease(16.78, 17.62, t);
         const moldRoot = C(M.T(0, -2.055 - withdraw * 1.0, .88 + (1 - moldIn) * 3.2 - withdraw * 2.15));
         const moldLight = state.stage * ease(7.66, 7.88, t);
         if (t > 7.66) {
@@ -3625,7 +3626,7 @@ GuziczakModules.define("scene/foundry", ["math", "scene/curves", "config/vocabul
                 push(meshes.dropGold, C(M.T(...p), M.S(.018, .029, .018)));
             }
         }
-        const breakSeal = ease(12.57, 12.88, t), lift = ease(12.88, 14.56, t), turn = ease(13.28, 14.56, t);
+        const breakSeal = ease(12.57, 12.88, t), lift = ease(12.88, 14.18, t), turn = ease(13.30, 14.18, t);
         if (t > 9.30) {
             push(meshes.meltFeed, moldRoot, 5, [0, 0, 0], [0, 0, 0], false, moldLight);
             if (t < 12.57) {
@@ -3798,12 +3799,24 @@ GuziczakModules.define("scene/signature", ["math", "scene/curves", "config/vocab
     const { WORDS } = vocabulary;
     function sample(ctx) {
         const { t, e, mobile, meshes, push, state, letterInstances, set, cup, cartridge, liquidY, moldIn, moldRoot, moldLight, breakSeal, lift, turn } = ctx;
-        // Eject vertically first. The cast cannot rotate or move through the sand.
+        // Real break-off choreography: the cast rises only enough to expose the two necks,
+        // pauses under tension while the mould and its feed tree remain visible, then snaps free.
+        // No invented rods: meltFeed is the actual feed geometry left behind in the mould.
         let castTransform = null;
         if (t >= 12.57) {
-            const scale = mix(.79, .83, lift), y = mix(-2.1388 + .19 * breakSeal, .66, lift), z = mix(1.08, 0, lift) + Math.sin(lift * PI) * 1.05;
+            const snap = ease(15.36, 15.86, t), depart = ease(15.86, 16.74, t);
+            const strain = ease(14.48, 15.34, t) * (1 - snap);
+            const scale = mix(.79, .825, lift);
+            let y = mix(-2.1388 + .19 * breakSeal, -1.18, lift);
+            let z = mix(1.08, .62, lift) + Math.sin(lift * PI) * .28;
+            // Tiny elastic-looking pre-break movement: readable, not cartoony.
+            y += Math.sin((t - 14.48) * 31.0) * .007 * strain;
+            z += .018 * strain;
+            // The actual release is a short upward/back impulse followed by a calm hero departure.
+            y += snap * .22 + depart * 1.62;
+            z -= snap * .13 + depart * .58;
             castTransform = C(M.T(0, y, z), M.Rx(-(1 - turn) * PI / 2), M.S(scale));
-            const castVisibility = 1 - ease(16.10, 16.82, t);
+            const castVisibility = 1 - ease(16.62, 17.18, t);
             if (castVisibility > .001) {
                 push(meshes.signatureA, castTransform, 0, [0, 0, 0], [0, 0, 0], false, castVisibility);
                 push(meshes.signatureB, castTransform, 0, [0, 0, 0], [0, 0, 0], false, castVisibility);
@@ -3812,13 +3825,21 @@ GuziczakModules.define("scene/signature", ["math", "scene/curves", "config/vocab
                 for (const [x, z] of [[-.47, .17], [.51, .58]])
                     push(meshes.ejector, C(moldRoot, M.T(x, -.327 + .19 * breakSeal - .215 * ease(13.02, 13.38, t), z)), 0, [0, 0, 0], [0, 0, 0], false, moldLight);
             }
-            // A few adhering sand grains release under gravity, showing the separation.
+            // Sand releases during lift.
             for (let i = 0; i < 11; i++) {
                 const age = t - (12.79 + i * .020);
-                if (age < 0 || age > .53)
-                    continue;
-                const x = (i % 2 ? 1 : -1) * (.27 + (i % 3) * .089), z = .18 + (i % 4) * .16, y = .003 + age * .18 - age * age * 1.8;
-                push(meshes.grain, C(moldRoot, M.T(x, y, z), M.Rx(i + age * 2), M.Rz(i * .6)), 0, [0, 0, 0], [0, 0, 0], false, moldLight);
+                if (age < 0 || age > .53) continue;
+                const x = (i % 2 ? 1 : -1) * (.27 + (i % 3) * .089), z = .18 + (i % 4) * .16, yy = .003 + age * .18 - age * age * 1.8;
+                push(meshes.grain, C(moldRoot, M.T(x, yy, z), M.Rx(i + age * 2), M.Rz(i * .6)), 0, [0, 0, 0], [0, 0, 0], false, moldLight);
+            }
+            // Two small fracture bursts occur exactly at release; feed geometry itself stays in the mould.
+            for (let i = 0; i < 14; i++) {
+                const age = t - (15.38 + i * .012);
+                if (age < 0 || age > .42) continue;
+                const side = i % 2 ? 1 : -1;
+                const x = side * (.19 + (i % 3) * .035), zz = .25 + (i % 4) * .025;
+                const yy = .02 + age * .12 - age * age * 1.05;
+                push(meshes.grain, C(castTransform, M.T(x, yy, zz), M.S(.55), M.Rx(i * .7 + age * 4), M.Rz(i * .9)), 0, [0, 0, 0], [0, 0, 0], false, .72);
             }
         }
         state.foundry = { arrived: moldIn, fill: ease(9.35, 11.38, t), cool: ease(11.62, 12.52, t), eject: breakSeal, lift };
@@ -3926,7 +3947,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             canvas.style.opacity = String((1 - tail) * ease(0, .45, t));
             $('cinema-shade').style.opacity = String(1 - tail);
             const vesselShadow = ease(...cues.vesselShadow, t) * (1 - tail);
-            $('vessel-shadow').style.opacity = String(vesselShadow * .92);
+            $('vessel-shadow').style.opacity = String(vesselShadow * .98);
             const flying = $('flying-mark'), word = $('flying-word'), { rect, wr } = metrics;
             if (castTransform && t > 14.0) {
                 const tl = project(M.point(castTransform, [-1.1, 1.12, .08])), br = project(M.point(castTransform, [1.1, -1.12, .08]));
@@ -3945,7 +3966,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             // It never uses the cup rim as a baseline, so the vessel remains a background relic.
             const markBottom = r.y + r.h * .5;
             const desiredWordY = mobile ? Math.min(viewport.height * .555, markBottom + 58) : Math.min(viewport.height * .565, markBottom + 64);
-            const desiredClaimY = desiredWordY + (mobile ? 48 : 52);
+            const desiredClaimY = desiredWordY + (mobile ? 36 : 42);
             word.style.left = mix(viewport.width * .5, wr.left + wr.width / 2, dock) + 'px';
             word.style.top = (mix(desiredWordY, wr.top + wr.height / 2, dock) - Math.sin(dock * PI) * viewport.height * .032) + 'px';
             word.style.fontSize = mix(wf, wfEnd, dock) + 'px';
