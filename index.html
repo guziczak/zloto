@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — ARCH 13 · Schronienie na niespokojnych wodach.</title>
+<title>GUZICZAK — ARCH 18 · Schronienie na niespokojnych wodach.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -93,7 +93,14 @@ body:not(.intro).score-active .hero-bottom{bottom:152px}
 #flying-word,.identity strong{font-family:Inter,'Helvetica Neue',Arial,sans-serif}
 #flying-word{font-weight:400!important;letter-spacing:.14em;color:#e4e7e6!important;text-shadow:0 2px 18px #000b,0 0 22px rgba(194,155,86,.08)!important}
 #signature-line{font-family:Inter,'Helvetica Neue',Arial,sans-serif!important;font-style:normal!important;font-weight:400!important;letter-spacing:.025em!important;color:#a8b5bd!important}
-@media(max-width:650px){#score-bridge{bottom:14px;width:94vw;height:94px}#score-bridge.score-compact{height:70px}body:not(.intro).score-active .hero-bottom{bottom:125px}}
+#side-brand-mark{position:fixed;right:clamp(14px,2.6vw,34px);top:50%;width:clamp(70px,7.4vw,112px);height:clamp(70px,7.4vw,112px);transform:translate3d(30px,-50%,0) scale(.88);opacity:0;pointer-events:none;z-index:9;filter:drop-shadow(0 12px 28px rgba(0,0,0,.42)) drop-shadow(0 0 24px rgba(217,183,112,.14));transition:opacity .9s ease,transform 1.05s cubic-bezier(.22,.85,.16,1)}
+#side-brand-mark::before{content:'';position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle,rgba(229,205,152,.12),transparent 62%);opacity:.7;filter:blur(8px)}
+#side-brand-mark svg{width:100%;height:100%;display:block;animation:sideMarkSpin 18s linear infinite,sideMarkFloat 4.2s ease-in-out infinite;transform-origin:50% 50%}
+body.page-brand-ready #side-brand-mark{opacity:.92;transform:translate3d(0,-50%,0) scale(1)}
+body.intro #side-brand-mark{opacity:0;transform:translate3d(34px,-50%,0) scale(.84)}
+@keyframes sideMarkSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes sideMarkFloat{0%,100%{margin-top:-7px}50%{margin-top:7px}}
+@media(max-width:650px){#score-bridge{bottom:14px;width:94vw;height:94px}#score-bridge.score-compact{height:70px}body:not(.intro).score-active .hero-bottom{bottom:125px}#side-brand-mark{display:none}}
 @media(max-height:540px){#score-bridge{height:76px;bottom:12px}}
 #vessel-shadow {
   position:fixed;
@@ -973,6 +980,7 @@ body:not(.intro) #motion,body:not(.intro) #motion-status{display:none}
 <div id="intro-caption" aria-hidden="true"><span class="caption-n" id="caption-n">01</span><span class="caption-name" id="caption-name">Energia.</span></div>
 <div id="intro-progress" aria-hidden="true"><i id="progress-fill"></i></div>
 <div id="flying-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.1 -1.12 2.2 2.24" aria-hidden="true"><defs><linearGradient id="przesmyk-1" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#a88b52"/><stop offset=".43" stop-color="#f0e1b9"/><stop offset=".68" stop-color="#b49963"/><stop offset="1" stop-color="#e5d2a5"/></linearGradient></defs><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)" fill="url(#przesmyk-1)"/><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)" fill="url(#przesmyk-1)"/></svg></div>
+<div id="side-brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.1 -1.12 2.2 2.24" aria-hidden="true"><defs><linearGradient id="przesmyk-side" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#9a7d45"/><stop offset=".38" stop-color="#f4e7c3"/><stop offset=".68" stop-color="#b89a60"/><stop offset="1" stop-color="#e9dbb2"/></linearGradient></defs><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)" fill="url(#przesmyk-side)"/><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)" fill="url(#przesmyk-side)"/></svg></div>
 <div id="motion-status" role="status" aria-live="polite"></div>
 <div id="flying-word" aria-hidden="true">GUZICZAK</div>
 <div id="signature-line" aria-hidden="true">Przekuwam AI w wartość.</div>
@@ -2037,7 +2045,7 @@ GuziczakModules.define("audio/foley", ["math", "scene/curves", "core/timeline"],
         const A = { ctx, events: new Set(), lastDrop: -10, restarted: false };
         const input = track(ctx.createGain()), dry = track(ctx.createGain()), send = track(ctx.createGain()), reverb = track(ctx.createConvolver()), wet = track(ctx.createGain()), comp = track(ctx.createDynamicsCompressor()), master = track(ctx.createGain());
         input.gain.value = 2.35;
-        dry.gain.value = .72;
+        dry.gain.value = .76;
         send.gain.value = .22;
         wet.gain.value = .16;
         master.gain.value = 0;
@@ -2265,7 +2273,7 @@ GuziczakModules.define("audio/music", ["core/scope"], (scopeLib) => {
         const scope = scopeLib.createScope(), controllers = new Set();
         const listen = (target, ...args) => scope.on(target, ...args);
         const $ = id => document.getElementById(id), PREF = 'guziczak.przesmyk.audio-muted.v3';
-        const BELL_PARTIALS = [[.5, .30, 6.5], [1, 1, 5.5], [2, .45, 3.2], [3, .20, 2.0], [4, .11, 1.1], [6, .05, .5]];
+        const BELL_PARTIALS = [[.5,.15,12.0],[1,1,8.8],[1.5,.12,8.2],[2.01,.44,7.0],[2.98,.19,5.9],[4.23,.11,4.6],[5.41,.06,3.7],[7.09,.028,2.8]];
         let muted = false;
         try {
             muted = localStorage.getItem(PREF) === '1';
@@ -2353,22 +2361,24 @@ GuziczakModules.define("audio/music", ["core/scope"], (scopeLib) => {
             lp.frequency.value = 6800;
             lp.Q.value = .5;
             const dry = ctx.createGain();
-            dry.gain.value = .72;
+            dry.gain.value = .76;
             const send = ctx.createBiquadFilter();
             send.type = 'highpass';
-            send.frequency.value = 260;
+            send.frequency.value = 190;
             send.Q.value = .5;
-            const reverb = ctx.createConvolver(), ir = ctx.createBuffer(2, Math.floor(ctx.sampleRate * 3.6), ctx.sampleRate);
+            const reverb = ctx.createConvolver(), ir = ctx.createBuffer(2, Math.floor(ctx.sampleRate * 5.8), ctx.sampleRate);
             let seed = 37181;
             const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
             for (let ch = 0; ch < 2; ch++) {
                 const d = ir.getChannelData(ch);
-                for (let i = 0; i < d.length; i++)
-                    d[i] = (rnd() * 2 - 1) * Math.pow(1 - i / d.length, 2.6);
+                for (let i = 0; i < d.length; i++) {
+                    const t=i/d.length, body=Math.pow(1-t,2.18), flutter=.84+.16*Math.sin(t*41.0+ch*.7);
+                    d[i]=(rnd()*2-1)*body*flutter + (i<4200 ? (rnd()*2-1)*Math.pow(1-t,4.2)*.26 : 0);
+                }
             }
             reverb.buffer = ir;
             const wet = ctx.createGain();
-            wet.gain.value = .5;
+            wet.gain.value = .66;
             const comp = ctx.createDynamicsCompressor();
             comp.threshold.value = -20;
             comp.knee.value = 14;
@@ -2460,35 +2470,68 @@ GuziczakModules.define("audio/music", ["core/scope"], (scopeLib) => {
             const dur = n[1] / 1000, midi = n[2], vel = n[3];
             if (vel === 0)
                 return;
-            const f = 440 * Math.pow(2, (midi - 69) / 12), velN = Math.pow(vel / 127, 1.3), amp = velN * .13, bright = .35 + .65 * velN;
+            const f = 440 * Math.pow(2, (midi - 69) / 12), velN = Math.pow(vel / 127, 1.24), amp = velN * .12, bright = .35 + .65 * velN;
             const head = ctx.createGain(), pan = ctx.createStereoPanner();
             head.gain.value = amp;
-            pan.pan.value = finiteClamp(((midi % 12) - 5.5) / 14 + (Math.sin(n[0] * .113 + midi) * .5) * .18, -.6, .6);
+            pan.pan.value = finiteClamp(((midi % 12) - 5.5) / 14 + (Math.sin(n[0] * .113 + midi) * .5) * .16, -.55, .55);
             head.connect(pan);
             pan.connect(themeBus);
-            const item = { head, pan, count: BELL_PARTIALS.length };
+            const shimmer = ctx.createGain(), shimmerPan = ctx.createStereoPanner();
+            shimmer.gain.value = amp * .48;
+            shimmerPan.pan.value = finiteClamp(pan.pan.value * .58, -.42, .42);
+            shimmer.connect(shimmerPan);
+            shimmerPan.connect(themeBus);
+            const item = { head, pan, shimmer, shimmerPan, count: 0 };
             voices.add(item);
+            const register = (o, g, stopAt) => {
+                item.count++;
+                activeOscillators.add(o);
+                o.onended = () => {
+                    try { o.disconnect(); } catch (_) { }
+                    try { g.disconnect(); } catch (_) { }
+                    activeOscillators.delete(o);
+                    stopped++;
+                    if (--item.count === 0) {
+                        try { head.disconnect(); } catch (_) { }
+                        try { pan.disconnect(); } catch (_) { }
+                        try { shimmer.disconnect(); } catch (_) { }
+                        try { shimmerPan.disconnect(); } catch (_) { }
+                        voices.delete(item);
+                    }
+                };
+                o.start(when);
+                o.stop(stopAt);
+                scheduled++;
+            };
             for (let j = 0; j < BELL_PARTIALS.length; j++) {
                 const [ratio, g, decay] = BELL_PARTIALS[j], o = ctx.createOscillator(), pg = ctx.createGain();
                 o.type = 'sine';
                 o.frequency.value = f * ratio;
-                o.detune.value = Math.sin(n[0] * .037 + midi * 1.2 + j * 2.3) * 2;
-                const peak = Math.max(g * (ratio >= 2 ? bright : 1), .0001), ring = decay * (.85 + .3 * (Math.min(dur, 2) / 2));
+                o.detune.value = Math.sin(n[0] * .037 + midi * 1.2 + j * 2.3) * 2.2;
+                const peak = Math.max(g * (ratio >= 2 ? bright : 1), .0001), ring = decay * (.95 + .35 * (Math.min(dur, 2.8) / 2.8));
                 pg.gain.setValueAtTime(.0001, when);
-                pg.gain.exponentialRampToValueAtTime(peak, when + .004);
-                pg.gain.exponentialRampToValueAtTime(.0001, when + .004 + ring);
+                pg.gain.exponentialRampToValueAtTime(peak, when + .005);
+                pg.gain.exponentialRampToValueAtTime(.0001, when + .005 + ring);
                 o.connect(pg);
                 pg.connect(head);
-                activeOscillators.add(o);
-                o.onended = () => { o.disconnect(); pg.disconnect(); activeOscillators.delete(o); stopped++; if (--item.count === 0) {
-                    head.disconnect();
-                    pan.disconnect();
-                    voices.delete(item);
-                } };
-                o.start(when);
-                o.stop(when + .004 + ring + .05);
-                scheduled++;
+                register(o, pg, when + .005 + ring + .06);
             }
+            const makePad = (ratio, type, peak, attack, release, detune, cutoff) => {
+                const o = ctx.createOscillator(), pg = ctx.createGain(), flt = ctx.createBiquadFilter();
+                o.type = type;
+                o.frequency.value = f * ratio;
+                o.detune.value = detune;
+                flt.type = 'lowpass';
+                flt.frequency.value = cutoff;
+                flt.Q.value = .22;
+                pg.gain.setValueAtTime(.0001, when);
+                pg.gain.exponentialRampToValueAtTime(peak, when + attack);
+                pg.gain.setTargetAtTime(.0001, when + attack + Math.max(.02, dur * .42), release);
+                o.connect(flt); flt.connect(pg); pg.connect(shimmer);
+                register(o, pg, when + attack + dur * .42 + release * 6.5);
+            };
+            makePad(.5, 'triangle', .24 + velN * .08, .06, .52, -3.5, 780 + bright * 520);
+            makePad(1, 'sine', .10 + velN * .05, .028, .42, 2.5, 1220 + bright * 690);
         }
         function clearVoices() {
             if (!ctx)
@@ -2845,7 +2888,7 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4, desktopMinDpr: 1.0, desktopMaxDpr: 1.75, desktopPixelBudget: 3600000, desktopMirrorScale: .58, desktopVolumeDiv: 3.4, desktopBloomDiv: 2.15 });
     const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15,extraction:3.25}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-17', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-18', referenceDuration: 22.70 };
 });
 
 
@@ -4436,30 +4479,37 @@ GuziczakModules.define('scene/cast-motion',['math','config/casting'],(math,confi
     'use strict';
     const {M,C,PI,mix,ease}=math;
     function sample(t){
-        const move=ease(config.phase.breakEnd,config.phase.travelEnd,t);
-        const turn=ease(config.phase.breakEnd+.44,config.phase.travelEnd,t);
-        const base=C(M.T(0,mix(config.rest.y,config.hero.y,move),mix(config.rest.z,config.hero.z,move)+Math.sin(move*PI)*.26),
-            M.Rx(-(1-turn)*PI/2),M.S(mix(config.rest.scale,config.hero.scale,move)));
-        const pieces=config.joints.map(j=>{
+        const extract=ease(config.phase.breakEnd,14.96,t);
+        const shuttle=ease(14.90,15.72,t);
+        const arrange=ease(15.72,config.phase.travelEnd,t);
+        const turn=ease(15.98,config.phase.travelEnd,t);
+        const baseY0=config.rest.y+config.clearance*.88;
+        const baseZ0=config.rest.z+config.advance*.08;
+        const extractedY=baseY0+.36*extract;
+        const extractedZ=baseZ0+.10*extract;
+        const stagedY=mix(extractedY, config.hero.y, arrange);
+        const stagedZ=mix(extractedZ, config.hero.z, arrange)+Math.sin(arrange*PI)*.18;
+        const base=C(M.T(0,stagedY,stagedZ),M.Rx(-(1-turn)*PI/2),M.S(mix(config.rest.scale,config.hero.scale,arrange)));
+        const pieces=config.joints.map((j,idx)=>{
             const snap=ease(j.at,j.at+.15,t),load=ease(...j.load,t);
             const after=Math.max(0,t-j.at);
             const relax=ease(j.at+.20,config.phase.breakEnd,t);
-            const separate=ease(j.at-.03,j.at+.24,t)*(1-move);
+            const separate=ease(j.at-.03,j.at+.24,t)*(1-arrange);
             const spread=j.spread||[0,0,0];
-            const angle=mix(j.angle*load,j.angle*.22,relax)*(1-move);
-            const lift=(.004*load+config.clearance*snap)*(1-move);
-            // A restrained mechanical recoil after separation, never a floating idle wobble.
-            const kick=t>=j.at?.011*Math.exp(-after*16)*Math.sin(after*45):0;
-            const forward=(config.advance*ease(j.at+.07,j.at+.26,t)+spread[2]*separate)*(1-move);
-            const pose=C(base,M.T(spread[0]*separate,lift+kick*(1-move)+spread[1]*separate,forward),M.T(...j.localPivot),M.Rx(angle),M.T(...j.localPivot.map(v=>-v)));
+            const side = idx===0 ? -1 : 1;
+            const stageX = side * .34 * shuttle;
+            const stageY = (.004*load + config.clearance*snap + .13*extract + .03*shuttle) * (1-arrange);
+            const stageZ = (config.advance*.12*shuttle + spread[2]*separate) * (1-arrange);
+            const angle=mix(j.angle*load,j.angle*.18,relax)*(1-arrange);
+            const lift=stageY;
+            const kick=t>=j.at?.006*Math.exp(-after*13)*Math.sin(after*33):0;
+            const pose=C(base,M.T(spread[0]*separate + stageX*(1-arrange),lift+kick*(1-arrange)+spread[1]*separate,stageZ),M.T(...j.localPivot),M.Rx(angle),M.T(...j.localPivot.map(v=>-v)));
             const gateReturn=1-ease(j.at,j.at+.16,t);
             return {...j,snap,broken:t>=j.at,angle,lift,pose,gateAngle:j.angle*load*gateReturn,
                 gateLift:.004*load*gateReturn};
         });
-        const finalPose=C(M.T(0,mix(config.rest.y+config.clearance,config.hero.y,move),mix(config.rest.z+config.advance,config.hero.z,move)+Math.sin(move*PI)*.26),M.Rx(-(1-turn)*PI/2),M.S(mix(.79,.83,move)));
-        // base translation needs the initial released clearance during the departure.
-        if(move>0)for(const p of pieces)p.pose[13]+=config.clearance*(1-move)-p.lift;
-        return {pieces,pose:finalPose,move,turn};
+        const finalPose=C(M.T(0,mix(baseY0+.36,config.hero.y,arrange),mix(baseZ0+.10,config.hero.z,arrange)+Math.sin(arrange*PI)*.18),M.Rx(-(1-turn)*PI/2),M.S(mix(.79,.83,arrange)));
+        return {pieces,pose:finalPose,move:arrange,turn,extract,shuttle};
     }
     return {sample};
 });
@@ -4896,9 +4946,10 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             lastLayout={mark:{...r},word:{left,width:m.wordWidth,centerY:cy},metrics:m,dock,wordIn};
 
         }
-        function enter(boot = false) { markRect = null; body.classList.add('intro'); body.classList.remove('handoff'); body.classList.toggle('booting', boot); $('site').inert = true; $('header').inert = true; canvas.style.display = 'block'; canvas.style.opacity = '1'; }
+        function enter(boot = false) { markRect = null; body.classList.add('intro'); body.classList.remove('handoff','page-brand-ready'); body.classList.toggle('booting', boot); $('site').inert = true; $('header').inert = true; canvas.style.display = 'block'; canvas.style.opacity = '1'; }
         function finish() {
             body.classList.remove('intro', 'booting', 'handoff');
+            body.classList.add('page-brand-ready');
             body.style.removeProperty('--hero-reveal');
             body.style.removeProperty('--header-reveal');
             $('site').inert = false;
