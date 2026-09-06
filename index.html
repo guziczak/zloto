@@ -2845,7 +2845,7 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4, desktopMinDpr: 1.0, desktopMaxDpr: 1.75, desktopPixelBudget: 3600000, desktopMirrorScale: .58, desktopVolumeDiv: 3.4, desktopBloomDiv: 2.15 });
     const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15,extraction:3.25}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-16', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-17', referenceDuration: 22.70 };
 });
 
 
@@ -3771,7 +3771,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             f1(prog,'uLakeTime',state.elapsed||0);
             f1(prog,'uPitcherSteam',state.pitcherSteam||0);
             f1(prog,'uPourTilt',state.pourTilt||0);
+            f1(prog,'uSanctumVent',state.sanctumVent||0);
             f3(prog,'uSteamOrigin',state.kettleSpout||[-2.4,2.6,0]);
+            f3(prog,'uSanctumOrigin',state.sanctumOrigin||[0,-2.405,-2.4]);
             if (prog === meshProg) {
                 texture(prog, 'uShadow', shadowTex, 0);
                 texture(prog, 'uMirror', mirrorBlur.t, 1);
@@ -4284,12 +4286,12 @@ void main(){
 `;
     // Steam is integrated in world space and clipped by the depth of the scene.
     const volumeFS = `#version 300 es
-precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam,uRiftWorld,uSteamOrigin;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uEnergy,uSteam,uPitcherSteam,uPourTilt;
+precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam,uRiftWorld,uSteamOrigin,uSanctumOrigin;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uEnergy,uSteam,uPitcherSteam,uPourTilt,uSanctumVent;
 ${noiseGLSL}
 void main(){float depth=texture(uDepth,vUv).r;vec4 h=uInvVP*vec4(vUv*2.-1.,depth*2.-1.,1.);vec3 endpoint=h.xyz/h.w,rd=normalize(endpoint-uCam);float lim=min(length(endpoint-uCam),35.);
  vec3 iRD=1./(rd+vec3(.0000001)),a0=(vec3(-1.35,-1.8,-.65)-uCam)*iRD,a1=(vec3(.90,2.9,.82)-uCam)*iRD,mn=min(a0,a1),mx=max(a0,a1);
  float entry=max(0.,max(mn.x,max(mn.y,mn.z))),exit=min(lim,min(mx.x,min(mx.y,mx.z)));
- if(exit<=entry){outColor=vec4(0,0,0,1);return;}float dt=(exit-entry)/40.;vec3 cCup=vec3(0.),cKettle=vec3(0.);float transCup=1.,transKettle=1.;float jit=.5;
+ if(exit<=entry){outColor=vec4(0,0,0,1);return;}float dt=(exit-entry)/40.;vec3 cCup=vec3(0.),cKettle=vec3(0.),cVent=vec3(0.);float transCup=1.,transKettle=1.,transVent=1.;float jit=.5;
  for(int i=0;i<40;i++){
   vec3 p=uCam+rd*(entry+(float(i)+jit)*dt);float y=p.y-.91;
   vec2 center=vec2(-.50,.02)+vec2(sin(y*2.6-uTime*.43)*.09,cos(y*2.8-uTime*.31)*.08)*max(0.,y);
@@ -4303,8 +4305,16 @@ void main(){float depth=texture(uDepth,vUv).r;vec4 h=uInvVP*vec4(vUv*2.-1.,depth
   float kCloud=fbm(vec3(adv*7.0,ky*3.4-uTime*.55));kDensity*=smoothstep(.34,.70,kCloud)*(.070+.018*abs(uPourTilt));
   cKettle+=transKettle*mix(vec3(.48,.50,.48),vec3(.72,.67,.58),smoothstep(0.,.8,ky))*kDensity*dt;
   transKettle*=exp(-kDensity*dt*1.4);
+  vec3 s=p-uSanctumOrigin;float sy=max(s.y,0.);
+  float ring=exp(-pow(length(s.xz)-.22,2.)/.010);
+  float core=exp(-dot(s.xz,s.xz)/.028);
+  float sDensity=(ring*.85+core*.35)*smoothstep(0.,.02,sy)*(1.-smoothstep(.18,.82,sy));
+  float sCloud=fbm(vec3(s.xz*8.5,sy*4.2-uTime*.70));
+  sDensity*=smoothstep(.28,.68,sCloud)*.11;
+  cVent+=transVent*mix(vec3(.34,.38,.40),vec3(.58,.62,.64),smoothstep(.0,.65,sy))*sDensity*dt;
+  transVent*=exp(-sDensity*dt*1.85);
  }
- outColor=vec4(cCup*uSteam + cKettle*uPitcherSteam,1.);}
+ outColor=vec4(cCup*uSteam + cKettle*uPitcherSteam + cVent*uSanctumVent,1.);}
 `;
     const wordVS = `#version 300 es
 precision highp float;layout(location=0) in vec3 aP;layout(location=1) in vec2 aUV;layout(location=2) in float aAlpha;layout(location=3) in float aHeat;
@@ -4343,25 +4353,28 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
             for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(sanctumOpen,0,0)));
             if(dock.down>.5)push(meshes.dockBridge,socket,0,[0,0,0],[0,0,0],false,state.stage*ease(.5,1,dock.down));
         }
-        // The coil must emerge STRAIGHT UP from the cylindrical sanctum, then only afterwards
-        // translate toward the cup and finally ram upward into its seat. No diagonal shortcut through the platform.
+        // The coil emerges vertically from the cylindrical sanctum with a restrained pneumatic lift,
+        // then glides forward below the cup, and only then rises into the receiver. No diagonal shortcut and no cup piercing.
         const seated = C(set, M.T(0,-dock.extra,0), M.Ry(dock.rotation));
-        const emergence = ease(.26, .96, t), transfer = ease(.98, 1.62, t), ram = ease(1.62, 2.20, t), detent = t > 2.20 ? .009 * Math.exp(-(t - 2.20) * 29) * Math.sin((t - 2.20) * 64) : 0;
-        const align = ease(1.08, 1.86, t);
-        const introYaw = (1 - align) * -.10;
-        const introRoll = (1 - align) * .03;
+        const emergence = ease(.28, 1.18, t), transfer = ease(1.24, 2.02, t), ram = ease(2.08, 2.72, t), detent = t > 2.72 ? .006 * Math.exp(-(t - 2.72) * 24) * Math.sin((t - 2.72) * 52) : 0;
+        const align = ease(1.34, 2.12, t);
+        const introYaw = (1 - align) * -.06;
+        const introRoll = (1 - align) * .018;
         const seatedY = dock.y - dock.extra;
-        const hoverY = seatedY + .72;
-        const riseY = mix(docking.config.wellFloor + .74, hoverY, emergence);
-        const travelY = hoverY + Math.sin(transfer * PI) * .045 * (1 - ram);
-        const seatY = mix(travelY, seatedY, ram) + detent;
+        const travelY = seatedY - .86;
+        const riseY = mix(docking.config.wellFloor + .74, travelY, emergence);
+        const glideY = travelY + Math.sin(transfer * PI) * .018 * (1 - ram);
+        const seatY = mix(glideY, seatedY, ram) + detent;
         const travelZ = mix(docking.config.finalZ, 0, transfer);
-        const worldY = t < .98 ? riseY : seatY;
-        const worldZ = t < .98 ? docking.config.finalZ : (t < 1.62 ? travelZ : mix(0, dock.z, ram));
+        const worldY = t < 1.24 ? riseY : (t < 2.08 ? glideY : seatY);
+        const worldZ = t < 1.24 ? docking.config.finalZ : (t < 2.08 ? travelZ : 0);
         const introCartridge = C(M.T(0, worldY, worldZ), M.Rz(introRoll), M.Ry(introYaw));
-        const cartridge = t < 2.24 ? introCartridge : seated;
-        const lock = ease(2.19, 2.39, t), clampClose = ease(2.42, 2.51, t);
-        state.assembly = { emerged: emergence, transferred: transfer, aligned: align, inserted: ram, locked: lock, clamped: clampClose, verticalOnly: t < .98 };
+        const cartridge = t < 2.78 ? introCartridge : seated;
+        const lock = ease(2.72, 2.92, t), clampClose = ease(2.95, 3.08, t);
+        const pneuVent = ease(.30, .48, t) * (1 - ease(.92, 1.36, t));
+        state.sanctumVent = pneuVent;
+        state.sanctumOrigin = [0, docking.config.deckY, docking.config.finalZ];
+        state.assembly = { emerged: emergence, transferred: transfer, aligned: align, inserted: ram, locked: lock, clamped: clampClose, verticalOnly: t < 1.24, underCup: t >= 1.24 && t < 2.08 };
         if (t > .18) {
             const reveal = state.stage * ease(.18, .50, t);
             for (const m of [meshes.neck, meshes.coil, meshes.bayonet])
