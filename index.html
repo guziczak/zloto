@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — ARCH 11 · Pęknięcie i materia.</title>
+<title>GUZICZAK — ARCH 12 · Schronienie na niespokojnych wodach.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -952,6 +952,14 @@ noscript {
 /* Brand lockup: only the name shifts, while the original vessel stays below. */
 #flying-word{line-height:1.05;letter-spacing:.14em;overflow:hidden}
 #signature-line{font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-style:normal;font-weight:400;letter-spacing:.025em;color:#aeb8bd;white-space:nowrap}
+
+#motion{display:inline-flex;gap:8px;align-items:center;opacity:.73;font-size:11px;letter-spacing:.02em;padding:8px 1px}
+#motion svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.15}
+#motion.on{color:#a7c5cb;opacity:1}
+#motion-status{position:fixed;bottom:115px;left:50%;transform:translateX(-50%);z-index:40;max-width:min(420px,85vw);font:11px/1.65 Arial,sans-serif;text-align:center;color:#a9b5b8;pointer-events:none;text-shadow:0 2px 10px #000}
+#motion-status:empty{display:none}
+body:not(.intro) #motion,body:not(.intro) #motion-status{display:none}
+@media(max-width:650px){#motion-label{display:none}#motion{padding:8px}#motion-status{bottom:106px;font-size:10px}#intro-controls{gap:14px}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
 </head>
@@ -961,10 +969,11 @@ noscript {
 <div id="vessel-shadow" aria-hidden="true"></div>
 <div id="score-bridge" aria-hidden="true"><canvas id="score-canvas"></canvas></div>
 <div class="intro-brand" aria-hidden="true">GUITS / GUZICZAK</div>
-<div id="intro-controls"><button class="sound" id="sound" type="button" aria-label="Włącz dźwięk" aria-pressed="false" title="Lux in tenebris · muzyka i efekty · M"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 4 5 7H2v6h3l4 3Z"/><path id="sound-path" d="m13 7 5 6m0-6-5 6"/></svg><span class="sound-label" id="sound-label">Dotknij, by usłyszeć</span></button><button class="skip" id="skip" type="button">Pomiń<span>↗</span></button></div>
+<div id="intro-controls"><button class="sound" id="sound" type="button" aria-label="Włącz dźwięk" aria-pressed="false" title="Lux in tenebris · muzyka i efekty · M"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 4 5 7H2v6h3l4 3Z"/><path id="sound-path" d="m13 7 5 6m0-6-5 6"/></svg><span class="sound-label" id="sound-label">Dotknij, by usłyszeć</span></button><button id="motion" type="button" aria-label="Włącz reakcję wody na przechylenie telefonu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7c3-4 6 4 9 0s6 4 9 0M3 12c3-4 6 4 9 0s6 4 9 0M3 17c3-4 6 4 9 0s6 4 9 0"/></svg><span id="motion-label">Ruch wody</span></button><button class="skip" id="skip" type="button">Pomiń<span>↗</span></button></div>
 <div id="intro-caption" aria-hidden="true"><span class="caption-n" id="caption-n">01</span><span class="caption-name" id="caption-name">Energia.</span></div>
 <div id="intro-progress" aria-hidden="true"><i id="progress-fill"></i></div>
 <div id="flying-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.1 -1.12 2.2 2.24" aria-hidden="true"><defs><linearGradient id="przesmyk-1" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#a88b52"/><stop offset=".43" stop-color="#f0e1b9"/><stop offset=".68" stop-color="#b49963"/><stop offset="1" stop-color="#e5d2a5"/></linearGradient></defs><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)" fill="url(#przesmyk-1)"/><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)" fill="url(#przesmyk-1)"/></svg></div>
+<div id="motion-status" role="status" aria-live="polite"></div>
 <div id="flying-word" aria-hidden="true">GUZICZAK</div>
 <div id="signature-line" aria-hidden="true">Przekuwam AI w wartość.</div>
 <header class="site-header" id="header"><a class="identity" href="#top" aria-label="Guziczak — strona główna"><span id="header-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.1 -1.12 2.2 2.24" aria-hidden="true"><defs><linearGradient id="przesmyk-2" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#a88b52"/><stop offset=".43" stop-color="#f0e1b9"/><stop offset=".68" stop-color="#b49963"/><stop offset="1" stop-color="#e5d2a5"/></linearGradient></defs><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)" fill="url(#przesmyk-2)"/><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)" fill="url(#przesmyk-2)"/></svg></span><span><strong id="header-word">GUZICZAK</strong><small>ŁUKASZ GUZICZAK / GUITS</small></span></a><nav class="site-nav" aria-label="Nawigacja główna"><a href="#kompetencje">Kompetencje</a><a href="#kontakt">Porozmawiajmy ↗</a></nav></header>
@@ -980,7 +989,15 @@ noscript {
 </main>
 <div id="boot-note" role="status"><div>ŚWIATŁO SPOTYKA MATERIĘ<div class="boot-line"></div></div></div>
 <div id="fallback" role="status"><button id="close-fallback" type="button" aria-label="Zamknij komunikat">×</button><span id="fallback-message"></span><code id="error-detail"></code></div>
-<noscript><style>#intro-controls,.replay{display:none!important}</style>Animacja 3D wymaga JavaScript. Treść strony i znak marki pozostają dostępne bez animacji.</noscript>
+<noscript><style>#intro-controls,.replay{display:none!important}
+#motion{display:inline-flex;gap:8px;align-items:center;opacity:.73;font-size:11px;letter-spacing:.02em;padding:8px 1px}
+#motion svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.15}
+#motion.on{color:#a7c5cb;opacity:1}
+#motion-status{position:fixed;bottom:115px;left:50%;transform:translateX(-50%);z-index:40;max-width:min(420px,85vw);font:11px/1.65 Arial,sans-serif;text-align:center;color:#a9b5b8;pointer-events:none;text-shadow:0 2px 10px #000}
+#motion-status:empty{display:none}
+body:not(.intro) #motion,body:not(.intro) #motion-status{display:none}
+@media(max-width:650px){#motion-label{display:none}#motion{padding:8px}#motion-status{bottom:106px;font-size:10px}#intro-controls{gap:14px}}
+</style>Animacja 3D wymaga JavaScript. Treść strony i znak marki pozostają dostępne bez animacji.</noscript>
 <script>
 /* A tiny, local module container. No eval, fetch, ES-module CORS or runtime CDN.
    Factories keep private state private; dependencies are explicit and cycle-checked. */
@@ -1023,6 +1040,293 @@ noscript {
 // ===== ARCH 9: config/reclaim =====
 
 // ===== src/config/reclaim.js =====
+
+// ===== world/water =====
+/* ARCH 12 / LAKE SYSTEM
+ * Multiscale Gerstner displacement + radial LOD mesh, analytic derivatives,
+ * fixed-step GPU local wave equation (height/velocity/foam, ping-pong),
+ * depth-aware refraction, planar scene reflections, Fresnel, absorption, fog.
+ * It is a real-time height-field model, not a 3-D Navier–Stokes solver.
+ */
+GuziczakModules.define('world/water',['math','config/water'],(math,cfg)=>{
+ 'use strict';const {M,inverse4,clamp}=math;
+ const screenVS=`#version 300 es
+ precision highp float;out vec2 vUv;void main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);vUv=p;gl_Position=vec4(p*2.-1.,0,1);}`;
+ const common=`
+ float hash21(vec2 p){p=fract(p*vec2(.1031,.1030));p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);}
+ float noise2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y);}
+ float clouds(vec2 p){return noise2(p)*.56+noise2(p*2.02+7.31)*.29+noise2(p*4.07-1.85)*.15;}
+ vec3 sky(vec3 ray,float time){
+   float up=max(ray.y,0.),haze=exp(-up*8.5);
+   vec3 col=mix(vec3(.005,.010,.020),vec3(.048,.081,.091),haze);
+   vec2 pos=ray.xz/(.14+up)*2.4+vec2(time*.007,-time*.003);
+   float bank=clouds(pos),detail=clouds(pos*2.1+31.);
+   float veil=smoothstep(.38,.71,bank*.84+detail*.16)*(.16+.74*exp(-up*2.3));
+   col*=1.-veil*.63;
+   float opening=exp(-pow((ray.x+.34)*3.1,2.))*exp(-up*4.5);
+   col+=vec3(.014,.025,.030)*opening*(1.-smoothstep(.33,.58,bank));
+   float mist=exp(-abs(ray.y)*28.);col=mix(col,vec3(.056,.083,.089),mist*.56);
+   // No luminous sun-disc: a pale opening through the storm is the light source.
+   return col;
+ }
+ float hullR(vec2 x){return length((x-vec2(0,-.4))/vec2(2.49,3.17));}
+ `;
+ const waveDecl=`const vec4 waves[8]=vec4[8](${cfg.waves.map(w=>'vec4('+w.map(v=>Number(v).toFixed(5)).join(',')+')').join(',')});`;
+ const waveGLSL=`
+ uniform float uTime;uniform vec2 uTilt;uniform sampler2D uLocal;
+ ${waveDecl}
+ void spectrum(vec2 x,out vec3 disp,out vec2 slope,out float compression){
+   disp=vec3(0);slope=vec2(0);compression=0.;
+   float r=hullR(x),shelter=smoothstep(.985,1.75,r),att=.035+.965*shelter;
+   vec2 q=(x-vec2(0,-.4))/vec2(2.49,3.17),dr=vec2(q.x/2.49,q.y/3.17)/max(r,.01);
+   float u=clamp((r-.985)/.765,0.,1.);vec2 da=dr*(.965*6.*u*(1.-u)/.765);
+   float wind=1.+.17*length(uTilt),steer=uTilt.x*.32;
+   for(int i=0;i<8;i++){
+     vec4 w=waves[i];float k=6.2831853/w.x,a=w.y*wind,theta=w.z+steer;vec2 d=vec2(cos(theta),sin(theta));
+     float ph=k*dot(d,x)-sqrt(9.81*k)*uTime*(.73+.06*uTilt.y)+w.w;
+     float sn=sin(ph),cs=cos(ph);disp.y+=a*att*sn;
+     disp.xz+=d*a*.40*att*cs;
+     slope+=a*(att*k*cs*d+sn*da);
+     compression+=a*k*sn*att*.40;
+   }
+   vec2 uv=x/${cfg.localSpan.toFixed(1)}+.5;
+   float inside=smoothstep(0.,.06,uv.x)*smoothstep(0.,.06,uv.y)*(1.-smoothstep(.94,1.,uv.x))*(1.-smoothstep(.94,1.,uv.y));
+   vec2 texel=1./vec2(textureSize(uLocal,0));
+   float hh=(texture(uLocal,uv).r-.5)*inside;
+   vec2 ds=vec2(texture(uLocal,uv+vec2(texel.x,0)).r-texture(uLocal,uv-vec2(texel.x,0)).r,texture(uLocal,uv+vec2(0,texel.y)).r-texture(uLocal,uv-vec2(0,texel.y)).r);
+   disp.y+=hh;slope+=ds*(${cfg.localSize.toFixed(1)}/${(cfg.localSpan*2).toFixed(1)})*inside;
+ }
+ `;
+ const waterVS=`#version 300 es
+ precision highp float;layout(location=0)in vec2 aXZ;uniform mat4 uVP;uniform float uLevel;
+ out vec3 vWorld,vN;out vec2 vBase;out float vCrest;
+ ${common}${waveGLSL}
+ void main(){vec3 disp;vec2 slope;float compression;spectrum(aXZ,disp,slope,compression);vWorld=vec3(aXZ.x,uLevel,aXZ.y)+disp;vBase=aXZ;vN=normalize(vec3(-slope.x,1.,-slope.y));vCrest=compression;gl_Position=uVP*vec4(vWorld,1);}
+ `;
+ const waterFS=`#version 300 es
+ precision highp float;in vec3 vWorld,vN;in vec2 vBase;in float vCrest;out vec4 outColor;
+ uniform vec3 uCam;uniform mat4 uInvVP;uniform sampler2D uReflection,uScene,uDepth,uLocal;
+ uniform vec2 uResolution,uTilt;uniform float uTime,uLevel,uEnergy;
+ ${common}
+ vec3 worldAt(vec2 uv,float d){vec4 q=uInvVP*vec4(uv*2.-1.,d*2.-1.,1);return q.xyz/q.w;}
+ void main(){
+   float hull=hullR(vBase);if(hull<1.017)discard;
+   vec3 v=normalize(uCam-vWorld);float dist=length(uCam-vWorld);
+   vec2 slope=vec2(0);float fine=exp(-dist*.032)*(.42+.58*smoothstep(1.03,1.45,hull));
+   for(int i=0;i<5;i++){float a=float(i),th=1.3+a*2.17;vec2 d=vec2(cos(th),sin(th));float k=18.+a*13.1;float ph=dot(vWorld.xz,d)*k-uTime*(4.1+a*1.13)+noise2(vWorld.xz*.35+a)*3.;slope+=d*cos(ph)*(.036/(1.+a*.36))*fine;}
+   vec3 n=normalize(vN+vec3(-slope.x,0,-slope.y));
+   float nv=max(dot(n,v),.001),fresnel=.02037+.97963*pow(1.-nv,5.);
+   vec3 reflected=sky(reflect(-v,n),uTime);
+   vec2 uv=gl_FragCoord.xy/uResolution,distort=vec2(n.x,n.z)*.026/(1.+dist*.013);
+   vec2 refUV=clamp(uv+distort,vec2(.002),vec2(.998));
+   // Object alpha distinguishes the mirror image from empty sky.
+   vec2 px=1./vec2(textureSize(uReflection,0));
+   vec4 object=texture(uReflection,refUV)*.46;
+   object+=(texture(uReflection,refUV+vec2(px.x,0)*1.35)+texture(uReflection,refUV-vec2(px.x,0)*1.35)+texture(uReflection,refUV+vec2(0,px.y)*1.35)+texture(uReflection,refUV-vec2(0,px.y)*1.35))*.135;
+   reflected=mix(reflected,object.rgb,clamp(object.a,0.,1.)*.88);
+   float bgDepth=texture(uDepth,uv).r;vec3 ground=worldAt(uv,min(bgDepth,.99998));
+   float depth=bgDepth>.9999?28.:clamp(vWorld.y-ground.y,0.,28.);
+   vec2 refrUV=clamp(uv-distort*.56*min(depth,1.),vec2(.002),vec2(.998));float displacedDepth=texture(uDepth,refrUV).r;
+   if(displacedDepth<gl_FragCoord.z)refrUV=uv;
+   vec3 through=texture(uScene,refrUV).rgb;
+   vec3 absorption=exp(-vec3(.68,.26,.15)*depth),deep=vec3(.004,.022,.028);
+   vec3 refracted=through*absorption+deep*(1.-absorption);
+   if(bgDepth>.9999)refracted=deep;
+   vec3 c=mix(refracted,reflected,clamp(fresnel+.12,0.,1.));
+   // A broad cloud opening produces broken specular tracks, not white plastic.
+   vec3 l=normalize(vec3(-.42,.31,-.82)),h=normalize(l+v);
+   float rough=.145,nh=max(dot(n,h),0.),nl=max(dot(n,l),0.);
+   float a2=pow(rough,4.),D=a2/(3.14159265*pow(nh*nh*(a2-1.)+1.,2.)+.00002);
+   c+=vec3(.18,.23,.24)*D*.023*nl/(.35+nv);
+   c+=vec3(.005,.014,.017)*max(0.,dot(n,l))*(1.-fresnel);
+   float motionFoam=texture(uLocal,vBase/${cfg.localSpan.toFixed(1)}+.5).b;
+   float grains=clouds(vBase*4.4+vec2(uTime*.2,-uTime*.13));
+   float crest=smoothstep(.11,.205,vCrest)*smoothstep(.51,.76,grains)*.19;
+   float contact=exp(-pow((hull-1.036)*36.,2.))*smoothstep(.25,.75,grains)*(.12+.06*sin(uTime*1.7+vBase.x));
+   float foam=clamp(crest+contact+motionFoam*.45,0.,.36);
+   c=mix(c,vec3(.15,.19,.195),foam);
+   float mist=1.-exp(-max(dist-15.,0.)*.009);c=mix(c,sky(normalize(vec3(vWorld.x-uCam.x,.012,vWorld.z-uCam.z)),uTime),mist);
+   outColor=vec4(max(c,vec3(0)),1.);
+ }
+ `;
+ const skyFS=`#version 300 es
+ precision highp float;in vec2 vUv;out vec4 outColor;uniform mat4 uInvVP;uniform vec3 uCam;uniform float uTime;
+ ${common}
+ void main(){vec4 a=uInvVP*vec4(vUv*2.-1.,1.,1.);vec3 ray=normalize(a.xyz/a.w-uCam);outColor=vec4(sky(ray,uTime),1.);}`;
+ const simFS=`#version 300 es
+ precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uPrev;uniform float uDt,uTime,uForce;uniform vec2 uTilt;
+ ${common}
+ void main(){vec2 texel=1./vec2(textureSize(uPrev,0)),pos=(vUv-.5)*${cfg.localSpan.toFixed(1)};vec4 old=texture(uPrev,vUv);float hh=old.r-.5,v=old.g-.5;
+ float r=hullR(pos);if(r<1.02){outColor=vec4(.5,.5,0,1);return;}
+ float lap=0.;for(int i=0;i<4;i++){vec2 off=i==0?vec2(texel.x,0):i==1?vec2(-texel.x,0):i==2?vec2(0,texel.y):vec2(0,-texel.y);float next=texture(uPrev,vUv+off).r-.5;if(hullR(pos+off*${cfg.localSpan.toFixed(1)})<1.02)next=hh;lap+=next-hh;}
+ float border=min(min(vUv.x,1.-vUv.x),min(vUv.y,1.-vUv.y));float absorb=(1.-smoothstep(0.,.13,border))*7.;
+ float dt=uDt;v+=(lap*${(cfg.waveSpeed**2/(cfg.localSpan/cfg.localSize)**2).toFixed(4)}-v*(${cfg.damping.toFixed(2)}+absorb))*dt;
+ vec2 wakeCenter=normalize(uTilt+vec2(.001,.001))*3.6;float gust=exp(-dot(pos-wakeCenter,pos-wakeCenter)*.7)*length(uTilt)*sin(uTime*3.6)*.25;
+ float wake=exp(-pow((r-1.06)*19.,2.))*(.6+.4*sin(atan(pos.y+.4,pos.x)*3.+uTime));
+ v+=dt*(gust+wake*uForce*.8);hh=clamp(hh+dt*v,-.18,.18);v=clamp(v,-.42,.42);
+ float foam=max(old.b*exp(-dt*1.3),smoothstep(.022,.10,abs(lap))*.15+abs(v)*wake*.16);
+ outColor=vec4(.5+hh,.5+v,foam,1.);}`;
+ function analyticHeight(x,z,time,tilt=[0,0]){let h=0;const r=Math.hypot(x/2.49,(z+.4)/3.17),u=clamp((r-.985)/.765,0,1),att=.035+.965*u*u*(3-2*u);for(const[w,a,ang,phase]of cfg.waves){const k=2*Math.PI/w,theta=ang+tilt[0]*.32;h+=a*(1+.17*Math.hypot(...tilt))*att*Math.sin(k*(Math.cos(theta)*x+Math.sin(theta)*z)-Math.sqrt(9.81*k)*time*(.73+.06*tilt[1])+phase);}return cfg.level+h;}
+ function create(gl,k){const {program,target,bind,screen,f1,f2,f3,m4,texture}=k;
+   const ocean=program(waterVS,waterFS),skies=program(screenVS,skyFS),simulation=program(screenVS,simFS);
+   const localA=target(cfg.localSize,cfg.localSize,false),localB=target(cfg.localSize,cfg.localSize,false),localEnabled=localA.fp&&localB.fp;
+   let read=localA,write=localB,simulationClock=null,accumulator=0,steps=0,resets=0,lastFrame=null;
+   for(const rt of [localA,localB]){bind(rt);gl.clearColor(.5,.5,0,1);gl.clear(gl.COLOR_BUFFER_BIT);}
+   const data=[],idx=[],R=cfg.radialRings,N=cfg.radialSegments;
+   for(let i=0;i<=R;i++){const r=cfg.nearScale*(Math.exp(i/R*Math.log(1+cfg.reach/cfg.nearScale))-1);for(let j=0;j<=N;j++){const a=j/N*Math.PI*2;data.push(r*Math.cos(a),r*Math.sin(a)-.4);}}
+   for(let i=0;i<R;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+N+1;idx.push(a,a+1,b+1,a,b+1,b);}
+   const vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,8,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(idx),gl.STATIC_DRAW);gl.bindVertexArray(null);
+   function reset(){for(const rt of [read,write]){bind(rt);gl.clearColor(.5,.5,0,1);gl.clear(gl.COLOR_BUFFER_BIT);}accumulator=0;resets++;}
+   function update(frame){lastFrame=frame;const time=frame.elapsed,dt=simulationClock===null?0:time-simulationClock;
+     if(simulationClock===null||dt<0||dt>.35){reset();simulationClock=time;return;}
+     simulationClock=time;if(!localEnabled||dt<=0)return;accumulator+=dt;
+     gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.depthMask(false);gl.useProgram(simulation.p);
+     let count=0;while(accumulator>=cfg.fixedDt&&count<cfg.maxSubsteps){bind(write);texture(simulation,'uPrev',read.t,0);f1(simulation,'uDt',cfg.fixedDt);f1(simulation,'uTime',time-accumulator);f2(simulation,'uTilt',...(frame.motion?.tilt||[0,0]));const t=frame.time;const force=.03+.08*Math.exp(-Math.pow((t-.82)*3.,2.))+.13*Math.exp(-Math.pow((t-16.55)*5.,2.))+.045*(frame.motion?.speed||0);f1(simulation,'uForce',force);screen(simulation);[read,write]=[write,read];steps++;count++;accumulator-=cfg.fixedDt;}
+     gl.depthMask(true);
+   }
+   function skyDraw(VP,cam,time){gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(skies.p);m4(skies,'uInvVP',inverse4(VP));f3(skies,'uCam',cam);f1(skies,'uTime',time);screen(skies);}
+   function draw(VP,cam,refraction,reflection,W,H,frame){gl.enable(gl.DEPTH_TEST);gl.depthMask(true);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);gl.useProgram(ocean.p);
+     m4(ocean,'uVP',VP);m4(ocean,'uInvVP',inverse4(VP));f3(ocean,'uCam',cam);f1(ocean,'uTime',frame.elapsed);f1(ocean,'uLevel',cfg.level);f1(ocean,'uEnergy',frame.energy);f2(ocean,'uTilt',...(frame.motion?.tilt||[0,0]));f2(ocean,'uResolution',W,H);
+     texture(ocean,'uReflection',reflection.t,0);texture(ocean,'uScene',refraction.t,1);texture(ocean,'uDepth',refraction.dt,2);texture(ocean,'uLocal',read.t,3);gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_INT,0);
+   }
+   return {update,skyDraw,draw,stats:()=>({model:'Gerstner spectrum + fixed-step GPU wave equation',level:cfg.level,geometricWaves:cfg.waves.length,triangles:idx.length/3,reach:cfg.reach,localGrid:cfg.localSize,localEnabled,localSteps:steps,resets,time:lastFrame?.elapsed,wind:lastFrame?.motion?.tilt||[0,0]}),config:cfg};
+ }
+ return {create,analyticHeight,config:cfg,skyGLSL:common};
+});
+
+
+// ===== input/motion =====
+GuziczakModules.define('input/motion',['math','core/scope'],(m,scopes)=>{
+  'use strict';const {clamp}=m;
+  function create(win,doc){const scope=scopes.createScope(),button=doc.getElementById('motion'),label=doc.getElementById('motion-label'),status=doc.getElementById('motion-status');
+    let permission='idle',active=false,center=null,target=[0,0],value=[0,0],speed=0,events=0,lastEvent=0,disposed=false,watch=0,messageTimer=0,subscribed=false;
+    function describe(text){if(status)status.textContent=text;if(messageTimer)win.clearTimeout(messageTimer);messageTimer=win.setTimeout(()=>{if(status)status.textContent='';},6200);}
+    function paint(){if(!button)return;button.setAttribute('aria-pressed',String(active));button.classList.toggle('on',active);label.textContent=active?'Ruch włączony':'Ruch wody';button.title=active?'Wyłącz reakcję wody na przechylenie':'Włącz reakcję wody na przechylenie telefonu';}
+    function onOrientation(e){if(!active||!Number.isFinite(e.beta)||!Number.isFinite(e.gamma))return;
+      if(!center)center=[e.beta,e.gamma];const angle=(win.screen?.orientation?.angle??win.orientation??0)*Math.PI/180;
+      const x=clamp((e.gamma-center[1])/26,-1,1),z=clamp((e.beta-center[0])/30,-1,1);target=[clamp(x*Math.cos(angle)+z*Math.sin(angle),-1,1),clamp(z*Math.cos(angle)-x*Math.sin(angle),-1,1)];events++;lastEvent=win.performance.now();permission='granted';
+    }
+    async function enable(){if(disposed)return false;if(active){active=false;target=[0,0];paint();describe('Reakcja na ruch wyłączona.');return false;}
+      if(!win.isSecureContext){permission='insecure';describe('Czujniki wymagają bezpiecznego połączenia HTTPS. Jezioro działa bez nich.');return false;}
+      const Type=win.DeviceOrientationEvent;if(!Type){permission='unavailable';describe('To urządzenie nie udostępnia czujników orientacji.');return false;}
+      try{
+        // Called directly from the button: permission retains transient activation.
+        const answer=typeof Type.requestPermission==='function'?await Type.requestPermission():'granted';
+        if(answer!=='granted'){permission='denied';describe('Brak zgody na czujniki. Jezioro działa bez reakcji na przechylenie.');paint();return false;}
+        if(disposed)return false;permission='granted';active=true;center=null;target=[0,0];
+        if(!subscribed){scope.on(win,'deviceorientation',onOrientation,{passive:true});subscribed=true;}
+        paint();describe('Przechyl delikatnie telefon. Obecne położenie jest neutralne.');
+        if(watch)win.clearTimeout(watch);const before=events;watch=win.setTimeout(()=>{if(active&&events===before){permission='no-data';describe('Zgoda udzielona, ale czujnik nie wysyła danych. Woda działa samodzielnie.');}},3500);
+        return true;
+      }catch(e){permission='denied';active=false;target=[0,0];paint();describe('Czujnik nie jest dostępny. Animacja działa bez niego.');return false;}
+    }
+    if(button)scope.on(button,'click',enable);
+    scope.on(win,'orientationchange',()=>{center=null;target=[0,0];});
+    function sample(dt=1/60,frozen=false){if(!frozen){const a=1-Math.exp(-Math.min(Math.max(dt,0),.12)*3.2),old=value.slice();value=value.map((v,i)=>v+(target[i]-v)*a);speed=Math.min(2,Math.hypot(...value.map((v,i)=>(v-old[i])))/Math.max(dt,.016));}return {tilt:value.slice(),target:target.slice(),speed,active,permission};}
+    return {enable,sample,recenter(){center=null;target=[0,0];},diagnostics:()=>({permission,active,events,lastEvent,tilt:value.slice(),target:target.slice(),dataStale:active&&events>0&&win.performance.now()-lastEvent>2000}),destroy(){disposed=true;scope.dispose();if(watch)win.clearTimeout(watch);if(messageTimer)win.clearTimeout(messageTimer);active=false;}};
+  }
+  return {create};
+});
+
+
+// ===== config/water =====
+GuziczakModules.define('config/water',[],()=>Object.freeze({
+  level:-2.71,reach:840,radialRings:128,radialSegments:192,nearScale:.52,
+  localSize:128,localSpan:28,fixedDt:1/60,maxSubsteps:8,waveSpeed:1.52,damping:.82,
+  // [wavelength, amplitude, heading (rad), phase]; bounded total steepness.
+  waves:Object.freeze([[17.8,.19,.41,1.1],[10.3,.132,1.21,.4],[6.8,.077,-.62,2.8],[4.31,.047,2.34,.6],[2.73,.028,.75,4.6],[1.66,.015,-1.62,1.8],[1.09,.010,2.85,.3],[.64,.0055,.06,3.4]]),
+  hull:[2.49,3.17,-.4],reflectionScale:.65
+}));
+
+
+// ===== geometry/refuge =====
+GuziczakModules.define('geometry/refuge',['math','config/docking'],(math,cfg)=>{
+  'use strict';const {M,C,PI,TAU}=math;
+  function create(tools){const {build,bevelBox,ringY}=tools,meshes={},deck=cfg.deckY,R=cfg.opening,N=192,center=[0,-2.4],rx=cfg.hull[0],rz=cfg.hull[1],cz=cfg.hull[2];
+    function ellipseRay(a){const dx=Math.cos(a),dz=Math.sin(a),oz=center[1]-cz,A=dx*dx/(rx*rx)+dz*dz/(rz*rz),B=2*oz*dz/(rz*rz),CC=oz*oz/(rz*rz)-1;return(-B+Math.sqrt(B*B-4*A*CC))/(2*A);}
+    function p(a,r,y){return[center[0]+r*Math.cos(a),y,center[1]+r*Math.sin(a)];}
+    meshes.pedestal=build(b=>{
+      // A continuous deck with a REAL eccentric opening, not a dark decal.
+      for(let i=0;i<N;i++){const a=i*TAU/N,aa=(i+1)*TAU/N,outer=ellipseRay(a),outer2=ellipseRay(aa);
+        const K=14;for(let j=0;j<K;j++){const f=j/K,ff=(j+1)/K;b.quad(p(a,R+(outer-R)*f,deck),p(aa,R+(outer2-R)*f,deck),p(aa,R+(outer2-R)*ff,deck),p(a,R+(outer-R)*ff,deck),22);}
+      }
+      // The dry, low obsidian island has a tapered hull below the waterline.
+      const levels=[[deck,1],[-2.44,1.018],[-2.57,1.03],[-2.80,1.015],[-3.18,.92],[-3.60,.73],[-3.72,.65]];
+      for(let j=0;j<levels.length-1;j++)for(let i=0;i<N;i++){const a=i*TAU/N,aa=(i+1)*TAU/N,P=(v,ang)=>[rx*v[1]*Math.cos(ang),v[0],cz+rz*v[1]*Math.sin(ang)];b.quad(P(levels[j],a),P(levels[j+1],a),P(levels[j+1],aa),P(levels[j],aa),22);}
+      for(const [scale,y,r] of [[1.018,-2.46,.007],[.975,deck+.002,.005]]){const points=[];for(let i=0;i<=N;i++){const a=i*TAU/N;points.push([rx*scale*Math.cos(a),y,cz+rz*scale*Math.sin(a)]);}b.tube(points,r,1,8);}
+      // Deck grooves run around, not across, the recessed docking aperture.
+      // The deck stays unbroken except for the actual socket in its stern.
+    });
+    meshes.dockSleeve=build(b=>{
+      const P=(a,r,y)=>[Math.cos(a)*r,y,Math.sin(a)*r];
+      for(let i=0;i<96;i++){const a=i*TAU/96,aa=(i+1)*TAU/96;
+        b.quad(P(a,R,0),P(aa,R,0),P(aa,R,-2.30),P(a,R,-2.30),11);
+        b.quad(P(a,R,-2.30),P(aa,R,-2.30),[0,-2.30,0],[0,-2.30,0],11);
+      }
+      ringY(b,.633,.024,.10,.047,2,128);ringY(b,.697,.030,.012,.019,1,128);ringY(b,.568,-.04,.022,.035,1,128);
+      // Internal receiving thread: the coil's lead is shared with the motion controller.
+      const pts=[];for(let i=0;i<=650;i++){const y=-.08-1.9*i/650,a=(-y/cfg.lead)*TAU;pts.push([.529*Math.cos(a),y,.529*Math.sin(a)]);}b.tube(pts,.014,2,8);
+      for(let i=0;i<12;i++){const a=i*TAU/12;b.at(C(M.Ry(a),M.T(.704,.038,0)),()=>{ringY(b,.020,0,.007,.009,2,16);});}
+    });
+    meshes.dockLeaf=build(b=>{
+      const inner=.005,outer=.60,half=PI/8+.015;const N=16;
+      for(let i=0;i<N;i++){const a=-half+2*half*i/N,aa=-half+2*half*(i+1)/N,P=(r,a,y)=>[r*Math.cos(a),y,r*Math.sin(a)];
+        b.quad(P(inner,a,0),P(inner,aa,0),P(outer,aa,0),P(outer,a,0),11);
+        b.quad(P(inner,a,-.026),P(outer,a,-.026),P(outer,aa,-.026),P(inner,aa,-.026),2);
+        b.quad(P(outer,a,0),P(outer,aa,0),P(outer,aa,-.026),P(outer,a,-.026),2);
+      }
+      b.tube([[.10,.002,-.025],[.44,.002,-.12],[.58,.002,-.15]],.004,1,6);
+    });
+    meshes.dockBridge=build(b=>{ringY(b,.41,.034,.11,.067,11,96);ringY(b,.433,.069,.012,.012,1,96);});
+    return meshes;
+  }
+  return {create};
+});
+
+
+// ===== scene/docking =====
+GuziczakModules.define('scene/docking',['math','config/docking'],(m,cfg)=>{
+  const {ease,M,C,TAU}=m;
+  function sample(t){const align=ease(...cfg.align,t),lower=ease(2.65,3.03,t),down=ease(...cfg.descend,t),extra=cfg.extraStroke*ease(...cfg.telescope,t),z=cfg.finalZ*align,y=.64*(1-lower)+cfg.finalY*down;
+    const penetration=Math.max(0,cfg.deckY-(y-extra-1.69)),rotation=-penetration/cfg.lead*TAU;
+    return {align,down,extra,rotation,closed:ease(...cfg.close,t),y,z,set:C(M.T(0,y,z)),coilTop:y-extra-.223,coilBottom:y-extra-1.69,
+      aperture:cfg.opening,deckY:cfg.deckY,inWell:penetration>0,radialError:Math.abs(z-cfg.finalZ),railScale:1-.78*down,lead:cfg.lead};
+  }
+  return {sample,config:cfg};
+});
+
+
+// ===== config/docking =====
+GuziczakModules.define('config/docking',[],()=>Object.freeze({
+  align:[14.38,15.20], descend:[15.18,16.52], telescope:[16.06,16.68], close:[16.69,17.0],
+  center:[0,-2.4],deckY:-2.405,wellFloor:-4.72,opening:.61,extraStroke:.51,lead:.90/4.6,
+  finalY:-1.8,finalZ:-2.4,hull:[2.49,3.17,-.4]
+}));
+
+
+// ===== scene/hydraulics =====
+GuziczakModules.define('scene/hydraulics',['math','config/hydraulics'],(m,cfg)=>{
+  'use strict';const {clamp,mix,ease}=m;
+  function radiusAt(y){const p=cfg.inner;if(y<=p[0][0])return p[0][1];for(let i=1;i<p.length;i++)if(y<=p[i][0])return mix(p[i-1][1],p[i][1],(y-p[i-1][0])/(p[i][0]-p[i-1][0]));return p.at(-1)[1];}
+  function volumeAt(y){let v=0;for(let i=1;i<cfg.inner.length;i++){const [y0,r0]=cfg.inner[i-1],[y1,r1]=cfg.inner[i];if(y<=y0)break;const h=Math.min(y,y1)-y0,rr=mix(r0,r1,h/(y1-y0));v+=Math.PI*h*(r0*r0+r0*rr+rr*rr)/3;}return v;}
+  const capacity=volumeAt(cfg.fullLevel),residue=volumeAt(cfg.residueLevel);
+  function levelAt(v){let lo=cfg.inner[0][0],hi=cfg.fullLevel;for(let i=0;i<27;i++){const mid=(lo+hi)/2;if(volumeAt(mid)<v)lo=mid;else hi=mid;}return(lo+hi)/2;}
+  function sample(t){const supplied=capacity*ease(...cfg.fill,t),drainProgress=ease(...cfg.drain,t),discharged=(capacity-residue)*drainProgress,remaining=Math.max(0,supplied-discharged);
+    const u=clamp((t-cfg.drain[0])/(cfg.drain[1]-cfg.drain[0]),0,1),flow=(t>cfg.drain[0]&&t<cfg.drain[1])?30*u*u*(1-u)*(1-u)/(cfg.drain[1]-cfg.drain[0]):0;
+    const y=levelAt(remaining);return {level:y,radius:radiusAt(y)*.994,remaining,supplied,discharged,capacity,residue,fillFraction:remaining/capacity,drainProgress,flow,visible:supplied>capacity*.00005,chamber:ease(...cfg.chamberFill,t)*(1-ease(10.75,11.62,t)),volumeError:supplied-remaining-discharged};
+  }
+  return {sample,radiusAt,volumeAt,levelAt,capacity,residue,config:cfg};
+});
+
+
+// ===== config/hydraulics =====
+GuziczakModules.define('config/hydraulics', [], () => Object.freeze({
+  // Actual inner wall profile [height, radius], shared by the volume integrator.
+  inner: Object.freeze([[-.205,.13],[-.18,.25],[-.13,.36],[-.02,.51],[.16,.70],[.36,.84],[.60,.97],[.83,1.06],[.95,1.094],[1.008,1.104]]),
+  fullLevel:.915, residueLevel:-.157,
+  fill:[4.92,7.91], drain:[9.03,11.56], chamberFill:[7.36,8.85]
+}));
+
 
 // ===== config/reclaim =====
 GuziczakModules.define('config/reclaim', [], () => Object.freeze({
@@ -1085,8 +1389,10 @@ GuziczakModules.define('geometry/reclaim', ['math','config/reclaim'], (math,cfg)
         // Complementary jagged ends: neighboring pieces share coordinates before
         // the blade opens this weak cross section. No opacity holes or thinning.
         return st.L*f+.0055*Math.sin(u*11.2+st.seed+k)+.003*(2*u-1);}
+    const workTables=streams.map(st=>{const d=[0],ss=[0];let work=0;for(let i=1;i<=220;i++){const x=(i-.5)*st.L/220,b=banks(st,x);let load=.74+2.0*(b[1]-b[0]);for(const f of st.partitions.slice(1,-1))load+=.48*Math.exp(-Math.pow((x-st.L*f)/.025,2));work+=load*st.L/220;d.push(work);ss.push(i*st.L/220);}return {d,ss,total:work};});
+    function workCut(st,p){const q=ease(...st.stroke,p),tab=workTables[st.index],v=q*tab.total;let lo=0,hi=tab.d.length-1;while(hi-lo>1){const k=(lo+hi)>>1;if(tab.d[k]<v)lo=k;else hi=k;}return mix(tab.ss[lo],tab.ss[hi],(v-tab.d[lo])/(tab.d[hi]-tab.d[lo]||1));}
     function stage(frame){const p=frame.phase==='reclaim'?frame.phaseProgress:(frame.time>=12.57?1:0);
-        return {p,time:frame.time,cuts:streams.map(st=>st.L*ease(...st.stroke,p)),complete:p>=1};}
+        return {p,time:frame.time,cuts:streams.map(st=>workCut(st,p)),complete:p>=1};}
     function materialPoint(st,k,s,u,cut,t,p,rolled){
         const lo=cutBoundary(st,k,u),hi=cutBoundary(st,k+1,u),endMax=st.L*st.partitions[k+1]+(st.partitions[k+1]===1?0:.009);
         const age=t-arrival(st,s,u),wet=ease(0,.085,age),crossEdge=.54+.46*Math.sqrt(Math.max(0,1-Math.pow(2*u-1,2)));
@@ -1124,7 +1430,7 @@ GuziczakModules.define('geometry/reclaim', ['math','config/reclaim'], (math,cfg)
             let ya=-Math.atan2(from.T[1],from.T[0]),delta=yaw-ya;while(delta>PI)delta-=TAU;while(delta<-PI)delta+=TAU;yaw=ya+delta*move;
             y=.39*Math.pow(Math.sin(PI*f),.72)+(id===0?.22*(1-move):0);
         }else if(p>end){const f=ease(end,1,p);point=[F.p[0]+2.35*f,F.p[1]-.1*f];y=.66*f;contact=false;}
-        return {id:st.id,index:id,x:point[0],z:point[1],y,yaw,T:[Math.cos(yaw),-Math.sin(yaw)],B:[Math.sin(yaw),Math.cos(yaw)],contact,visible:p>0&&p<1,width:cfg.bladeWidth,cut};
+        return {id:st.id,index:id,x:point[0],z:point[1],y,yaw,T:[Math.cos(yaw),-Math.sin(yaw)],B:[Math.sin(yaw),Math.cos(yaw)],contact,visible:p>0&&p<1,width:cfg.bladeWidth,cut,load:contact?Math.min(1,(banks(st,cut)[1]-banks(st,cut)[0])/cfg.bladeWidth):0};
     }
     function volume(st,lo=0,hi=st.L){const N=240,ds=(hi-lo)/N;let v=0;for(let i=0;i<N;i++){const b=banks(st,lo+(i+.5)*ds);v+=(b[1]-b[0])*cfg.thickness*ds*(.54+.46*PI/4);}return v;}
     function create(gl,tools){
@@ -1197,7 +1503,7 @@ GuziczakModules.define('geometry/reclaim', ['math','config/reclaim'], (math,cfg)
         }
         return {meshes,update};
     }
-    return {create,stage,streams,toolState,rest,pathAt,frameAt,materialPoint,banks,arrival,support,angleAt,volume,cutBoundary,config:cfg};
+    return {create,workCut,stage,streams,toolState,rest,pathAt,frameAt,materialPoint,banks,arrival,support,angleAt,volume,cutBoundary,config:cfg};
 });
 
 
@@ -1427,15 +1733,15 @@ GuziczakModules.define("assets", [], () => ({"logo":[[[0.134361,0.927517],[0.065
 // ===== app/engine =====
 GuziczakModules.define('app/engine', [
     'config/sequence', 'core/timeline', 'core/scope', 'render/device', 'geometry/catalog',
-    'scene/composer', 'scene/state', 'scene/camera', 'render/renderer', 'ui/controller', 'audio/music', 'audio/foley', 'audio/score'
-], (config, timelines, scopes, devices, geometry, scenes, states, cameras, renderers, interfaces, music, foley, scores) => {
+    'scene/composer', 'scene/state', 'scene/camera', 'render/renderer', 'ui/controller', 'audio/music', 'audio/foley', 'audio/score', 'input/motion'
+], (config, timelines, scopes, devices, geometry, scenes, states, cameras, renderers, interfaces, music, foley, scores, sensors) => {
     'use strict';
     /** Application boundary: only this module owns playback, RAF and lifecycle. */
     function mount(window, document, options = {}) {
         const timeline = timelines.createTimeline({ ...config.durations, ...options.durations }), clock = timelines.createClock(timeline);
         const scope = scopes.createScope(), ui = interfaces.createUI(document), canvas = ui.$('scene');
         const params = new URLSearchParams(window.location.search);
-        const seenKey = 'guziczak.przesmyk.arch9.seen';
+        const seenKey = 'guziczak.refuge.arch12.seen';
         let seen = false;
         try {
             seen = window.sessionStorage.getItem(seenKey) === '1';
@@ -1444,6 +1750,7 @@ GuziczakModules.define('app/engine', [
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const sound = music.createMusic(window, document, config.mix);
         const scoreLayer=scores.create(window,document,sound);
+        const motion=sensors.create(window,document);
         let device = null, catalog = null, scene = null, renderer = null, fx = null;
         let raf = 0, dirty = true, ready = false, failed = false, disposed = false, frameNumber = 0;
         let mode = 'idle', focused = true, hiddenPaused = false, lastFrame = null, lastPacket = null, lastError = '';
@@ -1503,7 +1810,10 @@ GuziczakModules.define('app/engine', [
                 const cursor = clock.tick(ms), frame = states.sampleState(cursor), vp = viewport();
                 frame.frozen = clock.state !== 'playing';
                 frame.finished = cursor.complete;
-                const packet = scene.sample(frame, vp), camera = cameras.sampleCamera(frame, vp);
+                frame.motion=motion.sample(lastFrame?Math.max(0,frame.elapsed-lastFrame.elapsed):1/60,frame.frozen);
+                const packet=scene.sample(frame,vp);
+                Object.assign(frame,{fluid:packet.fluid,docking:packet.docking,reclaim:packet.reclaim});
+                const camera=cameras.sampleCamera(frame,vp);
                 renderer.render(frame, packet, camera, vp);
                 ui.render(frame, packet, renderer.project, vp);
                 scoreLayer.setScene(frame.time);
@@ -1592,7 +1902,7 @@ GuziczakModules.define('app/engine', [
                 ...(renderer && !device.disposed ? renderer.stats() : {}), resources: device ? device.counts() : {},
                 triangles: catalog?.triangleCount || 0, objects: lastPacket?.commands.length || 0,
                 vesselTransform: lastPacket ? Array.from(lastPacket.vesselTransform) : null,
-                counts: lastPacket?.counts || {}, assembly: lastPacket?.assembly, foundry: lastPacket?.foundry,
+                counts: lastPacket?.counts || {}, assembly: lastPacket?.assembly, fluid:lastPacket?.fluid, docking:lastPacket?.docking, motion:motion.diagnostics(), foundry: lastPacket?.foundry,
                 markRect: ui.markRect, brandLayout:ui.layout, audio: sound.diagnostics(), score:scoreLayer.diagnostics(), reclaim:lastPacket?.reclaim, error: lastError, disposed };
         }
         function dispose() {
@@ -1603,6 +1913,7 @@ GuziczakModules.define('app/engine', [
             clock.pause();
             cancelFrame();
             scope.dispose();
+            motion.destroy();
             scoreLayer.destroy();
             sound.destroy();
             if (device)
@@ -1656,7 +1967,7 @@ GuziczakModules.define('app/engine', [
             }
         });
         scope.on(canvas, 'webglcontextlost', e => { e.preventDefault(); fail(Error('Kontekst WebGL został utracony. Odśwież kartę, aby ponowić animację.')); });
-        const api = { play, seek, pause, resume,
+        const api = { play, seek, pause, resume, motion,
             seekPhase(id,progress=0){const phase=timeline.segments.find(p=>p.id===id);if(!phase)throw Error('Unknown phase '+id);return seek(phase.start+phase.duration*Math.max(0,Math.min(1,progress)));},
             seekAuthored(t){return seek(timeline.toElapsed(t));}, skip: () => complete(), destroy: dispose, diagnostics, sound,
             get total() { return timeline.total; }, get state() { return Object.freeze({ ...lastFrame, finished: mode === 'page', frozen: clock.state === 'paused' }); },
@@ -1782,6 +2093,9 @@ GuziczakModules.define("audio/foley", ["math", "scene/curves", "core/timeline"],
         stream.connect(pan);
         pan.connect(input);
         source.start();
+        const waterLow=track(ctx.createBiquadFilter()),waterHigh=track(ctx.createBiquadFilter()),waterGain=track(ctx.createGain()),waterPan=track(ctx.createStereoPanner());
+        waterLow.type='lowpass';waterLow.frequency.value=540;waterHigh.type='highpass';waterHigh.frequency.value=80;waterGain.gain.value=0;
+        source.connect(waterLow);waterLow.connect(waterHigh);waterHigh.connect(waterGain);waterGain.connect(waterPan);waterPan.connect(input);
         const scrapeFilter=track(ctx.createBiquadFilter()),scrapeGain=track(ctx.createGain());
         scrapeFilter.type='bandpass';scrapeFilter.frequency.value=720;scrapeFilter.Q.value=.8;scrapeGain.gain.value=0;
         source.connect(scrapeFilter);scrapeFilter.connect(scrapeGain);scrapeGain.connect(input);
@@ -1892,23 +2206,28 @@ GuziczakModules.define("audio/foley", ["math", "scene/curves", "core/timeline"],
             else if (id === 13) {
                 friction(.020, .14, 610);
             }
-            else {
-                friction(.018, .17, 980);
-            }
+            else if(id===17){friction(.009,.34,430);}
+            else if(id===18){friction(.016,.052,255);tone(108,.16,.005);}
+            else { friction(.018, .17, 980); }
         };
         A.stop = () => { for (const { o } of A.events)
             try {
                 o.stop(ctx.currentTime + .02);
             }
             catch (e) { } stream.gain.setTargetAtTime(0, ctx.currentTime, .12);
+            waterGain.gain.setTargetAtTime(0,ctx.currentTime,.18);
             scrapeGain.gain.setTargetAtTime(0,ctx.currentTime,.04); coilGain.gain.setTargetAtTime(0, ctx.currentTime, .1); };
         A.update = (s, policy) => {
             const t = ctx.currentTime, on = !disposed && policy.enabled && policy.active;
             master.gain.setTargetAtTime(on ? settings.foleyMaster : 0, t, .12);
+            const waterEnvelope=(.64+.19*Math.sin(s.elapsed*.63)+.17*Math.sin(s.elapsed*1.21+.4));
+            waterGain.gain.setTargetAtTime(on?.020*waterEnvelope*(s.phase==='reclaim'?.45:1):0,t,.18);
+            waterPan.pan.setTargetAtTime((s.motion?.tilt?.[0]||0)*.35,t,.3);
+            waterLow.frequency.setTargetAtTime(440+110*waterEnvelope+90*(s.motion?.speed||0),t,.2);
             const rp=s.phase==='reclaim'?s.phaseProgress:0;
             const strokes=[[.08,.265],[.32,.505],[.56,.755],[.815,.95]];
             let rubbing=0;for(const [a,b] of strokes)rubbing=Math.max(rubbing,ease(a,a+.025,rp)*(1-ease(b-.012,b+.010,rp)));
-            scrapeGain.gain.setTargetAtTime(on?rubbing*.012:0,t,.045);
+            scrapeGain.gain.setTargetAtTime(on?rubbing*(.007+.007*(s.reclaim?.tool?.load||0)):0,t,.045);
             scrapeFilter.frequency.setTargetAtTime(660+rubbing*105,t,.065);
             for(const [a] of strokes)if(on&&previousReclaim<a&&rp>=a&&rp<a+.06)friction(.008,.05,730);
             previousReclaim=rp;
@@ -2451,11 +2770,12 @@ GuziczakModules.define("config/camera", [], () => {
         [1.72, .38, .13, 7.1, [.20, -.16, .12]], [2.54, .28, .16, 7.4, [0, -.10, .10]],
         [3.50, .15, .28, 11.9, [0, .14, 0]], [5.45, .06, .37, 12.0, [0, .27, 0]],
         [6.65, -.08, .39, 11.2, [0, .21, 0]], [7.90, .13, .42, 9.1, [0, -.45, .10]],
-        [8.85, .14, 1.00, 6.0, [0, -1.92, .77]], [9.55, .13, 1.02, 5.85, [0, -2.00, .77]],
+        [8.65,.19,.59,10.0,[0,-.52,.20]], [9.55,.20,.70,9.3,[0,-.58,.28]],
+        [10.05,.15,.81,8.7,[0,-1.03,.39]], [10.63,.12,1.01,5.90,[0,-2.00,.80]],
         [11.50, .10, 1.02, 5.8, [0, -2.00, .83]], [12.55, .09, 1.01, 5.85, [0, -2.00, .84]],
         [12.85,.09,.96,5.80,[0,-1.98,.73]], [13.45,.075,.90,5.82,[0,-1.93,.70]],
-        [14.30,.06,.88,5.9,[0,-1.84,.70]], [14.80,.04,.67,6.75,[0,-1.40,.59]],
-        [15.65,.01,.20,8.85,[0,-.25,.12]], [16.70,0,0,9.5,[0,0,0]], [22.70,0,0,9.5,[0,0,0]]
+        [14.30,.06,.88,5.9,[0,-1.84,.70]], [14.80,.19,.63,7.8,[0,-1.10,-.18]],
+        [15.42,.47,.36,8.6,[0,-1.08,-.56]], [15.90,.28,.25,9.25,[0,-.48,-.24]], [16.70,0,0,9.5,[0,0,0]], [22.70,0,0,9.5,[0,0,0]]
     ];
     return { shots: Object.freeze(shots), settledAt: 16.70 };
 });
@@ -2512,7 +2832,7 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
         ['seat', 1.06, 0], ['guide', 1.29, 1], ['stop', 1.60, 2], ['slide', 1.86, 3],
         ['insert', 2.075, 4], ['collar', 2.24, 5], ['latch-a', 2.43, 6], ['latch-b', 2.51, 7],
         ['rift', 4.44, 9], ['coffee-drop', 4.59, 8], ['tokens', 5.10, 10],
-        ['mould-seat', 8.36, 11], ['gold-drop', 9.33, 12], ['eject', 12.68, 13], ['break-left',13.10,15], ['break-right',13.42,16], ['signature',16.70,14]
+        ['mould-seat', 8.36, 11], ['gold-drop', 9.33, 12], ['eject', 12.68, 13], ['break-left',13.10,15], ['break-right',13.42,16], ['signature',16.70,14], ['dock-thread',15.36,17], ['dock-seat',16.74,18]
     ].map(([id, at, voice]) => Object.freeze({ id, at, voice })));
     const cues=Object.freeze({
         vesselFade:[22.05,22.68],cameraSettled:16.70,
@@ -2523,8 +2843,8 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
     });
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
-    const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-11', referenceDuration: 22.70 };
+    const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15,extraction:3.25}); // e.g. { cooling: 4 } changes only playback length.
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-12', referenceDuration: 22.70 };
 });
 
 
@@ -2947,7 +3267,7 @@ GuziczakModules.define("geometry/builder", ["math", "config/materials"], (math, 
 
 
 // ===== geometry/catalog =====
-GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets", "config/materials", "geometry/reclaim", "geometry/rift"], (math, builder, assets, materials, reclaim, rift) => {
+GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets", "config/materials", "geometry/reclaim", "geometry/rift", "geometry/refuge"], (math, builder, assets, materials, reclaim, rift, refuge) => {
     'use strict';
     const { PI, TAU, clamp, mix, vadd, vsub, vmul, dot, cross, norm, M, C } = math;
     function createGeometry(gl) {
@@ -2972,9 +3292,10 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
             }
         });
         meshes.cupBadge = build(b => {
-            b.at(C(M.Rx(.60), M.S(.10)), () => { for (const p of LOGO_POLYGONS)
+            b.at(C(M.Rx(.60), M.S(.138)), () => { for (const p of LOGO_POLYGONS)
                 extrudeLogo(b, p, .038, .009, 1); });
         });
+        meshes.cupDrain = build(b=>{ringY(b,.12,-.205,.023,.010,2,64);ringY(b,.092,-.208,.006,.012,1,64);});
         meshes.coffeeSurface = build(b => disk(b, 1.091, 4, 160, 34));
         meshes.coffeeStream = build(b => paramTube(b, 4, 150, 18));
         meshes.goldStream = build(b => paramTube(b, 5, 100, 18));
@@ -3044,6 +3365,12 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
             b.lathe([[.235, -.295], [.31, -.32], [.47, -.405], [.49, -.45], [.49, -.53], [.455, -.55], [.285, -.55], [.259, -.525], [.255, -.35], [.235, -.295]].reverse(), 11, 128);
             ringY(b, .484, -.433, .019, .024, 1);
             ringY(b, .472, -.535, .012, .009, 1);
+            for (let j = 0; j < 48; j++) {
+                const a = j * TAU / 48;
+                b.at(C(M.Ry(a), M.T(.491, -.47, 0)), () => cube(b, .008, j % 4 === 0 ? .051 : .021, .009, 1));
+            }
+        });
+        meshes.receiverRails = build(b=>{
             for (let j = 0; j < 3; j++) {
                 const a = j * TAU / 3 + .36;
                 b.at(M.Ry(a), () => {
@@ -3052,10 +3379,6 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
                     b.at(M.T(.509, -.776, 0), () => bevelBox(b, .014, .66, .032, .004, 1));
                     b.at(M.T(.53, -1.126, 0), () => bevelBox(b, .12, .105, .13, .012, 2, 1));
                 });
-            }
-            for (let j = 0; j < 48; j++) {
-                const a = j * TAU / 48;
-                b.at(C(M.Ry(a), M.T(.491, -.47, 0)), () => cube(b, .008, j % 4 === 0 ? .051 : .021, .009, 1));
             }
         });
         meshes.keyshoe = build(b => {
@@ -3077,12 +3400,7 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
         const breach = rift.create(gl,builder.createBuilder(gl));
         Object.assign(meshes,breach.meshes);
         // The receiver is a machined basin with a separate gold surface.
-        meshes.pedestal = build(b => {
-            b.lathe([[0, -2.675], [2.30, -2.675], [2.44, -2.635], [2.49, -2.57], [2.49, -2.46], [2.46, -2.42], [2.38, -2.40], [2.31, -2.325], [0, -2.325]], 22, 192);
-            ringY(b, 2.47, -2.47, .009, .015, 1, 192);
-            ringY(b, 2.316, -2.323, .012, .007, 1, 192);
-            ringY(b, 1.98, -2.318, .004, .006, 1, 192);
-        });
+        Object.assign(meshes,refuge.create(builder.createBuilder(gl)));
         meshes.goldPool = build(b => disk(b, 1.124, 5, 192, 42));
         meshes.ingot = build(b => { bevelBox(b, .49, .125, .25, .021, 1, 1); b.at(C(M.T(0, .065, 0), M.Rx(-PI / 2), M.S(.47)), () => strokeSymbol(b, 1, 0, 1, 2)); });
         // The signature is defined once, below, with two disjoint casting channels.
@@ -3223,7 +3541,7 @@ GuziczakModules.define('render/device', [], () => {
 
 
 // ===== render/renderer =====
-GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/vocabulary"], (math, shaders, vocabulary) => {
+GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/vocabulary", "world/water"], (math, shaders, vocabulary, lake) => {
     "use strict";
     const { PI, TAU, clamp, mix, vadd, vsub, vmul, dot, cross, norm, M, C, ease, inverse4 } = math;
     function createRenderer(device, catalog, canvas, document, settings) {
@@ -3288,6 +3606,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         catch (e) {
             throw Error('Materiały WebGL: ' + e.message);
         }
+        const water=lake.create(gl,{program,target,bind,screen,f1,f2,f3,m4,texture});
         const shadowSize = settings.shadowSize, shadowTex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, shadowTex);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, shadowSize, shadowSize, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
@@ -3304,7 +3623,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             throw Error('Nie udało się utworzyć bufora cieni.');
         }
         const shadowVP = M.mul(M.O(-5.4, 5.4, -5.4, 5.4, .1, 27), M.look([-4.5, 7, 5], [0, 0, 0]));
-        let mainRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, blooms = [], msaa = null, W = 0, H = 0;
+        let mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, blooms = [], msaa = null, W = 0, H = 0;
         function resize() {
             const ratio = Math.min(Math.max(viewport.dpr || 1, settings.minDpr), settings.maxDpr), w = Math.max(2, Math.round(viewport.width * ratio)), h = Math.max(2, Math.round(viewport.height * ratio));
             if (W === w && H === h)
@@ -3313,9 +3632,10 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             H = h;
             canvas.width = w;
             canvas.height = h;
-            for (const rt of [mainRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, ...blooms.flat()])
+            for (const rt of [mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, ...blooms.flat()])
                 disposeRT(rt);
             mainRT = target(w, h);
+            opaqueRT=target(w,h);
             if (!mainRT.fp)
                 floatRT = false;
             if (msaa) {
@@ -3412,7 +3732,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             gl.depthMask(true);
             gl.disable(gl.BLEND);
         }
-        function globalUniforms(prog, reflection = 0, reflectY = -2.677) {
+        function globalUniforms(prog, reflection = 0, reflectY = -2.71) {
             gl.useProgram(prog.p);
             m4(prog, 'uV', view);
             m4(prog, 'uP', projection);
@@ -3429,6 +3749,12 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             f1(prog, 'uAlpha', 1);
             f1(prog, 'uReveal', state.reveal);
             f1(prog, 'uHeat', state.energy);
+            f1(prog,'uFluidLevel',state.fluid?.level??-.2);
+            f1(prog,'uFluidFlow',state.fluid?.flow||0);
+            f1(prog,'uDrainProgress',state.fluid?.drainProgress||0);
+            f3(prog,'uRiftWorld',state.riftCenter||[2.5,2.4,0]);
+            f1(prog,'uRiftLight',state.riftLight||0);
+            f1(prog,'uLakeTime',state.elapsed||0);
             if (prog === meshProg) {
                 texture(prog, 'uShadow', shadowTex, 0);
                 texture(prog, 'uMirror', mirrorBlur.t, 1);
@@ -3457,12 +3783,14 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             viewport = nextViewport;
             letterInstances = packet.tokens;
             resize();
+            water.update(frame);
+            state.riftCenter=packet.rift?.center;state.riftLight=packet.rift?.open||0;
             const aspect = W / H, shot = camera;
             let distance = shot.distance;
             const target = shot.target, yaw = shot.yaw, pitch = shot.pitch;
             cam = [target[0] + Math.sin(yaw) * Math.cos(pitch) * distance, target[1] + Math.sin(pitch) * distance, target[2] + Math.cos(yaw) * Math.cos(pitch) * distance];
             view = M.look(cam, target);
-            projection = M.P(35 * PI / 180, aspect, .1, 140);
+            projection = M.P(35 * PI / 180, aspect, .1, 1500);
             VP = M.mul(projection, view);
             const objs = packet.commands;
             prepareWords();
@@ -3481,10 +3809,10 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
                     draw(o, shadowProg);
             gl.disable(gl.POLYGON_OFFSET_FILL);
             bind(mirrorRT);
-            gl.clearColor(.0065, .009, .011, 1);
+            gl.clearColor(0,0,0,0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             globalUniforms(meshProg, 1);
-            const refl = C(M.T(0, -5.354, 0), M.S(1, -1, 1));
+            const refl = C(M.T(0, water.config.level*2, 0), M.S(1, -1, 1));
             for (const o of objs)
                 if (!o.glass)
                     draw(o, meshProg, refl);
@@ -3504,18 +3832,21 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             bind(msaa || mainRT);
             gl.clearColor(.0065, .009, .011, 1);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.disable(gl.DEPTH_TEST);
-            gl.useProgram(bgProg.p);
-            f1(bgProg, 'uAspect', aspect);
-            f1(bgProg, 'uEnergy', state.energy);
-            screen(bgProg);
+            water.skyDraw(VP,cam,frame.elapsed);
             gl.enable(gl.DEPTH_TEST);
             gl.depthMask(true);
             globalUniforms(meshProg);
-            draw({ mesh: meshes.floor, m: M.I(), mode: 0, light: state.stage });
+            // The floor is now the lake; no hidden flat plane beneath the visible water.
             for (const o of objs)
                 if (!o.glass)
                     draw(o);
+            // Copy only opaque scene/depth: water never samples its own render target.
+            gl.bindFramebuffer(gl.READ_FRAMEBUFFER,(msaa||mainRT).fb);
+            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,opaqueRT.fb);
+            gl.blitFramebuffer(0,0,W,H,0,0,W,H,gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT,gl.NEAREST);
+            bind(msaa||mainRT);
+            water.draw(VP,cam,opaqueRT,mirrorRT,W,H,frame);
+            globalUniforms(meshProg);
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             gl.depthMask(false);
@@ -3586,7 +3917,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         function project(p) { if (!VP)
             return [0, 0, 0]; const q = M.point(VP, p), w = VP[3] * p[0] + VP[7] * p[1] + VP[11] * p[2] + VP[15]; return [(q[0] / w * .5 + .5) * viewport.width, (-q[1] / w * .5 + .5) * viewport.height, w]; }
         return { render, ready, project,
-            stats: () => ({ width: W, height: H, hdr: floatRT, msaa: !!msaa, frames: frameCount, glError: gl.getError(), resources: device.counts() }),
+            stats: () => ({ width: W, height: H, hdr: floatRT, msaa: !!msaa, frames: frameCount, water:water.stats(), glError: gl.getError(), resources: device.counts() }),
             dispose: () => device.dispose()
         };
     }
@@ -3618,7 +3949,9 @@ float surface(vec2 p,float mode){
   float impact=.6+.55*jetNoise(uTime*4.8);
   float ripple=(sin(r1*29.-uFlow*7.4)*exp(-r1*3.8)*.010*impact+sin(r2*24.-uFlow*8.1)*exp(-r2*4.4)*.004);
   float turn=sin(a*2.+r*11.-uFlow*.88)*.0040;
-  return(ripple+turn)*(1.-smoothstep(.91,1.09,r))*(1.+uEnergy*.55);
+  float drain=clamp(uFluidFlow*1.8,0.,1.);
+  float funnel=-.023*drain*exp(-r*r*20.)+sin(a*3.+r*15.-uFlow*3.7)*.0018*drain*exp(-r*2.);
+  return ((ripple+turn)*(1.-smoothstep(.91,1.09,r))*(1.+uEnergy*.55)*(1.-uDrainProgress*.87)+funnel);
  }
  float ring=sin(r*27.-uFlow*7.)*.004*exp(-r*.85)+sin(p.x*39.+p.y*27.-uFlow*3.2)*.0007+sin(p.x*24.-p.y*47.+uFlow*2.1)*.0006;
  float front=uPulse*exp(-pow((r-uWave)*10.,2.))*.040;
@@ -3666,7 +3999,7 @@ void deform(inout vec3 p,inout vec3 n,vec2 uv){
    r*=1.+.095*sin(s*83.-uTime*33.)+.042*sin(s*117.-uTime*49.);
    float edge=smoothstep(4.57,4.71,emitted)*(1.-smoothstep(7.49,7.71,emitted));
    r*=max(.045,pow(edge,.60));
-  }else r=(.041+uEnergy*.021)*(1.-s*.23)*(1.+.068*sin(s*36.-uFlow*14.));
+  }else r=.059*sqrt(max(.045,clamp(uFluidFlow/.742,0.,1.)))/sqrt(1.+s*.43)*(1.+.068*sin(s*36.-uFlow*14.));
   float cap=smoothstep(0.,.045,raw)*(1.-smoothstep(.94,1.,raw));
   r*=.78+.22*cap;p=curve(s)+r*(u*c+v*d);n=normalize(u*c+v*d);
  }
@@ -3682,7 +4015,7 @@ void deform(inout vec3 p,inout vec3 n,vec2 uv){
 precision highp float;
 layout(location=0) in vec3 aP;layout(location=1) in vec3 aN;layout(location=2) in vec2 aUV;layout(location=3) in float aMat;
 uniform mat4 uM,uV,uP,uShadowVP;uniform mat3 uNM;
-uniform float uTime,uFlow,uEnergy,uMode,uPulse,uWave,uStreamBegin,uStreamEnd;uniform vec3 uFrom,uTo;
+uniform float uTime,uFlow,uEnergy,uMode,uPulse,uWave,uStreamBegin,uStreamEnd,uFluidFlow,uDrainProgress;uniform vec3 uFrom,uTo;
 out vec3 vWorld,vLocal,vNormal;out vec4 vShadow;out vec2 vUV;flat out float vMat;
 ${deformGLSL}
 void main(){vec3 p=aP,n=aN;deform(p,n,aUV);vec4 w=uM*vec4(p,1.);vWorld=w.xyz;vLocal=p;vNormal=normalize(uNM*n);vUV=aUV;vMat=aMat;vShadow=uShadowVP*w;gl_Position=uP*uV*w;}
@@ -3690,7 +4023,7 @@ void main(){vec3 p=aP,n=aN;deform(p,n,aUV);vec4 w=uM*vec4(p,1.);vWorld=w.xyz;vLo
     const meshFS = `#version 300 es
 precision highp float;
 in vec3 vWorld,vLocal,vNormal;in vec4 vShadow;in vec2 vUV;flat in float vMat;
-uniform vec3 uCam;uniform float uTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat;
+uniform vec3 uCam,uRiftWorld;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat;
 uniform sampler2D uShadow,uMirror,uLiquidMirror;uniform vec2 uResolution;out vec4 outColor;
 const float PI=3.14159265359;
 ${noiseGLSL}
@@ -3745,7 +4078,9 @@ void main(){
  float macro=fbm(q*3.3+vec3(.2,1.,2.)),micro=mix(noise3(q*135.),.5,smoothstep(.3,1.2,length(fwidth(q*135.))));
  if(id<.5){
   base=mix(vec3(.011,.016,.018),vec3(.024,.031,.033),macro);metal=.18;rough=.145+macro*.09+micro*.008;
-  float scratches=pow(noise3(q*vec3(180.,5.,140.)),15.)*.026;base+=scratches;occ=.97;
+  float scratches=pow(noise3(q*vec3(180.,5.,140.)),15.)*.019;base+=scratches;occ=.97;
+  float wetBand=smoothstep(uFluidLevel-.025,uFluidLevel+.025,q.y)*(1.-smoothstep(.86,.94,q.y))*uDrainProgress;
+  rough=mix(rough,.135,wetBand*.56);base*=1.-wetBand*.045;
  }
  else if(id<1.5){
   float patina=smoothstep(.50,.86,macro);base=mix(vec3(.76,.495,.177),vec3(.38,.215,.065),patina*.45);metal=.995;rough=.19+macro*.065+micro*.014;
@@ -3762,7 +4097,7 @@ void main(){
   if(uMode>1.5&&uMode<2.5){
    float r=length(q.xz),a=atan(q.z,q.x);vec2 swirl=vec2(cos(a+r*2.9-uFlow*.16),sin(a+r*2.9-uFlow*.16))*r;
    float cream=fbm(vec3(swirl*4.3,uFlow*.08));cream=smoothstep(.53,.74,cream);
-   base=mix(base,vec3(.23,.105,.024),cream*.38);
+   base=mix(base,vec3(.23,.105,.024),cream*.38*(1.-uDrainProgress*.8));
    float convergence=smoothstep(.56,.66,noise3(vec3(swirl*11.,uFlow*.12)))*uEnergy;
    base=mix(base,vec3(.56,.30,.055),convergence*.65);metal+=convergence*.45;
   }else {base*=.90+.10*sin(q.y*42.+uFlow*12.);}
@@ -3828,12 +4163,14 @@ void main(){
  }
  else if(id>24.5&&id<25.5){
   float hot=1.-smoothstep(11.80,12.50,uTime);
-  base=vec3(.59,.343,.105);metal=.994;rough=mix(.195+macro*.072,.093,hot);
+  float edgePatina=noise3(q*vec3(22.,71.,36.));
+  base=mix(vec3(.61,.367,.123),vec3(.45,.269,.088),smoothstep(.43,.78,macro)*.26);metal=.994;rough=mix(.23+macro*.069,.088,hot);
+  float underside=(1.-smoothstep(-.5,.03,vNormal.y));rough+=underside*.13;base*=1.-underside*.13;
   float chill=1.-hot; base*=1.-chill*.065*smoothstep(.50,.72,noise3(q*27.));
   emission=vec3(.72,.21,.023)*hot*.12;
  }
  else if(id>23.5&&id<24.5){base=vec3(.63,.407,.167);metal=.994;rough=.43+macro*.04;}
- else if(id>11.5){base=vec3(.79,.525,.213);metal=.996;rough=.135+micro*.015;emission=vec3(2.45,1.02,.20)*castEdge+vec3(.58,.21,.025)*uHeat*.05;}
+ else if(id>11.5){base=vec3(.79,.525,.213);metal=.996;rough=.17+micro*.014+(1.-abs(vNormal.z))*.09;emission=vec3(2.45,1.02,.20)*castEdge+vec3(.58,.21,.025)*uHeat*.05;}
  else {float tool=sin(length(q.xz)*550.);base=mix(vec3(.012,.017,.019),vec3(.024,.031,.033),macro);rough=.37+macro*.15+tool*.004;metal=.18;}
  // Microgeometry affects the reflection normals, not an image pasted over a surface.
  float height=(micro-.5)*.000006+(macro-.5)*.000035;
@@ -3842,6 +4179,8 @@ void main(){
  if(id>14.5&&id<15.5){bool side=abs(q.x)>1.105&&abs(q.z)<1.18;float along=side?q.z:q.x,across=side?q.x:q.z;height=(noise3(vec3(along*3.,across*142.,q.y*29.))-.5)*.00062;}
  if(id>15.5&&id<17.5)height=(noise3(q*176.)-.5)*.00115+(noise3(q*42.)-.5)*.00074;
  if(id>19.5)height=0.;
+ if(id>24.5&&id<25.5)height=(noise3(q*79.)-.5)*.00014+(macro-.5)*.00010;
+ if(id>11.5&&id<13.5)height+=(noise3(q*vec3(85.,38.,150.))-.5)*.000015*(1.-abs(vNormal.z));
  vec3 dx=dFdx(p),dy=dFdy(p),rx=cross(dy,n),ry=cross(n,dx);float det=dot(dx,rx);
  if(abs(det)>.0000001)n=normalize(n-(rx*dFdx(height)+ry*dFdy(height))/det);
  float normalVariance=dot(dFdx(n),dFdx(n))+dot(dFdy(n),dFdy(n));rough=sqrt(rough*rough+min(.15,normalVariance*.10));
@@ -3850,6 +4189,8 @@ void main(){
  c+=base*(1.-metal)*vec3(.13,.16,.18)*(.75+n.y*.20);
  c+=brdf(n,v,normalize(vec3(-4.5,7.,5.)-p),base,metal,rough,vec3(3.9,3.65,3.30))*shadow(n);
  c+=brdf(n,v,normalize(vec3(3.8,4.,-3.2)-p),base,metal,rough,vec3(1.75,2.2,2.65));
+ vec3 rl=uRiftWorld-p;float rld=dot(rl,rl);
+ c+=brdf(n,v,normalize(rl),base,metal,max(rough,.16),vec3(.28,.58,.72)*uRiftLight/(.8+rld*.48));
  vec3 light=vec3(0,-.8,.6)-p;float dd=dot(light,light);
  c+=brdf(n,v,normalize(light),base,metal,max(rough,.28),vec3(1.05,.47,.10)*(1.+uEnergy*3.)/(.5+dd));
  if(id<.5){c+=env(reflect(-v,n),.07)*(.013+.065*pow(1.-nv,5.));}
@@ -3861,13 +4202,22 @@ void main(){
   vec3 reflected=texture(uLiquidMirror,reflectionUV).rgb;
   c=c*.22+reflected*base*.68;
  }
- c=c*occ+emission; if(id>11.5&&id<13.5){float sweep=softbox(reflect(-v,n),normalize(vec3(-1.4+smoothstep(13.58,14.56,uTime)*3.,1.1,6.)),.42,.85,.20);c+=base*(.10+sweep*.65);}
+ c=c*occ+emission;
+ if(id>11.5&&id<13.5){
+  float sweepTime=smoothstep(18.18,19.46,uTime),sweep=softbox(reflect(-v,n),normalize(vec3(-3.8+sweepTime*7.6,1.4,5.8)),.15,.70,.14);
+  float bevel=smoothstep(.10,.70,1.-abs(vNormal.z));
+  float once=smoothstep(18.05,18.4,uTime)*(1.-smoothstep(19.55,19.85,uTime));
+  float fillBox=softbox(reflect(-v,n),normalize(vec3(-.15,1.1,6.)),.90,.85,.23);
+  c+=base*(.10+fillBox*.46+sweep*.32*bevel*once);
+ }
  if(id>14.5&&id<15.5)c*=.38;
  if(id>15.5&&id<17.5)c*=.79;
  if(id>21.5&&id<22.5)c*=.17;
  if(id>24.5&&id<25.5)c*=.55;
   if(id>20.5&&id<21.5)c*=.28;
  if(id>11.5&&id<13.5)c*=mix(.34,1.,smoothstep(12.57,13.92,uTime));
+ // Reflective gold remains a material, not a white emissive silhouette.
+ if(id>11.5&&id<13.5){float peak=max(c.r,max(c.g,c.b));if(peak>.82)c*=(.82+.11*(1.-exp(-(peak-.82)*1.7)))/peak;}
  c=mix(c,vec3(.010,.014,.016),1.-exp(-length(cam-p)*.0045));
  outColor=vec4(max(c,0.)*uObjectLight,alpha);
 }
@@ -3906,7 +4256,7 @@ void main(){
 `;
     // Steam is integrated in world space and clipped by the depth of the scene.
     const volumeFS = `#version 300 es
-precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam;uniform float uTime,uEnergy,uSteam;
+precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam,uRiftWorld;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uEnergy,uSteam;
 ${noiseGLSL}
 void main(){float depth=texture(uDepth,vUv).r;vec4 h=uInvVP*vec4(vUv*2.-1.,depth*2.-1.,1.);vec3 endpoint=h.xyz/h.w,rd=normalize(endpoint-uCam);float lim=min(length(endpoint-uCam),35.);
  vec3 iRD=1./(rd+vec3(.0000001)),a0=(vec3(-1.35,-1.8,-.65)-uCam)*iRD,a1=(vec3(.90,2.7,.75)-uCam)*iRD,mn=min(a0,a1),mx=max(a0,a1);
@@ -3933,27 +4283,33 @@ void main(){float a=texture(uWords,vUV).a*vAlpha;if(a<.012)discard;vec3 col=mix(
 
 
 // ===== scene/assembly =====
-GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabulary"], (math, curves, vocabulary) => {
+GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabulary", "scene/docking", "scene/hydraulics"], (math, curves, vocabulary, docking, hydraulics) => {
     "use strict";
     const { PI, TAU, clamp, mix, vadd, vsub, vmul, dot, cross, norm, M, C, ease } = math;
     const { curvePoint, jetNoiseCPU, jetPressureCPU, coffeePoint } = curves;
     const { WORDS } = vocabulary;
     function sample(ctx) {
         const { t, e, mobile, meshes, push, state, letterInstances, liquidY, moldRoot, moldLight, breakSeal, lift, turn } = ctx;
-        const depart = ease(12.92, 14.10, t), lower = ease(2.65, 3.03, t);
-        const elevation = .64 * (1 - lower), set = C(M.T(0, elevation - depart * 1.8, -ease(12.87, 14.05, t) * 2.4));
+        const dock=docking.sample(t),fluid=hydraulics.sample(t),set=dock.set;
+        state.docking=dock;state.fluid=fluid;
         const seat = ease(.04, 1.07, t), seatHit = t > 1.07 ? .008 * Math.exp(-(t - 1.07) * 19) * Math.sin((t - 1.07) * 50) : 0;
         const cup = C(set, M.T(0, (1 - seat) * 1.55 - seatHit, 0), M.Ry((1 - seat) * .34));
         if (t > .02) {
             push(meshes.pedestal, M.T(0, -(1 - ease(.20, 1.18, t)) * .24, 0), 0, [0, 0, 0], [0, 0, 0], false, state.stage * ease(.2, .95, t));
             push(meshes.cup, cup);
-            push(meshes.cupBadge, C(cup, M.T(0, .30, .906)));
+            push(meshes.cupBadge, C(cup, M.T(0, .30, .920)));
             push(meshes.receiver, cup);
+            push(meshes.cupDrain,cup);
+            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,dock.railScale,1),M.T(0,.45,0)));
+            const socket=C(M.T(0,docking.config.deckY-(1-ease(.20,1.18,t))*.24,-2.4));
+            push(meshes.dockSleeve,socket);
+            for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(.78*(1-dock.closed),0,0)));
+            if(dock.down>.5)push(meshes.dockBridge,socket,0,[0,0,0],[0,0,0],false,state.stage*ease(.5,1,dock.down));
         }
         // The cassette is already full-size. Nothing materialises by scaling up.
         // It first finds the keys, waits against a hard stop, then travels along the Y rail.
         const align = ease(.83, 1.58, t), ram = ease(1.85, 2.075, t), detent = t > 2.075 ? .009 * Math.exp(-(t - 2.075) * 29) * Math.sin((t - 2.075) * 64) : 0;
-        const cartridge = C(set, M.T((1 - align) * 1.12, -.38 + (1 - ram) * -.23 + ram * .38 + detent, (1 - align) * 1.05), M.Rz((1 - align) * -.26), M.Ry((1 - align) * -.45));
+        const cartridge = C(set, M.T(0,-dock.extra,0),M.Ry(dock.rotation), M.T((1 - align) * 1.12, -.38 + (1 - ram) * -.23 + ram * .38 + detent, (1 - align) * 1.05), M.Rz((1 - align) * -.26), M.Ry((1 - align) * -.45));
         const lock = ease(2.19, 2.39, t), clampClose = ease(2.42, 2.51, t);
         state.assembly = { aligned: align, inserted: ram, locked: lock, clamped: clampClose };
         if (t > .72) {
@@ -3970,9 +4326,9 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
             for (let j = 0; j < 3; j++)
                 push(meshes.clasp, C(cup, M.Ry(j * TAU / 3 + .36), M.T((1 - clampClose) * .098, 0, 0)));
         }
-        if (t > 7.36)
-            push(meshes.chamberFill, cartridge, 0, [0, 0, 0], [0, 0, 0], false, state.stage * ease(7.36, 8.55, t));
-        return { set, cup, cartridge };
+        if (fluid.chamber>.001)
+            push(meshes.chamberFill,C(cartridge,M.T(0,-1.48,0),M.S(1,fluid.chamber,1),M.T(0,1.48,0)),0,[0,0,0],[0,0,0],false,state.stage);
+        return { set, cup, cartridge, fluid, docking:dock };
     }
     return { sample };
 });
@@ -3996,7 +4352,7 @@ GuziczakModules.define("scene/camera", ["math", "config/camera"], (math, config)
         const original=cameraTrack(frame.time);
         const r=frame.phase==='reclaim'?frame.phaseProgress:0;
         const focus=math.ease(0,.17,r)*(1-math.ease(.88,1,r));
-        const close={yaw:.065,pitch:1.11,distance:5.40,target:[0,-2.015,.78]};
+        const q=frame.reclaim?.tool;const close={yaw:.095,pitch:1.025,distance:5.46,target:[q?q.x*.12:0,-2.03,.80+(q?(q.z-.5)*.06:0)]};
         const shot={yaw:math.mix(original.yaw,close.yaw,focus),pitch:math.mix(original.pitch,close.pitch,focus),distance:math.mix(original.distance,close.distance,focus),target:original.target.map((v,i)=>math.mix(v,close.target[i],focus))}, aspect = viewport.width / viewport.height, mobile = viewport.width < 651;
         let distance = shot.distance;
         if (mobile)
@@ -4092,7 +4448,7 @@ GuziczakModules.define("scene/composer", ["scene/commands", "scene/assembly", "s
                 systems.forEach((system, i) => { list.family(names[i]); Object.assign(ctx, system.sample(ctx)); });
                 return { commands: list.commands, tokens: ctx.letterInstances, castTransform: ctx.castTransform,
                     vesselTransform: ctx.cup, foundryTransform: ctx.moldRoot,
-                    assembly: state.assembly, foundry: state.foundry, reclaim:state.reclaim, rift:state.rift,
+                    assembly: state.assembly, fluid:state.fluid, docking:state.docking, foundry: state.foundry, reclaim:state.reclaim, rift:state.rift,
                     // Exactly one authored vessel. No "shadowCup" copy is created.
                     counts: Object.fromEntries(list.counts) };
             }
@@ -4125,8 +4481,8 @@ GuziczakModules.define("scene/foundry", ["math", "scene/curves", "config/vocabul
         // The flask arrives before the pour. Its sand is genuinely recessed, including
         // the pouring well, two feeders and both negative impressions of the signature.
         const moldIn = ease(7.68, 8.36, t), withdraw = ease(16.82, 17.55, t);
-        const moldRoot = C(M.T(0, -2.055 - withdraw * 1.0, .88 + (1 - moldIn) * 3.2 - withdraw * 2.15));
-        const moldLight = state.stage * ease(7.66, 7.88, t);
+        const moldRoot = C(M.T(withdraw*3.8, -2.055 + .055*Math.sin(withdraw*PI), .88 + (1 - moldIn) * 3.2 + withdraw*.38));
+        const moldLight = state.stage * ease(7.66, 7.88, t) * (1-ease(.1,.78,withdraw));
         if (t > 7.66) {
             push(meshes.flask, moldRoot, 0, [0, 0, 0], [0, 0, 0], false, moldLight);
             push(meshes.sand, moldRoot, 0, [0, 0, 0], [0, 0, 0], false, moldLight);
@@ -4169,7 +4525,7 @@ GuziczakModules.define('scene/overflow', ['math','geometry/reclaim','config/recl
         const s=catalog.updateReclaim(state);if(t<=7.66)return {};
         for(const name of ['flowGold0','flowGold1','flowGold2','flowGold3','edgeRunoff'])if(meshes[name].count)push(meshes[name],moldRoot,0,[0,0,0],[0,0,0],false,moldLight*.69);
         if(s.tool.visible){
-            const q=s.tool, pose=C(moldRoot,M.T(q.x,reclaim.support(q.x,q.z)+q.y+.007,q.z),M.Ry(q.yaw));
+            const q=s.tool, pose=C(moldRoot,M.T(q.x,reclaim.support(q.x,q.z)+q.y+.007,q.z),M.Ry(q.yaw),M.Rz(q.contact?-.028*q.load:0));
             push(meshes.paletteBlade,pose,0,[0,0,0],[0,0,0],false,moldLight);
             push(meshes.paletteHandle,pose,0,[0,0,0],[0,0,0],false,moldLight);
         }
@@ -4198,9 +4554,9 @@ GuziczakModules.define("scene/pour", ["math", "scene/curves", "config/vocabulary
             push(meshes.pitcherFill, C(pitcher, M.T(0, .354, 0)));
         }
         const origin = M.point(pitcher, [.76, .64, 0]);
-        const fill = ease(4.95, 7.91, t), liquidY = .22 + fill * .704, landing = M.point(set, [-.60, liquidY, .045]);
-        if (t > 4.92 && state.stage > .001) {
-            const r = .662 + .338 * fill;
+        const fluid=state.fluid,fill=fluid.fillFraction,liquidY=fluid.level,landing = M.point(set, [-.60, liquidY, .045]);
+        if (fluid.visible && state.stage > .001) {
+            const r = fluid.radius/1.091;
             push(meshes.coffeeSurface, C(set, M.T(0, liquidY, 0), M.S(r, 1, r)), 2);
         }
         // Surface tension before the first detachment.
