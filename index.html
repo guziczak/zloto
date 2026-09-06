@@ -1047,12 +1047,17 @@ GuziczakModules.define('geometry/reclaim', ['math', 'config/reclaim'], (math, cf
     function bounds(s){
         const u=clamp(s/L,0,1),x=cfg.startX+s;
         const bell=Math.sqrt(Math.max(0,1-(2*u-1)*(2*u-1)));
-        // One asymmetrical, rounded flooded area. It spills over portions of the
-        // already filled impressions as well as the surrounding sand: not a
-        // precision-cut outline, and not a rectangular film on an extra table.
-        const back=cfg.splitZ-bell*(.315+.027*Math.sin(s*7.4)+.011*Math.sin(s*22.7));
-        const lobes=.055*Math.exp(-Math.pow((x+.61)/.15,2))+.039*Math.exp(-Math.pow((x-.52)/.18,2));
-        const front=Math.min(1.373,cfg.splitZ+bell*(.215+.018*Math.sin(s*15.)+.010*Math.sin(s*36.))+lobes);
+        const hiss=.018*Math.sin(s*8.1+.4)+.010*Math.sin(s*17.3-1.2)+.006*Math.sin(s*41.7+.9);
+        const tongueA=.086*Math.exp(-Math.pow((x+.73)/.10,2))*(.72+.28*Math.sin(s*19.6));
+        const tongueB=.057*Math.exp(-Math.pow((x+.19)/.16,2))*(.65+.35*Math.cos(s*16.1));
+        const tongueC=.074*Math.exp(-Math.pow((x-.41)/.12,2))*(.74+.26*Math.sin(s*22.7-.5));
+        const tongueD=.049*Math.exp(-Math.pow((x-.83)/.09,2))*(.60+.40*Math.cos(s*24.1+.8));
+        // The over-pour should look like viscous metal finding weak paths,
+        // not like one even halo. The back edge stays calmer, the front edge
+        // develops fingers and random-looking bulges that the knife later has to catch.
+        const back=cfg.splitZ-bell*(.314+.030*Math.sin(s*6.7)+.012*Math.sin(s*20.8))-.018*hiss+.010*Math.exp(-Math.pow((x+.52)/.18,2));
+        const frontCore=.205+.028*Math.sin(s*13.4)+.012*Math.sin(s*33.6)+hiss;
+        const front=Math.min(1.389,cfg.splitZ+bell*frontCore+tongueA+tongueB+tongueC+tongueD);
         return [back,cfg.splitZ,front];
     }
     function support(z){return .002+cfg.frameTop*ease(1.146,1.1775,z);}
@@ -1064,35 +1069,51 @@ GuziczakModules.define('geometry/reclaim', ['math', 'config/reclaim'], (math, cf
     function stage(frame){const p=frame.phase==='reclaim'?frame.phaseProgress:(frame.time>=12.57?1:0);
         return {p,cuts:[L*ease(...cfg.first,p),L*ease(...cfg.second,p)],time:frame.time,complete:p>=1};}
     function bandZ(s,u,band){const b=bounds(s);return mix(b[band],b[band+1],u);}
+    function fracture(s,cut,band){
+        if(!(cut>1e-7) || s>=cut-.01)return {gap:0,shift:0};
+        const seeds=band?[.16,.34,.57,.79,.92]:[.10,.27,.45,.68,.86];
+        const pos=s/L, prog=cut/L;
+        let gap=0,shift=0;
+        for(let i=0;i<seeds.length;i++){
+            const width=.014+.004*(i%2), d=(pos-seeds[i])/width;
+            const g=Math.exp(-d*d)*ease(seeds[i]-.08,seeds[i]+.02,prog);
+            gap=Math.max(gap,g);
+            shift+=g*(i%2?1:-1)*(.0045+.0010*i);
+        }
+        const mature=ease(.028,.11,cut-s);
+        return {gap:gap*mature,shift:shift*mature};
+    }
     function point(s,u,band,cut,time,offset={y:0,z:0}){
         const z=bandZ(s,u,band),x=cfg.startX+s;
         let y=support(z),xx=x;
         const rolled=cut>1e-7 && (s<cut-1e-7 || cut>=L-1e-7);
+        const breakage=rolled?fracture(s,cut,band):{gap:0,shift:0};
         if(rolled){const a=angleAt(s),T=angleAt(cut),r=cfg.innerRadius+pitch*a,R=cfg.innerRadius+pitch*T,d=T-a;
             xx=cfg.startX+cut-r*Math.sin(d); y+=R-r*Math.cos(d);
         }
         // A connected arrival front followed by stilling. The cast itself is never scaled.
         const wet=ease(0,.11,time-arrival(x,z));
-        const cold=ease(11.90,12.56,time);
-        const ripple=(1-cold)*wet*.0016*(Math.sin(x*27+z*21-time*7)+.35*Math.sin(x*49-z*31-time*11));
+        const cold=ease(11.96,12.56,time);
+        const ripple=(1-cold)*wet*.0017*(Math.sin(x*27+z*21-time*7)+.35*Math.sin(x*49-z*31-time*11)+.22*Math.sin(x*61+z*9-time*13));
         const edge=Math.sqrt(clamp(Math.min(s/.035,(L-s)/.035),0,1));
-        return {p:[xx,y+cfg.thickness*.5*wet*edge+ripple+(rolled?offset.y:0),z+(rolled?offset.z:0)],wet,thickness:cfg.thickness*wet*edge,age:time-arrival(x,z)};
+        const crackSink=rolled?breakage.gap*.0042:0;
+        return {p:[xx,y+cfg.thickness*.5*wet*edge+ripple-crackSink+(rolled?offset.y:0),z+(rolled?(offset.z+breakage.shift):0)],wet,thickness:cfg.thickness*wet*edge*(1-breakage.gap*.90),age:time-arrival(x,z)};
     }
     // One palette knife makes two strokes. It comes in from outside the frame,
     // contacts the material, lifts clear for the return and leaves both curls behind.
     function toolState(st){
         const p=st.p,a=st.cuts[0],b=st.cuts[1],park=ease(.43,.50,p);
         let x,z,y,band=0,tilt=0;
-        if(p<.10){const e=ease(0,.10,p);x=mix(-2.25,cfg.startX,e);z=.925;y=mix(.62,.24,e);tilt=mix(-.30,-.02,e);}
-        else if(p<.14){x=cfg.startX;z=.925;y=.24*(1-ease(.10,.14,p));}
-        else if(p<=.43){x=cfg.startX+a;z=.925;y=0;}
-        else if(p<.50){x=cfg.startX+L;z=.925-.14*park;y=.020*Math.sin(PI*park);}
+        if(p<.10){const e=ease(0,.10,p);x=mix(-2.25,cfg.startX,e);z=.935;y=mix(.62,.24,e);tilt=mix(-.30,-.02,e);}
+        else if(p<.14){x=cfg.startX;z=.935;y=.24*(1-ease(.10,.14,p));}
+        else if(p<=.43){x=cfg.startX+a;z=.94+.02*Math.sin(a*5.2);y=0;}
+        else if(p<.50){x=cfg.startX+L;z=.94-.15*park;y=.020*Math.sin(PI*park);}
         else if(p<.55){x=cfg.startX+L;z=.785;y=.28*ease(.50,.55,p);}
-        else if(p<.60){const e=ease(.55,.60,p);x=mix(cfg.startX+L,cfg.startX,e);z=mix(.785,1.305,e);y=.28+.10*Math.sin(PI*e);band=1;}
-        else if(p<.64){x=cfg.startX;z=1.305;y=.28*(1-ease(.60,.64,p));band=1;}
-        else if(p<=.91){x=cfg.startX+b;z=1.305;y=0;band=1;}
-        else{const e=ease(.91,1,p);x=cfg.startX+L+e*1.22;z=1.305;y=.44*e;tilt=-.20*e;band=1;}
-        return {x,z,y,band,tilt,visible:p>0&&p<1,width:.38};
+        else if(p<.60){const e=ease(.55,.60,p);x=mix(cfg.startX+L,cfg.startX,e);z=mix(.785,1.312,e);y=.28+.10*Math.sin(PI*e);band=1;}
+        else if(p<.64){x=cfg.startX;z=1.312;y=.28*(1-ease(.60,.64,p));band=1;}
+        else if(p<=.91){x=cfg.startX+b;z=1.312+.015*Math.sin(b*4.8);y=0;band=1;}
+        else{const e=ease(.91,1,p);x=cfg.startX+L+e*1.22;z=1.312;y=.44*e;tilt=-.20*e;band=1;}
+        return {x,z,y,band,tilt,visible:p>0&&p<1,width:.52};
     }
     function volume(lo=0,hi=L,band=0){let v=0;const N=600,ds=(hi-lo)/N;for(let i=0;i<N;i++){const s=lo+(i+.5)*ds,b=bounds(s);v+=(b[band+1]-b[band])*cfg.thickness*ds;}return v;}
     function create(gl,tools){
@@ -1132,14 +1153,16 @@ GuziczakModules.define('geometry/reclaim', ['math', 'config/reclaim'], (math, cf
             for(const i of [0,N])for(let j=0;j<W;j++){const a=rows[i][j],b=rows[i][j+1];if(a.wet>0&&b.wet>0)quad(a.bottom,b.bottom,b.top,a.top);}
         }
         function runoff(t){
-            // Two small adherent drips cross the unbroken original timber rim. They
-            // remain as residue on its vertical face; the knife skims only the top.
-            for(const [cx,w,len,birth] of [[-.61,.072,.166,11.72],[.52,.044,.096,11.86]]){
-                const advance=ease(birth,birth+.44,t);if(advance<=0)continue;
-                for(let i=0;i<42;i++){const a=i/42*advance,b=(i+1)/42*advance;
-                    const P=(s,u)=>{const bend=ease(.23,.48,s),end=clamp((s-.48)/.52,0,1),y=mix(.0465,.034,bend)-len*end;
-                        const z=mix(1.340,1.387,bend)+.007*Math.sin(end*PI/2);
-                        const ww=w*(.52+.22*Math.sin(s*PI)+.20*ease(.82,1,s));return[cx+u*ww*.5,y+.007*(1-u*u),z];};
+            // Several narrow rivulets descend over the original front rim. They are
+            // born from the same over-pour, with different widths, delays and bends.
+            for(const [cx,w,len,birth,sway] of [[-.72,.060,.185,11.70,.55],[-.34,.046,.132,11.78,-.35],[.24,.054,.164,11.84,.42],[.63,.036,.104,11.95,-.22]]){
+                const advance=ease(birth,birth+.46,t);if(advance<=0)continue;
+                for(let i=0;i<44;i++){const a=i/44*advance,b=(i+1)/44*advance;
+                    const P=(s,u)=>{const bend=ease(.20,.50,s),end=clamp((s-.46)/.54,0,1),y=mix(.0465,.033,bend)-len*end;
+                        const z=mix(1.338,1.388,bend)+.010*Math.sin(end*PI/2)+.010*sway*Math.sin(end*PI*1.7+.4);
+                        const ww=w*(.48+.26*Math.sin(s*PI)+.22*ease(.78,1,s));
+                        const shear=.009*sway*Math.sin(s*PI*1.2);
+                        return[cx+u*ww*.5+shear,y+.007*(1-u*u),z];};
                     for(let j=0;j<8;j++){const u=-1+j/4,v=u+.25;quad(P(a,u),P(b,u),P(b,v),P(a,v));}
                 }
             }
@@ -2397,7 +2420,7 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
     const durations = Object.freeze({cooling:2.2,breakoff:2.15}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-9', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-10', referenceDuration: 22.70 };
 });
 
 
@@ -4211,13 +4234,21 @@ GuziczakModules.define("scene/tokens", ["math", "scene/curves", "config/vocabula
     const { WORDS } = vocabulary;
     function sample(ctx) {
         const { t, e, mobile, meshes, push, state, letterInstances, set, cup, cartridge, liquidY, moldRoot, moldLight, breakSeal, lift, turn } = ctx;
-        const apertureOpen = ease(4.41, 5.13, t) * (1 - ease(7.83, 8.46, t)), cp = mobile ? [1.34, 2.38, -.12] : [2.51, 2.43, -.12];
-        const portRoot = C(set, M.T(...cp), M.Rz(-.20), M.Ry(-.15));
-        if (t > 4.38 && apertureOpen > .0005) {
-            const m = C(portRoot, M.S(.015 + apertureOpen * 1.12, .36 + apertureOpen * .64, 1));
-            push(meshes.aperture, m, 6, [0, 0, 0], [0, 0, 0], false, state.stage * ease(4.38, 4.54, t));
-            push(meshes.seam, m, 6, [0, 0, 0], [0, 0, 0], false, state.stage * ease(4.38, 4.56, t));
-            push(meshes.riftHaze, m, 6, [0, 0, 0], [0, 0, 0], true, state.stage * ease(4.43, 4.90, t));
+        const apertureOpen = ease(4.41, 5.13, t) * (1 - ease(7.83, 8.46, t)), preCrack = ease(4.28, 4.42, t) * (1 - ease(4.42, 4.68, t)), cp = mobile ? [1.34, 2.38, -.12] : [2.51, 2.43, -.12];
+        const surge = Math.sin((t - 4.38) * 18) * Math.exp(-Math.max(0, t - 4.38) * 1.8), tremor = .5 * Math.sin((t - 4.36) * 12.7) + .25 * Math.sin((t - 4.36) * 27.4 + .8);
+        const portRoot = C(set, M.T(...cp), M.Rz(-.20 + preCrack * .08 + apertureOpen * .03), M.Ry(-.15 + apertureOpen * .04), M.Rx(.05 * preCrack - .04 * apertureOpen));
+        // The breach now starts as a thin stressed seam, then peels into an irregular wound.
+        if (t > 4.26 && (preCrack > .0005 || apertureOpen > .0005)) {
+            const seamM = C(portRoot, M.T(.010 * preCrack - .012 * apertureOpen, .008 * surge * apertureOpen, 0), M.Rz(.08 * preCrack + tremor * .016 * apertureOpen), M.S(.0025 + preCrack * .11 + apertureOpen * .07, .08 + preCrack * .34 + apertureOpen * .58 + .05 * Math.max(0, surge), 1));
+            push(meshes.seam, seamM, 6, [0, 0, 0], [0, 0, 0], false, state.stage * Math.max(preCrack, ease(4.38, 4.56, t) * .78));
+        }
+        if (t > 4.36 && apertureOpen > .0005) {
+            const coreM = C(portRoot, M.T(.03 * apertureOpen, .018 * surge * apertureOpen, 0), M.Rz(.05 * surge * apertureOpen), M.Rx(-.04 * apertureOpen), M.S(.010 + apertureOpen * 1.12, .17 + apertureOpen * .90 + .08 * Math.max(0, surge), 1));
+            const haloM = C(portRoot, M.T(.05 * apertureOpen, .02 * surge * apertureOpen, 0), M.Rz(.07 * surge * apertureOpen), M.S(.05 + apertureOpen * 1.26, .24 + apertureOpen * .98 + .16 * Math.max(0, surge), 1));
+            push(meshes.aperture, coreM, 6, [0, 0, 0], [0, 0, 0], false, state.stage * ease(4.38, 4.56, t));
+            push(meshes.seam, C(coreM, M.S(1.06, 1.05, 1)), 6, [0, 0, 0], [0, 0, 0], false, state.stage * ease(4.39, 4.62, t) * .92);
+            push(meshes.riftHaze, haloM, 6, [0, 0, 0], [0, 0, 0], true, state.stage * ease(4.41, 4.92, t) * .82);
+            push(meshes.riftHaze, C(haloM, M.S(1.18, 1.10, 1), M.T(0, .01, 0)), 6, [0, 0, 0], [0, 0, 0], true, state.stage * ease(4.45, 5.00, t) * .35);
         }
         if (apertureOpen > .10) {
             for (let j = 0; j < 7; j++) {
