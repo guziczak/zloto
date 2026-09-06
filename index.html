@@ -2845,7 +2845,7 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
     const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4, desktopMinDpr: 1.0, desktopMaxDpr: 1.75, desktopPixelBudget: 3600000, desktopMirrorScale: .58, desktopVolumeDiv: 3.4, desktopBloomDiv: 2.15 });
     const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15,extraction:3.25}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-14', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-15', referenceDuration: 22.70 };
 });
 
 
@@ -4336,25 +4336,30 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
             push(meshes.cupBadge, C(cup, M.T(0, .35 + hotBadge * .09, .948 + hotBadge * .016), M.S(1 + hotBadge * .24 + badgePulse * .05)), 0, [0,0,0], [0,0,0], false, 1 + hotBadge * .44 + badgePulse * .24);
             push(meshes.receiver, cup);
             push(meshes.cupDrain,cup);
-            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,mix(.18,dock.railScale,ease(.34,1.00,t)),1),M.T(0,.45,0)));
+            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,mix(.10,dock.railScale,ease(1.46,2.02,t)),1),M.T(0,.45,0)));
             const socket=C(M.T(0,docking.config.deckY-(1-ease(.20,1.18,t))*.24,-2.4));
+            const sanctumOpen=mix(0,.78,ease(.12,.72,t))*(1-dock.closed)+.03*dock.closed;
             push(meshes.dockSleeve,socket);
-            for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(.78*(1-dock.closed),0,0)));
+            for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(sanctumOpen,0,0)));
             if(dock.down>.5)push(meshes.dockBridge,socket,0,[0,0,0],[0,0,0],false,state.stage*ease(.5,1,dock.down));
         }
-        // The coil now emerges sacrament-like from the receiver's metal locker beneath the cup,
-        // then completes a short, precise upward seat instead of materialising from nowhere.
-        const emergence = ease(.42, 1.02, t), ram = ease(1.56, 2.10, t), detent = t > 2.10 ? .009 * Math.exp(-(t - 2.10) * 29) * Math.sin((t - 2.10) * 64) : 0;
-        const align = ease(1.02, 1.64, t);
-        const introYaw = (1 - emergence) * .18 + (1 - align) * .06;
-        const introRoll = (1 - emergence) * -.07;
-        const introZ = .11 * (1 - emergence);
-        const introY = -1.26 + emergence * .62 + ram * .64 + detent;
-        const cartridge = C(set, M.T(0,-dock.extra,0),M.Ry(dock.rotation), M.T(0, introY, introZ), M.Rz(introRoll), M.Ry(introYaw));
+        // The coil must emerge from the cylindrical under-deck sanctum first, then travel and seat into the cup.
+        // This avoids the earlier read that it spawned from the cup receiver itself.
+        const seated = C(set, M.T(0,-dock.extra,0), M.Ry(dock.rotation));
+        const emergence = ease(.26, .96, t), transfer = ease(.92, 1.72, t), ram = ease(1.60, 2.18, t), detent = t > 2.18 ? .009 * Math.exp(-(t - 2.18) * 29) * Math.sin((t - 2.18) * 64) : 0;
+        const align = ease(1.08, 1.78, t);
+        const introYaw = (1 - align) * -.16;
+        const introRoll = (1 - align) * .05;
+        const wellY = mix(docking.config.wellFloor + .74, docking.config.deckY + .28, emergence);
+        const bridgeY = mix(wellY, .22, transfer);
+        const worldY = mix(bridgeY, dock.y - dock.extra, ram) + Math.sin(transfer * PI) * .13 * (1 - ram) + detent;
+        const worldZ = mix(docking.config.finalZ, 0, transfer);
+        const introCartridge = C(M.T(0, worldY, worldZ), M.Rz(introRoll), M.Ry(introYaw));
+        const cartridge = t < 2.22 ? introCartridge : seated;
         const lock = ease(2.19, 2.39, t), clampClose = ease(2.42, 2.51, t);
-        state.assembly = { emerged: emergence, aligned: align, inserted: ram, locked: lock, clamped: clampClose };
-        if (t > .34) {
-            const reveal = state.stage * ease(.34, .64, t);
+        state.assembly = { emerged: emergence, transferred: transfer, aligned: align, inserted: ram, locked: lock, clamped: clampClose };
+        if (t > .18) {
+            const reveal = state.stage * ease(.18, .50, t);
             for (const m of [meshes.neck, meshes.coil, meshes.bayonet])
                 push(m, cartridge, 0, [0, 0, 0], [0, 0, 0], false, reveal);
             for (let j = 0; j < 3; j++)
