@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d0e">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-1.1%20-1.12%202.2%202.24%22%20role%3D%22img%22%20aria-label%3D%22GUZICZAK%20%E2%80%94%20sygnet%20Przesmyk%22%3E%3Cpath%20d%3D%22M%20.20%20-1%20C%20-.25%20-.99%20-.69%20-.72%20-.85%20-.29%20C%20-1.03%20.17%20-.82%20.66%20-.32%201%20L%20.02%20.55%20C%20-.29%20.30%20-.41%20.02%20-.28%20-.24%20C%20-.19%20-.43%20-.03%20-.54%20.23%20-.61%20L%20.57%20-.67%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%20-0.04963877%20-0.00751729%29%22%20fill%3D%22%23cbb382%22%2F%3E%3Cpath%20d%3D%22M%20.46%20-.64%20L%20.12%20-.19%20C%20.44%20.02%20.54%20.28%20.42%20.51%20C%20.32%20.69%20.17%20.77%20-.02%20.82%20L%20-.18%201%20C%20.32%201.09%20.78%20.83%20.93%20.41%20C%201.10%20-.06%20.87%20-.40%20.46%20-.64%20Z%22%20transform%3D%22matrix%280.92%200%200%200.92%200.06952518%200.01693544%29%22%20fill%3D%22%23cbb382%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Łukasz Guziczak GUITS. Systemy AI, oprogramowanie i automatyzacja. Przekuwam AI w wartość.">
-<title>GUZICZAK — ARCH 12 · Schronienie na niespokojnych wodach.</title>
+<title>GUZICZAK — ARCH 13 · Schronienie na niespokojnych wodach.</title>
 <style>
 :root {
   color-scheme:dark;
@@ -1042,7 +1042,7 @@ body:not(.intro) #motion,body:not(.intro) #motion-status{display:none}
 // ===== src/config/reclaim.js =====
 
 // ===== world/water =====
-/* ARCH 12 / LAKE SYSTEM
+/* ARCH 13 / LAKE SYSTEM
  * Multiscale Gerstner displacement + radial LOD mesh, analytic derivatives,
  * fixed-step GPU local wave equation (height/velocity/foam, ping-pong),
  * depth-aware refraction, planar scene reflections, Fresnel, absorption, fog.
@@ -1535,8 +1535,8 @@ GuziczakModules.define('geometry/rift', ['math'], (math) => {
         const a=lip(s,t,-1),b=lip(s,t,1),k=stress(s,t);
         // A real concave throat: the illuminated folds are in front of a dark,
         // recessed opening. Its depth appears only behind the travelling tear.
-        const well=Math.pow(Math.max(0,1-u*u),.68)*(.50+.20*Math.sin(s*PI))*k.open;
-        return [mix(a[0],b[0],(u+1)*.5)+.027*(1-u*u)*Math.sin(s*17)*k.open,
+        const well=Math.pow(Math.max(0,1-u*u),.72)*(.66+.24*Math.sin(s*PI))*k.open;
+        return [mix(a[0],b[0],(u+1)*.5)+.030*(1-u*u)*Math.sin(s*17)*k.open,
                 a[1],mix(a[2],b[2],(u+1)*.5)-well];
     }
     function edge(s,r,t,side){
@@ -2787,10 +2787,11 @@ GuziczakModules.define('config/casting', [], () => {
     // Shared by motion, geometry joints, camera, tests and sound events.
     const phase = Object.freeze({coolEnd:12.57, breakEnd:14.30, travelEnd:16.70});
     const joints = Object.freeze([
-        Object.freeze({name:'A',pivot:[.070,-.0838,-.558],localPivot:[.070/.79,(.20+.558)/.79,0],load:[12.63,13.08],at:13.10,angle:-.095}),
-        Object.freeze({name:'B',pivot:[.524,-.0838,-.195],localPivot:[.524/.79,(.20+.195)/.79,0],load:[12.91,13.39],at:13.42,angle:-.080})
+        // Slightly open the halves away from one another during release so the sign never visually self-intersects.
+        Object.freeze({name:'A',pivot:[.070,-.0838,-.558],localPivot:[.070/.79,(.20+.558)/.79,0],load:[12.63,13.08],at:13.10,angle:-.055,spread:[-.135,.020,-.018]}),
+        Object.freeze({name:'B',pivot:[.524,-.0838,-.195],localPivot:[.524/.79,(.20+.195)/.79,0],load:[12.91,13.39],at:13.42,angle:-.050,spread:[.145,.018,.020]})
     ]);
-    return {phase,joints,rest:{y:-2.1388,z:1.08,scale:.79},hero:{y:.66,z:0,scale:.83},clearance:.235, advance:.42};
+    return {phase,joints,rest:{y:-2.1388,z:1.08,scale:.79},hero:{y:.66,z:0,scale:.83},clearance:.235, advance:.40};
 });
 
 
@@ -2842,9 +2843,9 @@ GuziczakModules.define('config/sequence', ['config/reclaim'], (reclaim) => {
         captionOut:[16.1,16.7],progressOut:[16.1,16.7],brandOut:[16.1,16.7]
     });
     const mix = Object.freeze({ music: .98, effects: .32, master: .80, foleyMaster: .60, pourBase: .043, pourPressure: .042 });
-    const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4 });
+    const render = Object.freeze({ minDpr: 1.25, maxDpr: 2, shadowSize: 2048, samples: 4, desktopMinDpr: 1.0, desktopMaxDpr: 1.75, desktopPixelBudget: 3600000, desktopMirrorScale: .58, desktopVolumeDiv: 3.4, desktopBloomDiv: 2.15 });
     const durations = Object.freeze({casting:2.9,cooling:2.7,breakoff:2.15,extraction:3.25}); // e.g. { cooling: 4 } changes only playback length.
-    return { phases, events, cues, mix, render, durations, version: 'ARCH-12', referenceDuration: 22.70 };
+    return { phases, events, cues, mix, render, durations, version: 'ARCH-14', referenceDuration: 22.70 };
 });
 
 
@@ -3335,30 +3336,30 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
             const pts = [[.31, -.235], [.45, -.52], [.50, -1.02], [.36, -1.41]];
             b.tube(pts.map(([r, y]) => [r * Math.cos(a), y, r * Math.sin(a)]), .031, 2, 8);
         } });
-        // Tilted pour-over pitcher with its own interior and a small, correctly located spout.
+        // Kettle-like gooseneck vessel: broader body, lid, knob and a clearer spout.
         meshes.pitcher = build(b => {
-            b.lathe([[0, -.62], [.29, -.62], [.355, -.59], [.403, -.48], [.424, -.23], [.421, .16], [.389, .44], [.364, .50], [.357, .514], [.321, .513], [.319, .495], [.345, .424], [.376, .15], [.38, -.23], [.35, -.47], [.27, -.53], [0, -.53]], 0, 128);
-            ringY(b, .339, .510, .035, .025, 1);
-            ringY(b, .307, -.603, .012, .012, 1, 96);
+            b.lathe([[0, -.66], [.30, -.66], [.39, -.62], [.46, -.48], [.49, -.20], [.47, .08], [.42, .28], [.34, .39], [.30, .42], [.27, .46], [.22, .50], [.18, .53], [0, .53], [0, .44], [.18, .42], [.25, .39], [.31, .31], [.36, .11], [.37, -.18], [.34, -.46], [.26, -.59], [0, -.59]], 0, 144);
+            ringY(b, .312, .524, .028, .020, 1, 96);
+            ringY(b, .185, .556, .045, .018, 1, 96);
+            b.at(C(M.T(0, .635, 0), M.S(.055)), () => b.sphere(1, 1, 10, 14));
             const handle = [];
-            for (let i = 0; i <= 90; i++) {
-                let a = PI / 2 + i * PI / 90;
-                handle.push([-.425 + Math.cos(a) * .46, .02 + Math.sin(a) * .365, 0]);
+            for (let i = 0; i <= 100; i++) {
+                const a = PI * (.18 + i / 100 * .94);
+                handle.push([-.41 + Math.cos(a) * .34, -.02 + Math.sin(a) * .50, 0]);
             }
-            b.tube(handle, .049, 2, 12);
-            b.tube([[-.39, .363, 0], [-.51, .39, 0]], .061, 1, 10);
-            b.tube([[-.4, -.30, 0], [-.5, -.34, 0]], .056, 1, 10);
-            // Ceramic spout: a tapered, open trough, not a closed cylinder.
-            const L = [[.29, .44, -.19], [.45, .47, -.16], [.68, .59, -.08], [.76, .64, -.045]], R = L.map(p => [p[0], p[1], -p[2]]);
-            for (let i = 0; i < 3; i++) {
+            b.tube(handle, .047, 2, 12);
+            b.tube([[-.31, .34, 0], [-.46, .43, 0]], .054, 1, 10);
+            b.tube([[-.33, -.22, 0], [-.47, -.28, 0]], .050, 1, 10);
+            const L = [[.26, .31, -.10], [.39, .34, -.095], [.54, .40, -.075], [.69, .50, -.055], [.84, .59, -.038], [.92, .56, -.025]], R = L.map(p => [p[0], p[1], -p[2]]);
+            for (let i = 0; i < L.length - 1; i++) {
                 b.quad(L[i], L[i + 1], R[i + 1], R[i], 0);
-                b.quad(vadd(L[i], [0, -.025, 0]), vadd(R[i], [0, -.025, 0]), vadd(R[i + 1], [0, -.025, 0]), vadd(L[i + 1], [0, -.025, 0]), 0);
+                b.quad(vadd(L[i], [0, -.022, 0]), vadd(R[i], [0, -.022, 0]), vadd(R[i + 1], [0, -.022, 0]), vadd(L[i + 1], [0, -.022, 0]), 0);
             }
-            b.tube(L, .012, 1, 8);
-            b.tube(R, .012, 1, 8);
-            b.at(C(M.T(0, .00, .422), M.S(.48)), () => strokeSymbol(b, 1, .012, 1, 1));
+            b.tube(L, .011, 1, 8);
+            b.tube(R, .011, 1, 8);
+            b.at(C(M.T(0, -.02, .49), M.S(.52)), () => strokeSymbol(b, 1, .012, 1, 1));
         });
-        meshes.pitcherFill = build(b => { disk(b, .33, 4, 96, 10); b.tube([[.12, 0, 0], [.34, .025, 0], [.48, .08, 0], [.70, .225, 0], [.762, .287, 0]], .035, 4, 12); });
+        meshes.pitcherFill = build(b => { disk(b, .345, 4, 96, 10); b.tube([[.14, 0, 0], [.32, .020, 0], [.46, .065, 0], [.64, .16, 0], [.82, .24, 0], [.92, .228, 0]], .032, 4, 12); });
         // Three-key receiver and rigid guide frame. The winding is a removable cartridge:
         // approach -> alignment stop -> axial insertion -> bayonet turn -> independent latches.
         meshes.receiver = build(b => {
@@ -3625,7 +3626,17 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         const shadowVP = M.mul(M.O(-5.4, 5.4, -5.4, 5.4, .1, 27), M.look([-4.5, 7, 5], [0, 0, 0]));
         let mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, blooms = [], msaa = null, W = 0, H = 0;
         function resize() {
-            const ratio = Math.min(Math.max(viewport.dpr || 1, settings.minDpr), settings.maxDpr), w = Math.max(2, Math.round(viewport.width * ratio)), h = Math.max(2, Math.round(viewport.height * ratio));
+            const desktop = viewport.width >= 980 && viewport.height >= 620 && (((globalThis.matchMedia && globalThis.matchMedia('(pointer:fine)').matches) || false) || (((typeof navigator !== 'undefined' ? navigator.maxTouchPoints : 0) || 0) === 0));
+            const minDpr = desktop ? (settings.desktopMinDpr || settings.minDpr) : settings.minDpr;
+            const maxDpr = desktop ? (settings.desktopMaxDpr || settings.maxDpr) : settings.maxDpr;
+            let ratio = Math.min(Math.max(viewport.dpr || 1, minDpr), maxDpr);
+            if (desktop && settings.desktopPixelBudget) {
+                const rawPixels = viewport.width * viewport.height * ratio * ratio;
+                if (rawPixels > settings.desktopPixelBudget)
+                    ratio *= Math.sqrt(settings.desktopPixelBudget / rawPixels);
+            }
+            ratio = Math.max(minDpr, ratio);
+            const w = Math.max(2, Math.round(viewport.width * ratio)), h = Math.max(2, Math.round(viewport.height * ratio));
             if (W === w && H === h)
                 return;
             W = w;
@@ -3635,7 +3646,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for (const rt of [mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, ...blooms.flat()])
                 disposeRT(rt);
             mainRT = target(w, h);
-            opaqueRT=target(w,h);
+            opaqueRT = target(w, h);
             if (!mainRT.fp)
                 floatRT = false;
             if (msaa) {
@@ -3662,14 +3673,17 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
                     gl.deleteRenderbuffer(depth);
                 }
             }
-            const mw = Math.max(200, Math.round(w * .65)), mh = Math.max(200, Math.round(h * .65));
+            const mirrorScale = desktop ? (settings.desktopMirrorScale || .58) : .65;
+            const volumeDiv = desktop ? (settings.desktopVolumeDiv || 3.4) : 3;
+            const bloomDiv = desktop ? (settings.desktopBloomDiv || 2.15) : 2;
+            const mw = Math.max(200, Math.round(w * mirrorScale)), mh = Math.max(200, Math.round(h * mirrorScale));
             mirrorRT = target(mw, mh);
             mirrorBlur = target(mw, mh, false);
             liquidMirror = target(mw, mh);
-            volumeRT = target(Math.max(2, Math.round(w / 3)), Math.max(2, Math.round(h / 3)), false);
+            volumeRT = target(Math.max(2, Math.round(w / volumeDiv)), Math.max(2, Math.round(h / volumeDiv)), false);
             blooms = [];
             for (let i = 0; i < 3; i++) {
-                const d = 2 ** (i + 1);
+                const d = Math.pow(bloomDiv, i + 1);
                 blooms.push([target(Math.max(2, Math.round(w / d)), Math.max(2, Math.round(h / d)), false), target(Math.max(2, Math.round(w / d)), Math.max(2, Math.round(h / d)), false)]);
             }
         }
@@ -3755,6 +3769,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             f3(prog,'uRiftWorld',state.riftCenter||[2.5,2.4,0]);
             f1(prog,'uRiftLight',state.riftLight||0);
             f1(prog,'uLakeTime',state.elapsed||0);
+            f1(prog,'uPitcherSteam',state.pitcherSteam||0);
+            f1(prog,'uPourTilt',state.pourTilt||0);
+            f3(prog,'uSteamOrigin',state.kettleSpout||[-2.4,2.6,0]);
             if (prog === meshProg) {
                 texture(prog, 'uShadow', shadowTex, 0);
                 texture(prog, 'uMirror', mirrorBlur.t, 1);
@@ -3958,11 +3975,14 @@ float surface(vec2 p,float mode){
  return(ring+front+sin(a*3.+r*10.-uFlow)*.002)*(1.-smoothstep(.98,1.13,r));
 }
 vec3 curve(float s){
- vec3 p=mix(uFrom,uTo,s);p.y+=s*(1.-s)*(uMode<2.?.78:.10);
+ vec3 p=mix(uFrom,uTo,s);p.y+=s*(1.-s)*(uMode<2.?( .78+.12*exp(-pow((uTime-4.78)*4.8,2.)) ):.10);
  if(uMode<2.){
   float emitted=uTime-s*.39,neck=sin(s*3.14159265);
-  p.x+=neck*(jetNoise(emitted*8.7+3.)-.5)*(.019+.011*s);
-  p.z+=s*(jetNoise(emitted*10.3)-.5)*.022+neck*.014;
+  float whip=exp(-pow((uTime-4.71)*8.8,2.));
+  float wake=exp(-pow((uTime-4.96)*6.4,2.));
+  p.x+=(1.-s)*(.053*whip*sin((uTime-4.57)*17.4)+.017*wake)+neck*(jetNoise(emitted*8.7+3.)-.5)*(.019+.011*s);
+  p.z+=s*(jetNoise(emitted*10.3)-.5)*.022+neck*(.014+whip*.018*sin((uTime-4.58)*11.3));
+  p.y-=whip*(1.-s)*s*.058;
  }
  return p;
 }
@@ -4061,10 +4081,11 @@ void main(){
   float fissure=pow(max(0.,1.-abs(q.x)/.46),2.0);
   float strata=fbm(vec3(q.xy*12.,q.z*8.+uTime*.12));
   float radius=length(q.xy/vec2(.40,.81)),well=1.-smoothstep(.24,.78,radius);
-  vec3 c=vec3(.00035,.00065,.00085)+vec3(.006,.011,.015)*pow(1.-nv,4.);
-  c+=env(reflect(-v,n),.21)*.0065*(1.-well)*smoothstep(.25,.8,strata);
+  vec3 c=vec3(.00008,.00012,.00018)+vec3(.002,.004,.006)*pow(1.-nv,4.);
+  c+=env(reflect(-v,n),.24)*.0032*(1.-well)*smoothstep(.28,.84,strata);
   float trace=pow(.5+.5*sin(q.y*37.+strata*13.-uTime*.30),18.);
-  c+=vec3(.004,.012,.011)*trace*fissure;
+  c+=vec3(.0016,.0062,.0076)*trace*fissure;
+  c*=1.-well*.35;
   outColor=vec4(c*uObjectLight,alpha);return;
  }
  float castEdge=0.;
@@ -4118,7 +4139,7 @@ void main(){
   float filament=pow(.5+.5*sin((rr-1.)*26.+a*2.+turbulence*8.-uTime*.45),11.);
   float envelope=smoothstep(1.035,1.12,rr)*(1.-smoothstep(1.25,1.565,rr));
   float fog=envelope*(filament*.42+.06)*smoothstep(.27,.71,turbulence);
-  outColor=vec4(vec3(.22,.27,.27)*uObjectLight,fog*.26);return;
+  outColor=vec4(vec3(.07,.10,.11)*uObjectLight,fog*.18);return;
  }
  else if(id>21.5&&id<22.5){base=vec3(.009,.013,.015)*(macro*.4+.8);metal=.055;rough=.72;occ=.88;}
  else if(id>14.5&&id<15.5){
@@ -4190,7 +4211,7 @@ void main(){
  c+=brdf(n,v,normalize(vec3(-4.5,7.,5.)-p),base,metal,rough,vec3(3.9,3.65,3.30))*shadow(n);
  c+=brdf(n,v,normalize(vec3(3.8,4.,-3.2)-p),base,metal,rough,vec3(1.75,2.2,2.65));
  vec3 rl=uRiftWorld-p;float rld=dot(rl,rl);
- c+=brdf(n,v,normalize(rl),base,metal,max(rough,.16),vec3(.28,.58,.72)*uRiftLight/(.8+rld*.48));
+ c+=brdf(n,v,normalize(rl),base,metal,max(rough,.16),vec3(.08,.18,.26)*uRiftLight/(.8+rld*.48));
  vec3 light=vec3(0,-.8,.6)-p;float dd=dot(light,light);
  c+=brdf(n,v,normalize(light),base,metal,max(rough,.28),vec3(1.05,.47,.10)*(1.+uEnergy*3.)/(.5+dd));
  if(id<.5){c+=env(reflect(-v,n),.07)*(.013+.065*pow(1.-nv,5.));}
@@ -4250,27 +4271,40 @@ void main(){
   vec2 shift=vec2(sign(q.x)*(.30+.20*shear),.13*shear)*uRiftSize*.065*shell*core*uRiftStrength;
   uv=clamp(uv+shift,vec2(.001),vec2(.999));
  }
- vec3 c=fxaa(uv);vec3 glow=texture(uBloom0,vUv).rgb*.22+texture(uBloom1,vUv).rgb*.29+texture(uBloom2,vUv).rgb*.39;c+=glow*(.30+uEnergy*.12)+texture(uVolume,vUv).rgb;
+ vec3 c=fxaa(uv);
+ if(uRiftStrength>.0001){
+  vec2 q=(vUv-uRiftCenter)/max(uRiftSize,vec2(.0001));
+  float slit=(1.-smoothstep(.05,.22,abs(q.x)))*(1.-smoothstep(.24,1.28,abs(q.y)));
+  float falloff=exp(-dot(q,q)*.75);
+  c*=1.-(.16*falloff+.24*slit)*uRiftStrength;
+ }
+ vec3 glow=texture(uBloom0,vUv).rgb*.22+texture(uBloom1,vUv).rgb*.29+texture(uBloom2,vUv).rgb*.39;c+=glow*(.30+uEnergy*.12)+texture(uVolume,vUv).rgb;
  c=pow(aces(c*.96),vec3(1./2.2));vec2 p=vUv*2.-1.;c*=1.-.15*pow(clamp(dot(p,p)*.35,0.,1.),1.4);
  float grain=fract(sin(dot(gl_FragCoord.xy+floor(uTime*20.)*.37,vec2(12.9898,78.233)))*43758.5453)-.5;c+=grain*.003;outColor=vec4(c,1.);}
 `;
     // Steam is integrated in world space and clipped by the depth of the scene.
     const volumeFS = `#version 300 es
-precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam,uRiftWorld;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uEnergy,uSteam;
+precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uDepth;uniform mat4 uInvVP;uniform vec3 uCam,uRiftWorld,uSteamOrigin;uniform float uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uEnergy,uSteam,uPitcherSteam,uPourTilt;
 ${noiseGLSL}
 void main(){float depth=texture(uDepth,vUv).r;vec4 h=uInvVP*vec4(vUv*2.-1.,depth*2.-1.,1.);vec3 endpoint=h.xyz/h.w,rd=normalize(endpoint-uCam);float lim=min(length(endpoint-uCam),35.);
- vec3 iRD=1./(rd+vec3(.0000001)),a0=(vec3(-1.35,-1.8,-.65)-uCam)*iRD,a1=(vec3(.90,2.7,.75)-uCam)*iRD,mn=min(a0,a1),mx=max(a0,a1);
+ vec3 iRD=1./(rd+vec3(.0000001)),a0=(vec3(-1.35,-1.8,-.65)-uCam)*iRD,a1=(vec3(.90,2.9,.82)-uCam)*iRD,mn=min(a0,a1),mx=max(a0,a1);
  float entry=max(0.,max(mn.x,max(mn.y,mn.z))),exit=min(lim,min(mx.x,min(mx.y,mx.z)));
- if(exit<=entry){outColor=vec4(0,0,0,1);return;}float dt=(exit-entry)/36.;vec3 c=vec3(0.);float trans=1.;float jit=.5;
- for(int i=0;i<36;i++){
+ if(exit<=entry){outColor=vec4(0,0,0,1);return;}float dt=(exit-entry)/40.;vec3 cCup=vec3(0.),cKettle=vec3(0.);float transCup=1.,transKettle=1.;float jit=.5;
+ for(int i=0;i<40;i++){
   vec3 p=uCam+rd*(entry+(float(i)+jit)*dt);float y=p.y-.91;
   vec2 center=vec2(-.50,.02)+vec2(sin(y*2.6-uTime*.43)*.09,cos(y*2.8-uTime*.31)*.08)*max(0.,y);
   float r=length(p.xz-center),spread=.21+max(y,0.)*.12;
   float density=exp(-r*r/(spread*spread))*smoothstep(0.,.15,y)*(1.-smoothstep(.65,1.4,y));
   float cloud=fbm(p*vec3(5.5,3.8,5.5)+vec3(0,-uTime*.40,0));density*=smoothstep(.32,.67,cloud)*.042;
-  c+=trans*vec3(.63,.68,.66)*density*dt;trans*=exp(-density*dt);
-  float gold=exp(-dot(p.xz,p.xz)*4.)*exp(-pow((p.y+.9)*1.6,2.));c+=vec3(.43,.20,.030)*gold*(.004+uEnergy*.020)*dt;
- }outColor=vec4(c*uSteam,1.);}
+  cCup+=transCup*vec3(.63,.68,.66)*density*dt;transCup*=exp(-density*dt);
+  float gold=exp(-dot(p.xz,p.xz)*4.)*exp(-pow((p.y+.9)*1.6,2.));cCup+=vec3(.43,.20,.030)*gold*(.004+uEnergy*.020)*dt;
+  vec3 k=p-uSteamOrigin;float ky=max(k.y,0.);vec2 adv=k.xz-vec2(.12+.20*abs(uPourTilt),.02*sin(uTime*.9))*ky;
+  float kSpread=.11+ky*.09;float kDensity=exp(-dot(adv,adv)/(kSpread*kSpread))*smoothstep(0.,.02,ky)*(1.-smoothstep(.22,1.05,ky));
+  float kCloud=fbm(vec3(adv*7.0,ky*3.4-uTime*.55));kDensity*=smoothstep(.34,.70,kCloud)*(.070+.018*abs(uPourTilt));
+  cKettle+=transKettle*mix(vec3(.48,.50,.48),vec3(.72,.67,.58),smoothstep(0.,.8,ky))*kDensity*dt;
+  transKettle*=exp(-kDensity*dt*1.4);
+ }
+ outColor=vec4(cCup*uSteam + cKettle*uPitcherSteam,1.);}
 `;
     const wordVS = `#version 300 es
 precision highp float;layout(location=0) in vec3 aP;layout(location=1) in vec2 aUV;layout(location=2) in float aAlpha;layout(location=3) in float aHeat;
@@ -4297,23 +4331,30 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
         if (t > .02) {
             push(meshes.pedestal, M.T(0, -(1 - ease(.20, 1.18, t)) * .24, 0), 0, [0, 0, 0], [0, 0, 0], false, state.stage * ease(.2, .95, t));
             push(meshes.cup, cup);
-            push(meshes.cupBadge, C(cup, M.T(0, .30, .920)));
+            const hotBadge = ease(5.14, 5.88, t) * (1 - ease(8.72, 10.34, t));
+            const badgePulse = hotBadge * (.5 + .5 * Math.sin((t - 5.10) * 15.2));
+            push(meshes.cupBadge, C(cup, M.T(0, .35 + hotBadge * .09, .948 + hotBadge * .016), M.S(1 + hotBadge * .24 + badgePulse * .05)), 0, [0,0,0], [0,0,0], false, 1 + hotBadge * .44 + badgePulse * .24);
             push(meshes.receiver, cup);
             push(meshes.cupDrain,cup);
-            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,dock.railScale,1),M.T(0,.45,0)));
+            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,mix(.18,dock.railScale,ease(.34,1.00,t)),1),M.T(0,.45,0)));
             const socket=C(M.T(0,docking.config.deckY-(1-ease(.20,1.18,t))*.24,-2.4));
             push(meshes.dockSleeve,socket);
             for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(.78*(1-dock.closed),0,0)));
             if(dock.down>.5)push(meshes.dockBridge,socket,0,[0,0,0],[0,0,0],false,state.stage*ease(.5,1,dock.down));
         }
-        // The cassette is already full-size. Nothing materialises by scaling up.
-        // It first finds the keys, waits against a hard stop, then travels along the Y rail.
-        const align = ease(.83, 1.58, t), ram = ease(1.85, 2.075, t), detent = t > 2.075 ? .009 * Math.exp(-(t - 2.075) * 29) * Math.sin((t - 2.075) * 64) : 0;
-        const cartridge = C(set, M.T(0,-dock.extra,0),M.Ry(dock.rotation), M.T((1 - align) * 1.12, -.38 + (1 - ram) * -.23 + ram * .38 + detent, (1 - align) * 1.05), M.Rz((1 - align) * -.26), M.Ry((1 - align) * -.45));
+        // The coil now emerges sacrament-like from the receiver's metal locker beneath the cup,
+        // then completes a short, precise upward seat instead of materialising from nowhere.
+        const emergence = ease(.42, 1.02, t), ram = ease(1.56, 2.10, t), detent = t > 2.10 ? .009 * Math.exp(-(t - 2.10) * 29) * Math.sin((t - 2.10) * 64) : 0;
+        const align = ease(1.02, 1.64, t);
+        const introYaw = (1 - emergence) * .18 + (1 - align) * .06;
+        const introRoll = (1 - emergence) * -.07;
+        const introZ = .11 * (1 - emergence);
+        const introY = -1.26 + emergence * .62 + ram * .64 + detent;
+        const cartridge = C(set, M.T(0,-dock.extra,0),M.Ry(dock.rotation), M.T(0, introY, introZ), M.Rz(introRoll), M.Ry(introYaw));
         const lock = ease(2.19, 2.39, t), clampClose = ease(2.42, 2.51, t);
-        state.assembly = { aligned: align, inserted: ram, locked: lock, clamped: clampClose };
-        if (t > .72) {
-            const reveal = state.stage * ease(.72, .95, t);
+        state.assembly = { emerged: emergence, aligned: align, inserted: ram, locked: lock, clamped: clampClose };
+        if (t > .34) {
+            const reveal = state.stage * ease(.34, .64, t);
             for (const m of [meshes.neck, meshes.coil, meshes.bayonet])
                 push(m, cartridge, 0, [0, 0, 0], [0, 0, 0], false, reveal);
             for (let j = 0; j < 3; j++)
@@ -4381,12 +4422,14 @@ GuziczakModules.define('scene/cast-motion',['math','config/casting'],(math,confi
             const snap=ease(j.at,j.at+.15,t),load=ease(...j.load,t);
             const after=Math.max(0,t-j.at);
             const relax=ease(j.at+.20,config.phase.breakEnd,t);
-            const angle=mix(j.angle*load,j.angle*.32,relax)*(1-move);
+            const separate=ease(j.at-.03,j.at+.24,t)*(1-move);
+            const spread=j.spread||[0,0,0];
+            const angle=mix(j.angle*load,j.angle*.22,relax)*(1-move);
             const lift=(.004*load+config.clearance*snap)*(1-move);
             // A restrained mechanical recoil after separation, never a floating idle wobble.
             const kick=t>=j.at?.011*Math.exp(-after*16)*Math.sin(after*45):0;
-            const forward=config.advance*ease(j.at+.07,j.at+.26,t)*(1-move);
-            const pose=C(M.T(0,lift+kick*(1-move),forward),base,M.T(...j.localPivot),M.Rx(angle),M.T(...j.localPivot.map(v=>-v)));
+            const forward=(config.advance*ease(j.at+.07,j.at+.26,t)+spread[2]*separate)*(1-move);
+            const pose=C(base,M.T(spread[0]*separate,lift+kick*(1-move)+spread[1]*separate,forward),M.T(...j.localPivot),M.Rx(angle),M.T(...j.localPivot.map(v=>-v)));
             const gateReturn=1-ease(j.at,j.at+.16,t);
             return {...j,snap,broken:t>=j.at,angle,lift,pose,gateAngle:j.angle*load*gateReturn,
                 gateLift:.004*load*gateReturn};
@@ -4465,7 +4508,16 @@ GuziczakModules.define("scene/curves", ["math"], (math) => {
     function curvePoint(from, to, s, bend) { const p = vadd(from, vmul(vsub(to, from), s)); p[1] += s * (1 - s) * bend; return p; }
     function jetNoiseCPU(x) { const hash = t => { const n = Math.sin(t * 127.1 + 19.19) * 43758.5453; return n - Math.floor(n); }; let i = Math.floor(x), f = x - i; f = f * f * (3 - 2 * f); return mix(hash(i), hash(i + 1), f); }
     function jetPressureCPU(t) { return Math.max(.23, .78 + .27 * (jetNoiseCPU(t * 3.6) - .5) + .22 * (jetNoiseCPU(t * 12.7 + 8) - .5) - .34 * Math.exp(-Math.pow((t - 5.46) * 10, 2)) - .26 * Math.exp(-Math.pow((t - 6.77) * 13, 2))); }
-    function coffeePoint(from, to, s, t) { let p = curvePoint(from, to, s, .78), em = t - s * .39, neck = Math.sin(s * PI); p[0] += neck * (jetNoiseCPU(em * 8.7 + 3) - .5) * (.019 + .011 * s); p[2] += s * (jetNoiseCPU(em * 10.3) - .5) * .022 + neck * .014; return p; }
+    function coffeePoint(from, to, s, t) {
+        let p = curvePoint(from, to, s, .78 + .12 * Math.exp(-Math.pow((t - 4.78) * 4.8, 2)));
+        const em = t - s * .39, neck = Math.sin(s * PI);
+        const whip = Math.exp(-Math.pow((t - 4.71) * 8.8, 2));
+        const wake = Math.exp(-Math.pow((t - 4.96) * 6.4, 2));
+        p[0] += (1 - s) * (.053 * whip * Math.sin((t - 4.57) * 17.4) + .017 * wake) + neck * (jetNoiseCPU(em * 8.7 + 3) - .5) * (.019 + .011 * s);
+        p[2] += s * (jetNoiseCPU(em * 10.3) - .5) * .022 + neck * (.014 + whip * .018 * Math.sin((t - 4.58) * 11.3));
+        p[1] -= whip * (1 - s) * s * .058;
+        return p;
+    }
     return { curvePoint, jetNoiseCPU, jetPressureCPU, coffeePoint };
 });
 
@@ -4545,28 +4597,39 @@ GuziczakModules.define("scene/pour", ["math", "scene/curves", "config/vocabulary
     function sample(ctx) {
         const { t, e, mobile, meshes, push, state, letterInstances, set, cup, cartridge, moldRoot, moldLight, breakSeal, lift, turn } = ctx;
         // Pitcher choreography and pressure are coupled: the residual trickle follows its recovery.
-        const arrival = ease(3.00, 4.05, t), out = ease(7.91, 8.86, t), tilt = ease(4.01, 4.58, t) * (1 - ease(7.47, 7.91, t));
+        const arrival = ease(3.00, 4.05, t), out = ease(7.91, 8.86, t), baseTilt = ease(4.01, 4.58, t) * (1 - ease(7.47, 7.91, t));
+        const startKick = Math.exp(-Math.pow((t - 4.62) * 6.7, 2));
+        const settleKick = Math.exp(-Math.pow((t - 4.96) * 4.6, 2));
+        const tilt = baseTilt;
         const ps = mobile ? .68 : .96, px = mobile ? -1.42 : -2.51, py = mobile ? 2.30 : 2.25;
         const minute = (jetNoiseCPU(t * 2.6) - .5) * .009 * tilt;
-        const pitcher = C(set, M.T(px - (1 - arrival) * 4.2 - out * 3.3, py + Math.sin(arrival * PI) * .43 + out * .8, -.035 - (1 - arrival) * 1.7 - out * 1.9), M.Ry((1 - arrival) * 1.03 - out * .70), M.Rz((1 - arrival) * .20 - tilt * .55 + minute), M.S(ps));
+        const pourPitch = (1 - arrival) * .20 - tilt * (.55 + startKick * .08) + minute + Math.sin((t - 4.54) * 12.8) * .030 * startKick;
+        const pitcher = C(set, M.T(px - (1 - arrival) * 4.2 - out * 3.3, py + Math.sin(arrival * PI) * .43 + out * .8, -.035 - (1 - arrival) * 1.7 - out * 1.9), M.Ry((1 - arrival) * 1.03 - out * .70), M.Rz(pourPitch), M.S(ps));
         if (t > 2.99 && out < .998) {
             push(meshes.pitcher, pitcher);
-            push(meshes.pitcherFill, C(pitcher, M.T(0, .354, 0)));
+            push(meshes.pitcherFill, C(pitcher, M.T(0, .332, 0)));
         }
-        const origin = M.point(pitcher, [.76, .64, 0]);
-        const fluid=state.fluid,fill=fluid.fillFraction,liquidY=fluid.level,landing = M.point(set, [-.60, liquidY, .045]);
+        const spout = M.point(pitcher, [.90, .56, 0]);
+        const fluid = state.fluid, fill = fluid.fillFraction, liquidY = fluid.level;
+        const landingBase = M.point(set, [-.60, liquidY, .045]);
+        const whipVec = [(.060 * startKick * Math.sin((t - 4.56) * 16.4) + .016 * settleKick), -.020 * startKick, .022 * startKick * Math.cos((t - 4.56) * 10.8)];
+        const origin = [spout[0] + whipVec[0] * .18, spout[1] + whipVec[1] * .12, spout[2] + whipVec[2] * .16];
+        const landing = [landingBase[0] + whipVec[0] * .24, landingBase[1], landingBase[2] + whipVec[2] * .32];
+        state.kettleSpout = spout;
+        state.pitcherSteam = ease(3.28, 4.35, t) * (1 - ease(8.24, 9.06, t));
+        state.pourTilt = tilt + startKick * .16;
         if (fluid.visible && state.stage > .001) {
-            const r = fluid.radius/1.091;
+            const r = fluid.radius / 1.091;
             push(meshes.coffeeSurface, C(set, M.T(0, liquidY, 0), M.S(r, 1, r)), 2);
         }
         // Surface tension before the first detachment.
         if (t > 4.32 && t < 4.60) {
             const s = ease(4.32, 4.60, t), r = .005 + s * .023;
-            push(meshes.dropCoffee, C(M.T(origin[0], origin[1] - .028 * s, origin[2]), M.S(r, r * (1 + s * .9), r)));
+            push(meshes.dropCoffee, C(M.T(origin[0], origin[1] - (.028 + startKick * .018) * s, origin[2]), M.S(r, r * (1 + s * .9), r)));
         }
         if (t > 4.59 && t < 4.96) {
-            const s = (t - 4.59) / .37, p = coffeePoint(origin, landing, s, t), r = .025 - .006 * s;
-            push(meshes.dropCoffee, C(M.T(...p), M.S(r, r * (1.7 + s * .7), r)));
+            const s = (t - 4.59) / .37, p = coffeePoint(origin, landing, s, t), r = .026 - .007 * s;
+            push(meshes.dropCoffee, C(M.T(...p), M.S(r, r * (1.82 + s * .74), r)));
         }
         const cb = clamp((t - 7.69) / .39, 0, 1), ce = clamp((t - 4.60) / .39, 0, 1);
         if (ce > cb + .002 && t < 8.09)
