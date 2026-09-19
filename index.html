@@ -7,7 +7,7 @@
 .work,.contact{padding:90px var(--pad);border-top:1px solid var(--line)}.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:42px;margin-bottom:48px}.section-head h2,.contact h2{font-size:clamp(32px,3.2vw,52px);font-weight:400;letter-spacing:-.035em;line-height:1.2}.work-row{display:grid;grid-template-columns:45px 1fr 1.15fr;gap:28px;padding:30px 0;border-top:1px solid var(--line);align-items:start}.work-row .n{font:italic 14px Georgia;color:var(--gold)}.work-row h3{font-weight:400;font-size:24px;letter-spacing:-.025em}.work-row p{font-size:14px;color:var(--muted);max-width:400px;line-height:1.85}.contact-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:60px}.contact .eyebrow{margin-bottom:24px}.contact p{margin:24px 0;color:var(--muted);font-size:15px}.external{font-size:14px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:7px;display:inline-flex;gap:22px}.company{border-left:1px solid var(--line);padding-left:54px;align-self:end}.company h3{font-size:17px;font-weight:500}.company p{margin:8px 0 28px}.company dl{font-size:12px;color:var(--muted)}.company dl div{display:flex;justify-content:space-between;gap:20px;margin-bottom:12px}.company dd{color:var(--fg);text-align:right}.footer{margin:0 var(--pad);padding:24px 0 30px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:10px;letter-spacing:.10em;color:#98a3a7;gap:24px}
 #intro-controls{position:fixed;right:var(--pad);top:27px;display:flex;align-items:center;gap:16px;z-index:45}.sound{display:flex;gap:10px;align-items:center;color:var(--gold);font-size:11px;padding:8px 0}.sound svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.2}.sound[aria-pressed=false]{color:#a4afb4}.skip{display:none;gap:16px;align-items:center;font-size:12px}.intro .skip{display:flex}#scene-pause{display:none;font-size:12px}.intro #scene-pause{display:block}#audio-menu-button{font-size:16px;color:var(--muted);padding:8px;min-width:40px}#audio-panel{position:absolute;right:0;top:56px;width:310px;max-width:calc(100vw - 32px);padding:22px;background:#10171b;border:1px solid #ffffff20;box-shadow:0 20px 70px #0009;font-size:12px}#audio-panel[hidden]{display:none}#audio-panel h2{font-size:14px;font-weight:500;margin-bottom:6px}#audio-panel p{font-size:11px;color:var(--muted);margin-bottom:16px}#audio-panel .track{width:100%;display:block;text-align:left;padding:12px 0;border-top:1px solid var(--line);font-size:12px}#audio-panel .track[aria-pressed=true]{color:var(--gold)}#audio-panel .track small{display:block;color:var(--muted);font-size:10px}#audio-panel label{display:block;padding:16px 0 8px}#audio-panel input{width:100%;accent-color:var(--gold)}#staff-pause{display:block;font-size:11px;margin-top:12px;color:var(--muted)}#motion{display:none;align-items:center;gap:8px;font-size:11px;color:var(--muted)}.intro #motion{display:inline-flex}#motion svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.15}#motion-status{position:fixed;bottom:115px;left:50%;transform:translateX(-50%);z-index:45;width:min(380px,85vw);font-size:11px;color:var(--muted);text-align:center;pointer-events:none}#motion-status:empty{display:none}
 #scene{display:none;position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none;background:transparent}.intro #scene{display:block}#cinema-shade{position:fixed;inset:0;z-index:21;pointer-events:none;background:linear-gradient(#05060645,transparent 18%,transparent 80%,#05060640);opacity:0}#vessel-shadow{position:fixed;inset:0;z-index:23;pointer-events:none;opacity:0;background:radial-gradient(ellipse 43% 32% at 50% 71%,#000d 0%,#000a 38%,#0004 68%,transparent 86%),linear-gradient(transparent 50%,#02030320 61%,#02030340)}.intro-brand{position:fixed;top:46px;left:var(--pad);font-size:10px;letter-spacing:.20em;color:var(--muted);z-index:30;pointer-events:none;opacity:0}#intro-caption{position:fixed;left:var(--pad);bottom:54px;z-index:30;display:flex;gap:24px;align-items:baseline;pointer-events:none;opacity:0}.caption-n{font:italic 13px Georgia;color:var(--gold)}.caption-name{font:20px Georgia;color:var(--muted)}#intro-progress{position:fixed;height:1px;left:var(--pad);right:var(--pad);bottom:30px;z-index:30;background:var(--line);pointer-events:none;opacity:0}#progress-fill{position:absolute;inset:0;background:var(--gold);transform-origin:0 50%}
-#flying-mark{display:none!important}#flying-word{display:none;position:fixed;z-index:28;pointer-events:none;transform:translate(-50%,-50%);font-family:Inter,'Helvetica Neue',Arial,sans-serif;font-weight:400;color:#e4e7e6;white-space:nowrap;line-height:1.05;text-shadow:0 2px 18px #000b}#signature-line{position:fixed;left:0;right:0;z-index:27;pointer-events:none;opacity:0;font-family:Inter,'Helvetica Neue',Arial,sans-serif;color:#b7c0c4;white-space:nowrap;line-height:1.5;letter-spacing:.025em;text-shadow:0 2px 16px #000b}.intro #flying-word{display:block}.intro #site,.intro #header{opacity:0}.intro.handoff #site{opacity:1}.intro.handoff #header{opacity:var(--header-reveal)}.handoff #site{pointer-events:none}.intro #artifact-poster{display:none}
+#flying-mark{display:none!important}#flying-word{display:none;position:fixed;z-index:28;pointer-events:none;transform:translate(-50%,-50%);font-family:Inter,'Helvetica Neue',Arial,sans-serif;font-weight:400;color:#e4e7e6;white-space:nowrap;line-height:1.05;text-shadow:0 2px 18px #000b}#signature-line{position:fixed;left:0;right:0;z-index:27;pointer-events:none;opacity:0;font-family:Inter,'Helvetica Neue',Arial,sans-serif;color:#b7c0c4;white-space:nowrap;line-height:1.5;letter-spacing:.025em;text-shadow:0 2px 16px #000b}.intro #flying-word{display:block}.booting #flying-word{visibility:hidden}.intro #site,.intro #header{opacity:0}.intro.handoff #site{opacity:1}.intro.handoff #header{opacity:var(--header-reveal)}.handoff #site{pointer-events:none}.intro #artifact-poster{display:none}
 #score-bridge{position:fixed;left:50%;bottom:20px;width:min(800px,90vw);height:108px;transform:translateX(-50%);z-index:24;pointer-events:none;opacity:0;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 91%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 91%,transparent)}#score-bridge canvas{width:100%;height:100%;display:block}#score-bridge.score-compact{height:72px;width:min(700px,90vw)}.hero{padding-bottom:190px}.hero-bottom{bottom:132px}
 #fallback{display:none;position:fixed;bottom:20px;left:20px;right:20px;max-width:540px;background:#152027;border:1px solid #ffffff30;padding:20px;z-index:100;font-size:13px}#fallback h2{font-size:17px;margin-bottom:10px}#error-detail{font-size:11px;color:var(--muted);overflow-wrap:anywhere;max-height:80px;overflow:auto;margin:10px 0}#close-fallback{color:var(--gold);font-size:12px}
 @media(min-width:1650px){.hero{column-gap:90px}.hero-copy{padding-bottom:80px}}
@@ -62,8 +62,9 @@ h1 em{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing
 .artifact-caption{position:absolute;bottom:9px;right:9%;left:8%;padding:0;border:0;display:flex;gap:14px;align-items:center;justify-content:space-between;opacity:.62;font-size:8px;letter-spacing:.19em;transition:opacity .2s}.artifact-caption:hover{opacity:1}
 #artifact-toggle{min-height:36px;font-size:10px;padding:5px 0;color:#d9c29c}.artifact-help{position:absolute;bottom:-15px;left:8%;padding:0;margin:0;color:#a09987;font-size:9px;line-height:1.4;opacity:.62}
 .atelier-words{position:absolute;right:0;top:45%;font-size:9px;letter-spacing:.34em;line-height:2.1;color:#cdb37e;pointer-events:none}.atelier-words:after{content:'';display:block;width:29px;height:1px;margin-top:18px;background:#b99652aa}
-#page-score-slot{position:relative;grid-area:2 / 1 / 3 / -1;left:auto;right:auto;top:auto;bottom:auto!important;width:calc(100% + 2 * var(--pad));margin-left:calc(-1 * var(--pad));height:120px;z-index:3;overflow:hidden;pointer-events:none;align-self:stretch}
-#score-bridge.score-page{position:absolute;inset:0!important;left:0!important;top:0!important;transform:none!important;width:100%!important;height:100%!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+/* Preserve room for curved ledger notes without changing the hero grid. */
+#page-score-slot{position:relative;grid-area:2 / 1 / 3 / -1;left:auto;right:auto;top:auto;bottom:auto!important;width:calc(100% + 2 * var(--pad));margin-left:calc(-1 * var(--pad));height:120px;--score-bleed:72px;z-index:3;overflow:visible;pointer-events:none;align-self:stretch}
+#score-bridge.score-page{position:absolute;inset:calc(-1 * var(--score-bleed)) 0 auto!important;left:0!important;top:calc(-1 * var(--score-bleed))!important;transform:none!important;width:100%!important;height:calc(100% + 2 * var(--score-bleed))!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
 #score-canvas{width:100%;height:100%;display:block}.score-label{position:absolute;left:var(--pad);bottom:9px;font-size:8px;letter-spacing:.16em;color:#af936666;line-height:1.3}
 .hero-bottom{grid-area:3 / 1 / 4 / -1;position:relative;inset:auto!important;align-self:stretch;padding:17px 0 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #b8985c25;z-index:3;font-size:9px;letter-spacing:.13em;line-height:1.5;color:#a6adb0}
 .hero-bottom .domains{gap:26px;display:flex}.hero-bottom a{color:#d8bd84;display:block}.hero-bottom a:hover{color:#ffe3a0}
@@ -96,7 +97,7 @@ h1 em{font-size:1.105em;line-height:1.07;margin-top:.035em;letter-spacing:-.062e
 #artifact-slot{inset:0 9% 14px -1%}
 .atelier-words{top:42%;font-size:9px;letter-spacing:.34em}
 .hero-copy{padding-bottom:16px}
-#page-score-slot{overflow:hidden}
+#page-score-slot{overflow:visible}
 .hero-bottom{background:linear-gradient(90deg,#080a0a80,#080a0a20)}
 .score-label{opacity:.40}
 @media(min-width:1051px) and (max-height:780px){:root{--head:82px}h1{font-size:clamp(58px,6.6vw,88px)}.hero-copy{padding-bottom:8px}}
@@ -126,9 +127,40 @@ h1 em{font-size:1.105em;line-height:1.07;margin-top:.035em;letter-spacing:-.062e
 @media(min-width:1051px) and (min-height:781px){.hero-copy p{margin-top:12px}.hero-actions{margin-top:32px}}
 
 .world-pending #artifact-poster{visibility:hidden}
+
+@media(max-width:700px){
+ .hero{min-height:calc(100svh - var(--head));grid-template-rows:auto clamp(220px,29svh,268px) 92px 46px;padding-top:0}
+ .hero-copy{padding:8px 0 2px;max-width:none}
+ .hero-copy .eyebrow{margin-bottom:16px;font-size:6.8px;letter-spacing:.13em}
+ h1{font-size:clamp(42px,10.6vw,68px);line-height:1.02;letter-spacing:-.055em}
+ h1 em{margin-top:.04em;font-size:1.10em}
+ .hero-copy p{font-size:12px;line-height:1.72;margin-top:16px;max-width:30ch}
+ .hero-actions{margin-top:18px;gap:14px;align-items:center}
+ .button-main{min-width:160px;padding:12px 16px;gap:16px}
+ .replay{font-size:10px;gap:8px}
+ #artifact-stage{margin-top:-6px}
+ #artifact-slot{inset:-2% -6% 10px -6%}
+ .artifact-caption{font-size:6.6px;bottom:4px}
+ #artifact-toggle{font-size:8px}
+ #page-score-slot{height:92px;margin-top:-10px;overflow:visible}
+ #score-bridge.score-page{top:-6px}
+ .hero-bottom{padding:9px 0 14px;font-size:6.5px;letter-spacing:.09em}
+ .hero-bottom .domains{gap:8px}
+ .hero-bottom a{font-size:7px;max-width:58px}
+}
+@media(max-width:430px){
+ .hero{grid-template-rows:auto clamp(205px,27svh,245px) 84px 44px}
+ h1{font-size:clamp(40px,10.2vw,62px)}
+ .hero-copy p{font-size:11.6px;line-height:1.68}
+ .hero-actions{gap:12px}
+ .button-main{min-width:150px;padding:11px 15px}
+ #artifact-slot{inset:-2% -7% 8px -7%}
+ #page-score-slot{height:84px;margin-top:-12px}
+ .hero-bottom{font-size:6.2px}
+}
 @media(min-width:1051px){.atelier-words{right:6%}}
 </style></head>
-<body><a class="skip-content" href="#hero-heading">Przejdź do treści</a>
+<body><script>document.body.classList.add('intro','booting');</script><a class="skip-content" href="#hero-heading">Przejdź do treści</a>
 <canvas id="scene" role="img" aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak."></canvas>
 <div id="cinema-shade" aria-hidden="true"></div><div id="vessel-shadow" aria-hidden="true"></div><div id="score-bridge" aria-hidden="true"><canvas id="score-canvas"></canvas></div>
 <div class="intro-brand" aria-hidden="true">GUITS / GUZICZAK</div>
@@ -788,8 +820,8 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
     const paths={g:new Path2D(G),f:new Path2D(F),four:new Path2D(FOUR)};
     let pitchRange={low:14,high:42};
     let pageVisible=true;
-    let paused=window.matchMedia('(prefers-reduced-motion:reduce)').matches,phaseOpacity=0,page=false,raf=0,disposed=false,W=0,H=0,dpr=1,revision=-1,ns=[],model=null,frames=0,lastPosition=0,painted=[],compact=false,pageLead=[],pageLeadRevision=-1;
-    function resize(){const r=cv.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));g.setTransform(dpr,0,0,dpr,0,0);}
+    let paused=window.matchMedia('(prefers-reduced-motion:reduce)').matches,phaseOpacity=0,page=false,raf=0,disposed=false,W=0,H=0,pageHeight=0,dpr=1,revision=-1,ns=[],model=null,frames=0,lastPosition=0,painted=[],compact=false,pageLead=[],pageLeadRevision=-1;
+    function resize(){const r=cv.getBoundingClientRect();W=r.width;H=r.height;pageHeight=page?pageSlot.getBoundingClientRect().height:H;dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));g.setTransform(dpr,0,0,dpr,0,0);}
     const pageSlot=document.getElementById('page-score-slot');
     const pageObserver=new IntersectionObserver(es=>{pageVisible=es[0].isIntersecting;if(pageVisible)schedule();},{threshold:0});pageObserver.observe(pageSlot);
     function placement(){
@@ -823,9 +855,12 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
       }
       if(!W||!H)resize();g.clearRect(0,0,W,H);lastPosition=pos;painted=[];
       let low=30,high=38;for(const n of lead){low=Math.min(low,n.step);high=Math.max(high,n.step);}
-      const gap=Math.min(13.2,Math.max(4.7,(H-36)/((high-low)/2+5))),mid=(low+high)/2;
-      const curve=x=>Math.sin(x/W*Math.PI*2-.55)*Math.min(20,H*.13)+Math.sin(x/W*Math.PI*1.2+.8)*4;
-      const Y=(step,x)=>H*.50-(step-mid)*gap*.5+curve(x);
+      // The canvas has transparent vertical bleed; the staff still uses its
+      // original layout height, so neither the wave nor the notes are rescaled.
+      const layoutH=pageHeight||H,padY=Math.max(0,(H-layoutH)*.5);
+      const gap=Math.min(13.2,Math.max(4.7,(layoutH-36)/((high-low)/2+5))),mid=(low+high)/2;
+      const curve=x=>Math.sin(x/W*Math.PI*2-.55)*Math.min(20,layoutH*.13)+Math.sin(x/W*Math.PI*1.2+.8)*4;
+      const Y=(step,x)=>padY+layoutH*.50-(step-mid)*gap*.5+curve(x);
       const head=W<650?W*.28:W*.23,edge=W<650?43:76,pps=90;
       const line=(x,y,a,b)=>{g.beginPath();g.moveTo(x,y);g.lineTo(a,b);g.stroke();};
       const idle=!lead.length;
@@ -836,7 +871,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
       const clefX=W<650?9:29,sc=gap/250;g.save();g.translate(clefX,Y(32,clefX));g.scale(sc,sc);g.fillStyle=idle?'#bb955ba0':'#ecd299';g.shadowBlur=idle?0:8;g.shadowColor='#f2c879';g.fill(paths.g);g.restore();
       if(!idle){
        const rx=gap*.63,ry=gap*.43;
-       g.save();g.beginPath();g.rect(edge,0,W-edge-6,H-15);g.clip();
+       g.save();g.beginPath();g.rect(edge,0,W-edge-6,H);g.clip();
        const fade=x=>clamp((x-edge)/28,0,1)*clamp((W-x)/30,0,1);
        for(const n of lead){const x=head+(n.t-pos)*pps;if(x<edge-10||x>W+10)continue;const y=Y(n.step,x);const on=pos>=n.t&&pos<n.t+n.d,after=pos>=n.t+n.d;
         const a=fade(x)*(on?1:after?.44:.79);if(a<.01)continue;
@@ -938,8 +973,7 @@ GuziczakModules.define('app/engine',[
  'use strict';
  function mount(window,document,options={}){
   const timeline=timelines.createTimeline({...config.durations,...options.durations}),clock=timelines.createClock(timeline),scope=scopes.createScope(),ui=interfaces.createUI(document),canvas=ui.$('scene');
-  const params=new URLSearchParams(window.location.search),reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches,seenKey='guziczak.arch30.seen';
-  let seen=false;try{seen=sessionStorage.getItem(seenKey)==='1';}catch(_){}
+  const params=new URLSearchParams(window.location.search),reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   const sound=music.createMusic(window,document,config.mix),scoreLayer=scores.create(window,document,sound),motion=sensors.create(window,document);
   let device=null,brand=null,catalog=null,scene=null,renderer=null,exhibit=null,fx=null;
   let raf=0,mode='idle',dirty=true,ready=false,failed=false,disposed=false,frameNumber=0,lastFrame=null,lastPacket=null,lastError='',wasPlaying=false,seekFrame=false;
@@ -997,14 +1031,14 @@ GuziczakModules.define('app/engine',[
     if(!ready){ready=true;ui.booted();window.__renderReady=true;sound.ready();clock.reanchor();}
     if(fx)fx.update(frame,{enabled:sound.enabled,active:!frame.frozen&&!frame.finished});
     ui.$('scene-pause').setAttribute('aria-pressed',String(frame.frozen));ui.$('scene-pause').textContent=frame.frozen?'▷':'Ⅱ';
-    resolve();if(cursor.complete){complete(true);return;}if(clock.state==='playing')schedule();
+    resolve();if(cursor.complete){complete();return;}if(clock.state==='playing')schedule();
    }catch(e){fail(e);}
   }
-  function complete(save=true){
+  function complete(){
     cancel();clock.setRate(1);quenchPanel.hide();clock.complete();mode='page';dirty=true;pageEpoch++;lastPageMs=null;
     canvas.style.visibility='hidden';canvas.dataset.renderMode='pending';document.body.classList.add('world-pending');if(fx)fx.stop();
     if(renderer)renderer.suspend();ui.finish();document.getElementById('exhibit-world').appendChild(canvas);canvas.classList.add('exhibit-canvas');canvas.style.opacity='1';canvas.style.display='block';stage.activate();
-    sound.finish();scoreLayer.finish();sound.ready();if(save)try{sessionStorage.setItem(seenKey,'1');}catch(_){}
+    sound.finish();scoreLayer.finish();sound.ready();
     dispatch('guziczak:brand-complete');schedule();return new Promise(r=>waiters.push(r));
   }
   function enter(){stage.deactivate();if(exhibit)exhibit.suspend();lastPageMs=null;canvas.style.visibility='hidden';canvas.dataset.renderMode='pending';document.body.classList.remove('world-pending');canvas.classList.remove('exhibit-canvas');document.body.insertBefore(canvas,ui.$('cinema-shade'));ui.enter(!ready);mode='intro';dirty=true;lastSceneRect=null;}
@@ -1040,7 +1074,7 @@ GuziczakModules.define('app/engine',[
    get total(){return timeline.total;},get state(){return Object.freeze({...lastFrame,finished:mode==='page',frozen:clock.state==='paused'});},getAudio:()=>fx,
    sample(seconds){initializeCinema();const f=states.sampleState(timeline.sample(seconds)),p=scene.sample(f,viewport());return {frame:f,camera:cameras.sampleCamera(f,viewport()),packet:{assembly:p.assembly,foundry:p.foundry},commands:p.commands.map(o=>({id:o.id,transform:Array.from(o.m),bounds:o.mesh.bounds,mode:o.mode,light:o.light})),vesselTransform:Array.from(p.vesselTransform),castTransform:p.castTransform?Array.from(p.castTransform):null};}
   };
-  try{if(params.has('t'))seek(Number(params.get('t'))||0);else if(!params.has('intro')||params.has('page')||reduced||seen)complete(false);else{clock.play();enter();sound.begin(false);schedule();dispatch('guziczak:brand-start');}}
+  try{if(params.has('t'))seek(Number(params.get('t'))||0);else if(params.has('page')||reduced)complete();else{window.scrollTo({top:0,left:0,behavior:'instant'});clock.play();enter();sound.begin(false);schedule();dispatch('guziczak:brand-start');}}
   catch(e){fail(e);}return Object.freeze(api);
  }
  return {mount};
@@ -2675,7 +2709,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             throw Error('Nie udało się utworzyć bufora cieni.');
         }
         const shadowVP = M.mul(M.O(-5.4, 5.4, -5.4, 5.4, .1, 27), M.look([-4.5, 7, 5], [0, 0, 0]));
-        let mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, blooms = [], msaa = null, W = 0, H = 0;
+        let mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, tokenRT = null, blooms = [], msaa = null, W = 0, H = 0;
         function resize() {
             const profile=profiles.choose(viewport,limits,'cinema');activeProfile=profile;
             const {width:w,height:h}=profile;
@@ -2685,8 +2719,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             W = w;
             H = h;
 
-            for (const rt of [mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, ...blooms.flat()])
+            for (const rt of [tokenRT, mainRT, opaqueRT, mirrorRT, mirrorBlur, liquidMirror, volumeRT, ...blooms.flat()])
                 disposeRT(rt);
+            tokenRT = null;
             mainRT = target(w, h);
             opaqueRT = target(w, h);
             if (!mainRT.fp)
@@ -2752,28 +2787,30 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         const wordProg = program(wordVS, wordFS), wordVAO = gl.createVertexArray(), wordBuffer = gl.createBuffer();
         gl.bindVertexArray(wordVAO);
         gl.bindBuffer(gl.ARRAY_BUFFER, wordBuffer);
-        for (const [i, size, off] of [[0, 3, 0], [1, 2, 12], [2, 1, 20], [3, 1, 24], [4, 1, 28]]) {
+        for (const [i, size, off] of [[0, 3, 0], [1, 2, 12], [2, 1, 20], [3, 1, 24], [4, 1, 28], [5, 1, 32]]) {
             gl.enableVertexAttribArray(i);
-            gl.vertexAttribPointer(i, size, gl.FLOAT, false, 32, off);
+            gl.vertexAttribPointer(i, size, gl.FLOAT, false, 36, off);
         }
         gl.bindVertexArray(null);
-        let wordVertexCount = 0,worldToCup=M.I();
+        let wordVertexCount = 0,frontWordCount = 0,worldToCup=M.I();
         const cupRippleData=new Float32Array(cupConfig.maxRipples*4);
         function prepareWords() {
             const arr = [], right = [view[0], view[4], view[8]], up = [view[1], view[5], view[9]];
+            frontWordCount = 0;
             for (const w of letterInstances) {
+                if ((w.riftFront || 0) * w.alpha > .0001) frontWordCount++;
                 const co = Math.cos(w.tilt), si = Math.sin(w.tilt), u = vadd(vmul(right, co), vmul(up, si)), v = vadd(vmul(right, -si), vmul(up, co));
                 const ww = .63 * w.scale, hh = .23625 * w.scale, x = w.word % 8, y = Math.floor(w.word / 8), u0 = x / 8, u1 = (x + 1) / 8, v0 = 1 - (y + 1) / 4, v1 = 1 - y / 4;
                 for (const [px, py, tx, ty] of [[-.5, -.5, u0, v0], [.5, -.5, u1, v0], [.5, .5, u1, v1], [-.5, -.5, u0, v0], [.5, .5, u1, v1], [-.5, .5, u0, v1]]) {
                     const p = vadd(w.p, vadd(vmul(u, px * ww), vmul(v, py * hh)));
-                    arr.push(...p, tx, ty, w.alpha, w.heat,w.clipCup||0);
+                    arr.push(...p, tx, ty, w.alpha, w.heat,w.clipCup||0,w.riftFront||0);
                 }
             }
-            wordVertexCount = arr.length / 8;
+            wordVertexCount = arr.length / 9;
             gl.bindBuffer(gl.ARRAY_BUFFER, wordBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.DYNAMIC_DRAW);
         }
-        function drawWords(prefix = M.I()) {
+        function drawWords(prefix = M.I(), layer = -1) {
             if (!wordVertexCount)
                 return;
             gl.enable(gl.DEPTH_TEST);
@@ -2783,6 +2820,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             globalUniforms(wordProg);
             m4(wordProg, 'uVP', VP);
             m4(wordProg, 'uPrefix', prefix);
+            f1(wordProg, 'uWordLayer', layer); // -1: reflection/all; 0: rift; 1: foreground.
             texture(wordProg, 'uWords', wordTex, 5);
             gl.bindVertexArray(wordVAO);
             gl.drawArrays(gl.TRIANGLES, 0, wordVertexCount);
@@ -2844,7 +2882,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             gl.bindVertexArray(o.mesh.vao);
             gl.drawArrays(gl.TRIANGLES, 0, o.mesh.count);
         }
-        function filter(src, dst, dx, dy, threshold = 0) { bind(dst); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.useProgram(filterProg.p); texture(filterProg, 'uTex', src.t, 0); f2(filterProg, 'uDir', dx, dy); f1(filterProg, 'uThreshold', threshold); screen(filterProg); }
+        function filter(src, dst, dx, dy, threshold = 0, addTokens = false) { bind(dst); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.useProgram(filterProg.p); texture(filterProg, 'uTex', src.t, 0); texture(filterProg, 'uTokens', tokenRT ? tokenRT.t : src.t, 6); f1(filterProg, 'uAddTokens', addTokens && tokenRT ? 1 : 0); f2(filterProg, 'uDir', dx, dy); f1(filterProg, 'uThreshold', threshold); screen(filterProg); }
         function render(frame, packet, camera, nextViewport) {
             state = frame;
             time = frame.time;
@@ -2860,9 +2898,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             state.riftCenter=packet.rift?.center;state.riftLight=packet.rift?.open||0;
             const aspect = W / H, shot = camera;
             let distance = shot.distance;
-            const target = shot.target, yaw = shot.yaw, pitch = shot.pitch;
-            cam = [target[0] + Math.sin(yaw) * Math.cos(pitch) * distance, target[1] + Math.sin(pitch) * distance, target[2] + Math.cos(yaw) * Math.cos(pitch) * distance];
-            view = M.look(cam, target);
+            const aim = shot.target, yaw = shot.yaw, pitch = shot.pitch;
+            cam = [aim[0] + Math.sin(yaw) * Math.cos(pitch) * distance, aim[1] + Math.sin(pitch) * distance, aim[2] + Math.cos(yaw) * Math.cos(pitch) * distance];
+            view = M.look(cam, aim);
             projection = M.P(35 * PI / 180, aspect, .1, 1500);
             VP = M.mul(projection, view);
             const objs = packet.commands.filter(o=>!(frame.time>=20.35 && ['signatureA','signatureB','gateTipA','gateTipB'].includes(catalog.names.get(o.mesh))));
@@ -2931,11 +2969,27 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
                     draw(o);
             gl.depthMask(true);
             gl.disable(gl.BLEND);
-            drawWords();
+            drawWords(M.I(), 0);
             if (msaa) {
                 gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaa.fb);
                 gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, mainRT.fb);
                 gl.blitFramebuffer(0, 0, W, H, 0, 0, W, H, gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+            }
+            if (frontWordCount) {
+                if (!tokenRT) {
+                    tokenRT = target(W, H, false, mainRT.fp);
+                    // Borrow, do not own/clear, the resolved depth. The cup and
+                    // the real rift rim still occlude tokens at their true depth.
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, mainRT.dt, 0);
+                    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+                        throw Error('Nie udało się utworzyć warstwy tokenów.');
+                }
+                bind(tokenRT);
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                drawWords(M.I(), 1);
+            } else if (tokenRT) {
+                disposeRT(tokenRT); tokenRT = null;
             }
             bind(volumeRT);
             gl.disable(gl.DEPTH_TEST);
@@ -2951,7 +3005,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             let src = mainRT;
             for (let i = 0; i < 3; i++) {
                 const [a, b] = blooms[i];
-                filter(src, a, 1 / src.w, 1 / src.h, i === 0 ? (floatRT ? 1.0 : .6) : 0);
+                filter(src, a, 1 / src.w, 1 / src.h, i === 0 ? (floatRT ? 1.0 : .6) : 0, i === 0);
                 filter(a, b, 1 / a.w, 0);
                 filter(b, a, 0, 1 / a.h);
                 src = a;
@@ -2963,6 +3017,8 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             texture(compProg, 'uBloom1', blooms[1][0].t, 2);
             texture(compProg, 'uBloom2', blooms[2][0].t, 3);
             texture(compProg, 'uVolume', volumeRT.t, 4);
+            texture(compProg, 'uTokens', tokenRT ? tokenRT.t : mainRT.t, 6);
+            f1(compProg, 'uAddTokens', tokenRT ? 1 : 0);
             f2(compProg, 'uResolution', W, H);
             f1(compProg, 'uTime', time);
             f1(compProg, 'uEnergy', state.energy);f1(compProg,'uSceneOpacity',1-ease(21.3,22.68,time));
@@ -2995,13 +3051,13 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             return [0, 0, 0]; const q = M.point(VP, p), w = VP[3] * p[0] + VP[7] * p[1] + VP[11] * p[2] + VP[15]; return [(q[0] / w * .5 + .5) * viewport.width, (-q[1] / w * .5 + .5) * viewport.height, w]; }
         function suspend(){
             if(gpuSync){gl.deleteSync(gpuSync);gpuSync=null;}
-            for(const rt of [mainRT,opaqueRT,mirrorRT,mirrorBlur,liquidMirror,volumeRT,...blooms.flat()])disposeRT(rt);
-            mainRT=opaqueRT=mirrorRT=mirrorBlur=liquidMirror=volumeRT=null;blooms=[];
+            for(const rt of [tokenRT,mainRT,opaqueRT,mirrorRT,mirrorBlur,liquidMirror,volumeRT,...blooms.flat()])disposeRT(rt);
+            tokenRT=mainRT=opaqueRT=mirrorRT=mirrorBlur=liquidMirror=volumeRT=null;blooms=[];
             if(msaa){gl.deleteFramebuffer(msaa.fb);gl.deleteRenderbuffer(msaa.color);gl.deleteRenderbuffer(msaa.depth);msaa=null;}
             W=H=0;
         }
         return { render, ready, project, suspend,
-            stats: () => ({ width: W, height: H, profile:activeProfile, suspended:W===0, hdr: floatRT, msaa: !!msaa, frames: frameCount, water:water.stats(), quenchRender:quench.stats(), glError: gl.getError(), resources: device.counts() }),
+            stats: () => ({ width: W, height: H, profile:activeProfile, suspended:W===0, hdr: floatRT, msaa: !!msaa, frames: frameCount, tokenLayer: !!tokenRT, frontTokens: frontWordCount, water:water.stats(), quenchRender:quench.stats(), glError: gl.getError(), resources: device.counts() }),
             dispose: () => device.dispose()
         };
     }
@@ -3327,10 +3383,11 @@ precision highp float;in vec2 vUv;out vec4 outColor;uniform float uAspect,uEnerg
 void main(){vec2 p=(vUv-.5)*vec2(uAspect,1.);float h=exp(-dot(p*vec2(1.4,1.1),p*vec2(1.4,1.1))*2.);
  vec3 c=vec3(.0065,.009,.011)+vec3(.007,.009,.0095)*h;float warm=exp(-dot(p-vec2(0.,-.15),p-vec2(0.,-.15))*9.);c+=vec3(.009,.0045,.0007)*warm*(1.+uEnergy*.4);outColor=vec4(c,1.);}`;
     const filterFS = `#version 300 es
-precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uTex;uniform vec2 uDir;uniform float uThreshold;
-void main(){vec3 c=texture(uTex,vUv).rgb*.227027;c+=(texture(uTex,vUv+uDir*1.384615).rgb+texture(uTex,vUv-uDir*1.384615).rgb)*.316216;c+=(texture(uTex,vUv+uDir*3.230769).rgb+texture(uTex,vUv-uDir*3.230769).rgb)*.070270;float b=max(max(c.r,c.g),c.b);if(uThreshold>0.)c*=max(b-uThreshold,0.)/max(b,.0001);outColor=vec4(c,1.);}`;
+precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uTex,uTokens;uniform vec2 uDir;uniform float uThreshold,uAddTokens;
+vec3 source(vec2 uv){vec3 c=texture(uTex,uv).rgb;if(uAddTokens>.5)c+=texture(uTokens,uv).rgb;return c;}
+void main(){vec3 c=source(vUv)*.227027;c+=(source(vUv+uDir*1.384615)+source(vUv-uDir*1.384615))*.316216;c+=(source(vUv+uDir*3.230769)+source(vUv-uDir*3.230769))*.070270;float b=max(max(c.r,c.g),c.b);if(uThreshold>0.)c*=max(b-uThreshold,0.)/max(b,.0001);outColor=vec4(c,1.);}`;
     const compositeFS = `#version 300 es
-precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uScene,uBloom0,uBloom1,uBloom2,uVolume;uniform vec2 uResolution;uniform float uTime,uEnergy,uSceneOpacity;uniform vec2 uRiftCenter,uRiftSize;uniform float uRiftStrength;
+precision highp float;in vec2 vUv;out vec4 outColor;uniform sampler2D uScene,uBloom0,uBloom1,uBloom2,uVolume,uTokens;uniform vec2 uResolution;uniform float uTime,uEnergy,uSceneOpacity,uAddTokens;uniform vec2 uRiftCenter,uRiftSize;uniform float uRiftStrength;
 float luma(vec3 c){return dot(c,vec3(.299,.587,.114));}
 vec3 fxaa(vec2 uv){vec2 px=1./uResolution;vec3 nw=texture(uScene,uv+vec2(-1,1)*px).rgb,ne=texture(uScene,uv+px).rgb,sw=texture(uScene,uv-px).rgb,se=texture(uScene,uv+vec2(1,-1)*px).rgb,m=texture(uScene,uv).rgb;float a=luma(nw),b=luma(ne),c=luma(sw),d=luma(se),e=luma(m);float lo=min(e,min(min(a,b),min(c,d))),hi=max(e,max(max(a,b),max(c,d)));vec2 dir=vec2(-((a+b)-(c+d)),(a+c)-(b+d));float red=max((a+b+c+d)*.03125,.0078125);float inv=1./(min(abs(dir.x),abs(dir.y))+red);dir=clamp(dir*inv,vec2(-6),vec2(6))*px;vec3 A=.5*(texture(uScene,uv+dir*(-1./6.)).rgb+texture(uScene,uv+dir*(1./6.)).rgb),B=A*.5+.25*(texture(uScene,uv+dir*-.5).rgb+texture(uScene,uv+dir*.5).rgb);float l=luma(B);return(l<lo||l>hi)?A:B;}
 vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}
@@ -3351,6 +3408,9 @@ void main(){
   float falloff=exp(-dot(q,q)*.75);
   c*=1.-(.16*falloff+.24*slit)*uRiftStrength;
  }
+ // Foreground tokens have already passed the scene-depth and cup-surface tests.
+ // Composite at their ORIGINAL pixels, after rift distortion/darkening, once.
+ if(uAddTokens>.5)c+=texture(uTokens,vUv).rgb;
  vec3 glow=texture(uBloom0,vUv).rgb*.22+texture(uBloom1,vUv).rgb*.29+texture(uBloom2,vUv).rgb*.39;c+=glow*(.30+uEnergy*.12)+texture(uVolume,vUv).rgb;
  c=pow(aces(c*.96),vec3(1./2.2));vec2 p=vUv*2.-1.;c*=1.-.15*pow(clamp(dot(p,p)*.35,0.,1.),1.4);
  float grain=fract(sin(dot(gl_FragCoord.xy+floor(uTime*20.)*.37,vec2(12.9898,78.233)))*43758.5453)-.5;c+=grain*.003;outColor=vec4(c,uSceneOpacity);}
@@ -3400,9 +3460,9 @@ void main(){float depth=texture(uDepth,vUv).r;vec4 h=uInvVP*vec4(vUv*2.-1.,depth
  outColor=vec4(cCup*uSteam + cKettle*uPitcherSteam + cVent*uSanctumVent+cQuench,1.);}
 `;
     const wordVS = `#version 300 es
-precision highp float;layout(location=0) in vec3 aP;layout(location=1) in vec2 aUV;layout(location=2) in float aAlpha;layout(location=3) in float aHeat;layout(location=4) in float aCupClip;
-uniform mat4 uVP,uPrefix,uWorldToCup;out vec2 vUV;out float vAlpha,vHeat,vCupClip;out vec3 vCup;
-void main(){vUV=aUV;vAlpha=aAlpha;vHeat=aHeat;vCupClip=aCupClip;vCup=(uWorldToCup*vec4(aP,1.)).xyz;gl_Position=uVP*uPrefix*vec4(aP,1.);}`;
+precision highp float;layout(location=0) in vec3 aP;layout(location=1) in vec2 aUV;layout(location=2) in float aAlpha;layout(location=3) in float aHeat;layout(location=4) in float aCupClip;layout(location=5) in float aRiftFront;
+uniform mat4 uVP,uPrefix,uWorldToCup;uniform float uWordLayer;out vec2 vUV;out float vAlpha,vHeat,vCupClip;out vec3 vCup;
+void main(){float weight=uWordLayer<-.5?1.:(uWordLayer>.5?aRiftFront:1.-aRiftFront);vUV=aUV;vAlpha=aAlpha*weight;vHeat=aHeat;vCupClip=aCupClip;vCup=(uWorldToCup*vec4(aP,1.)).xyz;gl_Position=uVP*uPrefix*vec4(aP,1.);}`;
     const wordFS = `#version 300 es
 precision highp float;in vec2 vUV;in float vAlpha,vHeat,vCupClip;in vec3 vCup;uniform sampler2D uWords;out vec4 outColor;
 ${liquidField.glsl}
@@ -3780,13 +3840,8 @@ GuziczakModules.define('scene/signature',['math','config/sequence','config/casti
                 gaps.push({name:p.name,broken:p.broken,gap:Math.hypot(...near.map((v,i)=>v-far[i]))});
             }
             castTransform=cast.pose;
-            // Each ejector belongs to ONE release, then retracts before lateral motion.
-            // It cannot follow its casting across the sand or move the waiting half.
-            for(const [i,pos] of [[0,[-.47,.45]],[1,[.58,.44]]]){
-                const p=cast.pieces[i];
-                if(t<p.transfer[0]+(p.transfer[1]-p.transfer[0])*.58)
-                    push(meshes.ejector,C(moldRoot,M.T(pos[0],-.327+p.ejectorRise,pos[1])),0,[0,0,0],[0,0,0],false,moldLight);
-            }
+            // Ejectors intentionally not rendered: they read as stray metal pieces falling off the mark.
+            // The release is now conveyed only by the casting motion itself.
             state.breakoff={gates:gaps,allSeparated:gaps.every(g=>g.broken),
                 inMould:cast.pieces.every(p=>p.progress===0),phase:cast.phase,resting:cast.resting,
                 activePiece:cast.activePiece,pieces:cast.pieces.map(p=>({name:p.name,phase:p.phase,
@@ -4894,15 +4949,30 @@ GuziczakModules.define('scene/cup-inflow',['math','config/cup-effects','scene/hy
  function cubic(p0,p1,p2,p3,u){const a=1-u;return p0.map((v,k)=>a*a*a*v+3*a*a*u*p1[k]+3*a*u*u*p2[k]+u*u*u*p3[k]);}
  function tokenSpec(i,mobile){
   const birth=5.04+i*.073+(i%5)*.008,flight=1.22+(i%4)*.035,lane=i%3-1,end=birth+flight;
-  const source=M.point(port(mobile),[-.025+lane*.028,.075+lane*.15,-.42]);
+  // First clear the entire peeled rim, then turn towards the cup. The old
+  // single arc moved sideways while still behind the edge of the aperture.
+  const frame=port(mobile),sx=-.025+lane*.028,sy=.075+lane*.15,exitU=.24;
+  const at=z=>M.point(frame,[sx,sy,z]);
+  const source=at(-.42),exit=at(.62),exitControl1=at(.08),exitControl2=at(.48);
   const f=hyd.sample(end),target=[.085+lane*.024,f.level-.19,.035+lane*.022];
+  // Match dP/du at the join: no stop, snap or abrupt turn at the mouth.
+  const control1=exit.map((v,k)=>v+(v-exitControl2[k])*(1-exitU)/exitU);
   return {id:i,birth,flight,end,lane,source,target,word:i%32,scale:(mobile?.83:1)*(.86+(i%4)*.07),
-   control1:[source[0]*.40,source[1]+.19,source[2]*.55],control2:[target[0],1.82+lane*.025,target[2]]};
+   exitU,exit,exitControl1,exitControl2,control1,control2:[target[0],1.82+lane*.025,target[2]]};
  }
- function tokenPoint(spec,t){const u=clamp((t-spec.birth)/spec.flight,0,1);return cubic(spec.source,spec.control1,spec.control2,spec.target,u);}
+ function tokenPoint(spec,t){
+  const u=clamp((t-spec.birth)/spec.flight,0,1);
+  return u<spec.exitU?cubic(spec.source,spec.exitControl1,spec.exitControl2,spec.exit,u/spec.exitU)
+   :cubic(spec.exit,spec.control1,spec.control2,spec.target,(u-spec.exitU)/(1-spec.exitU));
+ }
  function tokenAt(spec,t){const u=(t-spec.birth)/spec.flight;if(u<0||u>1)return null;
   const p=tokenPoint(spec,t),scale=spec.scale;
-  return {...spec,p,u,scale,alpha:ease(0,.085,u),tilt:-.06+.10*u+spec.lane*.02,yaw:0,heat:ease(.60,.93,u)*.65,
+  // Cross-fade out of the rift's screen-space treatment as the token emerges.
+  // Geometry depth and the liquid-surface test remain active in both layers.
+  const f=clamp(u/spec.exitU,0,1),a=1-f;
+  const exitDepth=a*a*a*(-.42)+3*a*a*f*.08+3*a*f*f*.48+f*f*f*.62;
+  const riftFront=ease(.18,.55,exitDepth);
+  return {...spec,p,u,scale,riftFront,alpha:ease(0,.085,u),tilt:-.06+.10*u+spec.lane*.02,yaw:0,heat:ease(.60,.93,u)*.65,
    // Circumscribed sphere bounds the FULL rendered quad, including transparent padding.
    bound:.5*Math.hypot(cfg.tokenWidth,cfg.tokenHeight)*scale,clipCup:1};
  }
