@@ -77,7 +77,7 @@ body.intro #exhibit-world{opacity:0}body.handoff #exhibit-world{opacity:var(--he
 @media(max-width:360px){:root{--pad:20px}.hero{grid-template-rows:auto 285px 95px 60px}h1{font-size:44px}.hero-copy p{font-size:11.5px}.hero-copy .eyebrow{font-size:6px;letter-spacing:.13em}.button-main{min-width:147px;padding:12px 15px}.hero-actions{gap:12px}.replay{font-size:9px}.hero-bottom .domains{gap:8px;font-size:6.5px}.identity small{display:block}#header{padding-right:104px}#intro-controls{right:16px;gap:8px}#page-score-slot{height:95px}}
 @media(prefers-reduced-motion:reduce){.button-main:hover{transform:none}*{scroll-behavior:auto!important}}
 
-@media(min-width:1051px){.site-nav{padding-right:clamp(285px,21vw,360px)}.sound-label{max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+@media(min-width:1051px){.site-nav{padding-right:clamp(360px,25vw,420px)}.sound-label{max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 
 .artifact-caption span,.artifact-help{display:none}.artifact-caption{left:auto;right:7%;bottom:3px;opacity:.8}#artifact-toggle{font-size:10px;text-shadow:0 1px 8px #000;background:#0a0c0a40;padding:5px 9px;border-radius:2px}
 @media(max-width:700px){.artifact-caption{right:0;bottom:0}}
@@ -128,37 +128,48 @@ h1 em{font-size:1.105em;line-height:1.07;margin-top:.035em;letter-spacing:-.062e
 
 .world-pending #artifact-poster{visibility:hidden}
 
+/* Mobile: the copy keeps its intrinsic height; free space belongs to the
+   model. The score has its own row, including room for all ledger lines. */
 @media(max-width:700px){
- .hero{min-height:calc(100svh - var(--head));grid-template-rows:auto clamp(220px,29svh,268px) 92px 46px;padding-top:0}
- .hero-copy{padding:8px 0 2px;max-width:none}
- .hero-copy .eyebrow{margin-bottom:16px;font-size:6.8px;letter-spacing:.13em}
- h1{font-size:clamp(42px,10.6vw,68px);line-height:1.02;letter-spacing:-.055em}
+ :root{--head:calc(78px + env(safe-area-inset-top,0px))}
+ #header{padding-top:env(safe-area-inset-top,0px)}
+ #intro-controls{top:calc(18px + env(safe-area-inset-top,0px))}
+ .intro-brand{top:calc(39px + env(safe-area-inset-top,0px))}
+ .hero{min-height:calc(100svh - var(--head));grid-template-rows:max-content minmax(190px,1fr) 94px auto;padding-top:0;align-content:stretch}
+ .hero-copy{padding:10px 0 4px;max-width:none;margin:0;align-self:start}
+ .hero-copy .eyebrow{margin-bottom:15px;font-size:7.5px;letter-spacing:.12em}
+ h1{font-size:clamp(40px,10.4vw,68px);line-height:1.02;letter-spacing:-.055em}
  h1 em{margin-top:.04em;font-size:1.10em}
- .hero-copy p{font-size:12px;line-height:1.72;margin-top:16px;max-width:30ch}
- .hero-actions{margin-top:18px;gap:14px;align-items:center}
- .button-main{min-width:160px;padding:12px 16px;gap:16px}
+ .hero-copy p{font-size:13px;line-height:1.70;margin-top:14px;max-width:none}
+ .hero-actions{margin-top:17px;gap:14px;align-items:center;margin-bottom:4px}
+ .hero-actions .button-main{min-width:166px;padding:12px 16px;gap:16px}
  .replay{font-size:10px;gap:8px}
- #artifact-stage{margin-top:-6px}
- #artifact-slot{inset:-2% -6% 10px -6%}
- .artifact-caption{font-size:6.6px;bottom:4px}
- #artifact-toggle{font-size:8px}
- #page-score-slot{height:92px;margin-top:-10px;overflow:visible}
- #score-bridge.score-page{top:-6px}
- .hero-bottom{padding:9px 0 14px;font-size:6.5px;letter-spacing:.09em}
+ #artifact-stage{margin:0;min-height:190px}
+ #artifact-slot{top:0;bottom:16px;left:max(-6%,calc(-1 * var(--pad)));right:max(-6%,calc(-1 * var(--pad)))}
+ .artifact-caption{font-size:8px;bottom:0}
+ #artifact-toggle{font-size:10px;min-height:36px}
+ #page-score-slot{height:94px;margin-top:0;overflow:visible}
+ .hero-bottom{min-height:44px;padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));font-size:8px;letter-spacing:.06em;gap:10px}
  .hero-bottom .domains{gap:8px}
- .hero-bottom a{font-size:7px;max-width:58px}
+ .hero-bottom a{font-size:8px;max-width:60px}
 }
-@media(max-width:430px){
- .hero{grid-template-rows:auto clamp(205px,27svh,245px) 84px 44px}
- h1{font-size:clamp(40px,10.2vw,62px)}
- .hero-copy p{font-size:11.6px;line-height:1.68}
- .hero-actions{gap:12px}
- .button-main{min-width:150px;padding:11px 15px}
- #artifact-slot{inset:-2% -7% 8px -7%}
- #page-score-slot{height:84px;margin-top:-12px}
- .hero-bottom{font-size:6.2px}
+@media(max-width:360px){
+ .hero{grid-template-rows:max-content minmax(165px,1fr) 88px auto}
+ .hero-copy .eyebrow{font-size:7px}
+ .hero-copy p{font-size:12px}
+ .hero-actions{gap:10px}
+ .hero-actions .button-main{min-width:148px;padding:11px 14px}
+ #artifact-stage{min-height:165px}
+ #page-score-slot{height:88px}
+ .hero-bottom{font-size:7px;letter-spacing:.035em}
+ .hero-bottom .domains{gap:7px}
 }
 @media(min-width:1051px){.atelier-words{right:6%}}
+/* The incoming page text stays above the live transition; its empty
+   environment holder must not cover the shared WebGL canvas before reparenting. */
+.intro.handoff #site{position:relative;z-index:22}
+.intro.handoff #header{z-index:31}.intro.handoff .site-nav{visibility:hidden}
+.intro.handoff #exhibit-world{opacity:0!important}
 </style></head>
 <body><script>document.body.classList.add('intro','booting');</script><a class="skip-content" href="#hero-heading">Przejdź do treści</a>
 <canvas id="scene" role="img" aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak."></canvas>
@@ -1000,7 +1011,7 @@ GuziczakModules.define('app/engine',[
   function cancel(){if(raf)cancelAnimationFrame(raf);raf=0;}
   function initializeBase(){if(device)return;device=devices.createDevice(canvas);brand=brands.create(device.gl);exhibit=exhibits.create(device,brand,canvas);}
   function initializeCinema(){initializeBase();if(renderer)return;catalog=geometry.createGeometry(device.gl,brand);scene=scenes.createScene(catalog);renderer=renderers.createRenderer(device,catalog,canvas,document,config.render);}
-  function fail(e){if(disposed)return;failed=true;ready=false;mode='failed';lastError=String(e?.message||e);cancel();clock.pause();if(device)device.dispose();canvas.style.display='none';document.body.classList.remove('exhibit-ready','world-pending');ui.fail('Model 3D nie jest dostępny. Treść i kontakt pozostają aktywne.',lastError);canvas.style.display='none';ui.$('artifact-toggle').disabled=true;stage.slot.removeAttribute('tabindex');ui.$('artifact-help').textContent='Statyczny podgląd — model 3D niedostępny.';sound.finish();sound.ready();resolve();console.error('[GUZICZAK]',e);}
+  function fail(e){if(disposed)return;failed=true;ready=false;mode='failed';lastError=String(e?.message||e);cancel();clock.pause();if(device)device.dispose();canvas.style.display='none';document.body.classList.remove('exhibit-ready','world-pending');ui.fail('Model 3D nie jest dostępny. Treść i kontakt pozostają aktywne.',lastError);canvas.style.display='none';ui.$('artifact-toggle').disabled=true;ui.$('quench-preview').disabled=true;stage.slot.removeAttribute('tabindex');ui.$('artifact-help').textContent='Statyczny podgląd — model 3D niedostępny.';sound.finish();sound.ready();resolve();console.error('[GUZICZAK]',e);}
   sound.attachEffects((ctx,dest)=>{fx=foley.createFoley(ctx,dest,config.mix);fx.reset(lastFrame?.time||0);return fx;});
   function tick(ms){
    raf=0;if(disposed||failed||document.hidden)return;
@@ -1019,12 +1030,16 @@ GuziczakModules.define('app/engine',[
     Object.assign(frame,waterFrame(ms,frame.frozen));
     frame.quench=quench.sample(frame);
     const packet=scene.sample(frame,vp);Object.assign(frame,{fluid:packet.fluid,docking:packet.docking,reclaim:packet.reclaim,inflow:packet.inflow},packet.atmosphere);
-    renderer.render(frame,packet,cameras.sampleCamera(frame,vp),vp);canvas.style.visibility='visible';canvas.dataset.renderMode='intro';ui.render(frame,packet,renderer.project,vp);
+    renderer.render(frame,packet,cameras.sampleCamera(frame,vp,packet.assembly),vp);canvas.style.visibility='visible';canvas.dataset.renderMode='intro';ui.render(frame,packet,renderer.project,vp);
     if(frame.time>=20.0){
       const r=ui.markRect||lastSceneRect||{x:vp.width*.5,y:vp.height*.4,w:200,h:204};lastSceneRect=r;
       const target=stage.rect(),a=math.ease(20.35,22.70,frame.time),from={x:r.x-r.w/2,y:r.y-r.h/2,w:r.w,h:r.h};
       const rect={};for(const k of ['x','y','w','h'])rect[k]=math.mix(from[k],target[k],a);
-      exhibit.render(rect,-.32*math.ease(.70,1,a),.09*math.ease(.70,1,a),true,math.ease(20,20.35,frame.time),0);device.gl.flush();
+      const turn=math.ease(.05,1,a),pose=exhibitUI.initialPose;
+      exhibit.render(rect,pose.yaw*turn,math.mix(Math.atan2(.52,6),pose.pitch,turn),true,
+        math.ease(20,20.35,frame.time),frame.water.time,
+        {...frame.motion,water:frame.water,environmentReveal:math.ease(21.0,22.70,frame.time)});
+      device.gl.flush();
     }
     quenchPanel.update(frame,frame.quench,frame.motion);clock.setRate(frame.phase==='cooling'?frame.quench.coolingRate:1);
     scoreLayer.setScene(frame.time);lastFrame=frame;lastPacket=packet;dirty=false;frameNumber++;window.__frameNumber=frameNumber;
@@ -1063,7 +1078,7 @@ GuziczakModules.define('app/engine',[
   scope.on(panel,'keydown',e=>{if(e.key==='Escape'){e.stopPropagation();panel.hidden=true;menu.setAttribute('aria-expanded','false');menu.focus();}});
   for(const b of panel.querySelectorAll('[data-track]'))scope.on(b,'click',()=>{sound.selectTrack(b.dataset.track);for(const k of panel.querySelectorAll('[data-track]'))k.setAttribute('aria-pressed',String(k===b));});
   scope.on(ui.$('music-volume'),'input',e=>sound.setVolume(Number(e.target.value)/100));
-  let staffPaused=reduced;ui.$('staff-pause').setAttribute('aria-pressed',String(staffPaused));
+  let staffPaused=reduced;ui.$('staff-pause').setAttribute('aria-pressed',String(staffPaused));ui.$('staff-pause').textContent=staffPaused?'Wznów przewijanie nut':'Wstrzymaj przewijanie nut';ui.$('water-pause').setAttribute('aria-pressed',String(waterPaused));ui.$('water-pause').textContent=waterPaused?'Wznów wodę':'Wstrzymaj wodę';
   scope.on(ui.$('staff-pause'),'click',()=>{staffPaused=!staffPaused;scoreLayer.setPaused(staffPaused);ui.$('staff-pause').setAttribute('aria-pressed',String(staffPaused));ui.$('staff-pause').textContent=staffPaused?'Wznów przewijanie nut':'Wstrzymaj przewijanie nut';});
   scope.on(ui.$('motion-mobile'),'click',()=>motion.enable());
   for(const id of ['water-wave','water-surge'])scope.on(document.getElementById(id),'click',()=>{if(waterPaused)setWaterPaused(false);surge();});
@@ -1072,7 +1087,7 @@ GuziczakModules.define('app/engine',[
   const api={play,seek,pause,resume,surge,setWaterPaused,skip:()=>complete(),destroy,diagnostics,sound,motion,
    seekPhase(id,p=0){const a=timeline.segments.find(x=>x.id===id);if(!a)throw Error('Unknown phase');return seek(a.start+a.duration*math.clamp(p,0,1));},seekAuthored(t){return seek(timeline.toElapsed(t));},
    get total(){return timeline.total;},get state(){return Object.freeze({...lastFrame,finished:mode==='page',frozen:clock.state==='paused'});},getAudio:()=>fx,
-   sample(seconds){initializeCinema();const f=states.sampleState(timeline.sample(seconds)),p=scene.sample(f,viewport());return {frame:f,camera:cameras.sampleCamera(f,viewport()),packet:{assembly:p.assembly,foundry:p.foundry},commands:p.commands.map(o=>({id:o.id,transform:Array.from(o.m),bounds:o.mesh.bounds,mode:o.mode,light:o.light})),vesselTransform:Array.from(p.vesselTransform),castTransform:p.castTransform?Array.from(p.castTransform):null};}
+   sample(seconds){initializeCinema();const f=states.sampleState(timeline.sample(seconds)),p=scene.sample(f,viewport());return {frame:f,camera:cameras.sampleCamera(f,viewport(),p.assembly),packet:{assembly:p.assembly,foundry:p.foundry},commands:p.commands.map(o=>({id:o.id,transform:Array.from(o.m),bounds:o.mesh.bounds,mode:o.mode,light:o.light})),vesselTransform:Array.from(p.vesselTransform),castTransform:p.castTransform?Array.from(p.castTransform):null};}
   };
   try{if(params.has('t'))seek(Number(params.get('t'))||0);else if(params.has('page')||reduced)complete();else{window.scrollTo({top:0,left:0,behavior:'instant'});clock.play();enter();sound.begin(false);schedule();dispatch('guziczak:brand-start');}}
   catch(e){fail(e);}return Object.freeze(api);
@@ -1816,8 +1831,8 @@ GuziczakModules.define("config/camera", [], () => {
     'use strict';
     const shots = [
         [0,1.02,.82,5.9,[0,-2.24,-2.4]], [.42,1.00,.80,5.9,[0,-2.18,-2.4]],
-        [1.10,.88,.52,6.8,[0,-1.24,-2.30]], [1.46,.76,.39,7.5,[0,-.90,-1.96]],
-        [2.08,.54,.22,7.8,[0,-.52,-.50]], [2.65,.28,.18,7.8,[0,-.20,.04]],
+        [1.10,.88,.52,7.65,[0,-.92,-2.00]], [1.46,.76,.39,9.05,[0,-.35,-1.50]],
+        [2.08,.54,.22,8.90,[-.10,.10,-.50]], [2.65,.28,.18,8.80,[-.08,.12,.04]],
         [3.50, .15, .28, 11.9, [0, .14, 0]], [5.45, .06, .48, 12.0, [0, .27, 0]],
         [6.65, -.08, .51, 11.2, [0, .21, 0]], [7.90, .13, .42, 9.1, [0, -.45, .10]],
         [8.65,.19,.59,10.0,[0,-.52,.20]], [9.55,.20,.70,9.3,[0,-.58,.28]],
@@ -1881,7 +1896,7 @@ GuziczakModules.define('config/materials', [], () => {
 });
 
 
-GuziczakModules.define('config/sequence', ['config/reclaim','config/casting'], (reclaim,casting) => {
+GuziczakModules.define('config/sequence', ['config/reclaim','config/casting','config/mechanics'], (reclaim,casting,mechanics) => {
     'use strict';
     // The source's choreography is a reference coordinate system, NOT elapsed wall time.
     // Change a duration here; clock, objects, camera, GLSL, captions and FX follow together.
@@ -1899,8 +1914,8 @@ GuziczakModules.define('config/sequence', ['config/reclaim','config/casting'], (
         ['handoff', 20.00, 22.70, '07', 'Podpis.']
     ].map(([id, from, to, number, caption]) => Object.freeze({ id, from, to, duration: id==='reclaim'?reclaim.duration:to-from, holdAt:id==='reclaim'?12.569999:undefined, number, caption })));
     const events = Object.freeze([
-        ['seat', 1.06, 0], ['guide', .42, 1], ['stop', 1.38, 2], ['slide', 2.24, 3],
-        ['insert', 2.60, 4], ['collar', 2.72, 5], ['latch-a', 2.86, 6], ['latch-b', 2.94, 7],
+        ['seat', 1.06, 0], ['guide', .42, 1], ['stop', 1.38, 2], ['slide', mechanics.insert[0], 3],
+        ['insert', mechanics.insert[1], 4], ['collar', (mechanics.lock[0]+mechanics.lock[1])*.5, 5], ['latch-a', mechanics.clamp[0]+.035, 6], ['latch-b', mechanics.clamp[1], 7],
         ['rift', 4.44, 9], ['coffee-drop', 4.59, 8], ['tokens', 5.10, 10],
         ['mould-seat', 8.36, 11], ['gold-drop', 9.33, 12], ['eject', 12.68, 13], ['break-left',casting.joints[0].at,15], ['break-right',casting.joints[1].at,16], ['signature',16.70,14], ['dock-thread',15.36,17], ['dock-seat',16.74,18]
     ].map(([id, at, voice]) => Object.freeze({ id, at, voice })));
@@ -2343,10 +2358,19 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
     function createGeometry(gl, brandMeshes = null) {
         const { Builder, build, cube, bevelBox, ringY, line, disk, paramTube, strokeSymbol, extrudeLogo } = builder.createBuilder(gl);
         const LOGO_POLYGONS = assets.logo, foundryData = assets.foundry, meshes = {};
+        // One outer profile for both the bowl and its surface-conforming badge.
+        const cupProfile = [[.21, -.33], [.245, -.315], [.30, -.28], [.43, -.19], [.60, -.065], [.77, .12], [.91, .34], [1.04, .60], [1.123, .83], [1.163, .965], [1.17, 1.0], [1.16, 1.021], [1.12, 1.025], [1.104, 1.008], [1.094, .95], [1.06, .83], [.97, .60], [.84, .36], [.70, .16], [.51, -.02], [.36, -.13], [.25, -.18], [.13, -.205]];
+        const cupOuter = cupProfile.slice(0, 11);
+        function cupSurfaceAt(y) {
+            let k = 1;
+            while (k < cupOuter.length - 1 && y > cupOuter[k][1]) k++;
+            const a = cupOuter[k - 1], c = cupOuter[k];
+            const dr = (c[0] - a[0]) / (c[1] - a[1]);
+            return { radius: a[0] + (y - a[1]) * dr, dr };
+        }
         // Thick, hollow ceramic bowl; the interior is modelled rather than painted.
         meshes.cup = build(b => {
-            const p = [[.21, -.33], [.245, -.315], [.30, -.28], [.43, -.19], [.60, -.065], [.77, .12], [.91, .34], [1.04, .60], [1.123, .83], [1.163, .965], [1.17, 1.0], [1.16, 1.021], [1.12, 1.025], [1.104, 1.008], [1.094, .95], [1.06, .83], [.97, .60], [.84, .36], [.70, .16], [.51, -.02], [.36, -.13], [.25, -.18], [.13, -.205]];
-            b.lathe(p, 0, 192);
+            b.lathe(cupProfile, 0, 192);
             ringY(b, 1.145, 1.013, .061, .031, 1, 192);
             ringY(b, .253, -.294, .026, .048, 1, 96);
             ringY(b, 1.13, .902, .007, .008, 1, 192);
@@ -2354,6 +2378,9 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
             const profile = [[.28, -.283], [.44, -.18], [.60, -.055], [.775, .13], [.92, .355], [1.046, .608], [1.129, .846]];
             for (let j = 0; j < 16; j++) {
                 const a = j * TAU / 16;
+                // The badge faces +Z, not +X. Keep its front meridian absent;
+                // all other ribs, including the +X side, remain unchanged.
+                if (Math.sin(a) > .999999) continue;
                 b.tube(profile.map(([r, y]) => [(r + .009) * Math.cos(a), y, (r + .009) * Math.sin(a)]), .0076, 1, 8);
             }
             for (let j = 0; j < 96; j++) {
@@ -2362,10 +2389,68 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
             }
         });
         meshes.cupBadge = build(b => {
-            b.at(M.S(.205),()=>{for(const p of LOGO_POLYGONS)extrudeLogo(b,p,.027,.006,27);});
-            const profile=[[.34,.91],[.60,1.04],[.83,1.123]],R=y=>{for(let i=1;i<profile.length;i++)if(y<=profile[i][0])return mix(profile[i-1][1],profile[i][1],(y-profile[i-1][0])/(profile[i][0]-profile[i-1][0]));return profile.at(-1)[1];};
-            for(let i=0;i<b.a.length;i+=9){const x=b.a[i],y=b.a[i+1]+.52,r=R(y),z=Math.sqrt(Math.max(.01,r*r-x*x)),dr=(R(y+.001)-R(y-.001))/.002;const nn=[b.a[i+3],b.a[i+4],b.a[i+5]],nx=x/z,ny=-dr*r/z;
-                b.a[i]=x;b.a[i+1]=y;b.a[i+2]=z+.011+b.a[i+2];const n=norm([nn[0]+nn[2]*nx,nn[1]+nn[2]*ny,nn[2]]);for(let j=0;j<3;j++)b.a[i+3+j]=n[j];}
+            // Retain the supplied logo outline and its original bevelled relief.
+            b.at(M.S(.205), () => { for (const p of LOGO_POLYGONS) extrudeLogo(b, p, .027, .006, 27); });
+            const flat = b.a, centerY = .52, surfaceLift = .0032, maxEdge2 = .035 * .035;
+            b.a = [];
+            const blend = (a, c, t) => a.map((v, k) => mix(v, c[k], t));
+            // Split at actual bowl-profile joints before bending. A face must not
+            // cut across a change of slope and disappear into the ceramic.
+            function clipAtY(poly, y, above) {
+                const out = [];
+                for (let i = 0; i < poly.length; i++) {
+                    const a = poly[i], c = poly[(i + 1) % poly.length];
+                    const ai = above ? a[1] >= y : a[1] <= y;
+                    const ci = above ? c[1] >= y : c[1] <= y;
+                    if (ai) out.push(a);
+                    if (ai !== ci) { const v = blend(a, c, (y - a[1]) / (c[1] - a[1])); v[1] = y; out.push(v); }
+                }
+                return out;
+            }
+            let triangles = [];
+            for (let i = 0; i < flat.length; i += 27) {
+                let polys = [[flat.slice(i, i + 9), flat.slice(i + 9, i + 18), flat.slice(i + 18, i + 27)]];
+                for (const [, height] of cupOuter) {
+                    const cut = height - centerY, next = [];
+                    for (const poly of polys) {
+                        if (Math.min(...poly.map(v => v[1])) < cut && Math.max(...poly.map(v => v[1])) > cut)
+                            next.push(clipAtY(poly, cut, false), clipAtY(poly, cut, true));
+                        else next.push(poly);
+                    }
+                    polys = next;
+                }
+                for (const poly of polys) for (let k = 1; k + 1 < poly.length; k++) triangles.push([poly[0], poly[k], poly[k + 1]]);
+            }
+            // Refine only long edges. Shared edges receive identical midpoints;
+            // the mapped surface stays continuous without a heavy uniform mesh.
+            const long = (a, c) => (a[0] - c[0]) ** 2 + (a[1] - c[1]) ** 2 > maxEdge2;
+            for (let pass = 0; pass < 10; pass++) {
+                const next = []; let changed = false;
+                for (const v of triangles) {
+                    const edges = [long(v[0], v[1]), long(v[1], v[2]), long(v[2], v[0])];
+                    const count = edges.filter(Boolean).length;
+                    if (!count) { next.push(v); continue; }
+                    changed = true;
+                    const mids = v.map((a, k) => blend(a, v[(k + 1) % 3], .5));
+                    if (count === 3) next.push([v[0], mids[0], mids[2]], [mids[0], v[1], mids[1]], [mids[2], mids[1], v[2]], [mids[0], mids[1], mids[2]]);
+                    else if (count === 1) {
+                        const k = edges.indexOf(true), a = v[k], c = v[(k + 1) % 3], d = v[(k + 2) % 3], mid = mids[k];
+                        next.push([a, mid, d], [mid, c, d]);
+                    } else {
+                        const k = edges.indexOf(false), a = v[k], c = v[(k + 1) % 3], d = v[(k + 2) % 3];
+                        const ca = mids[(k + 2) % 3], cd = mids[(k + 1) % 3];
+                        next.push([d, ca, cd], [a, c, ca], [c, cd, ca]);
+                    }
+                }
+                triangles = next;
+                if (!changed) break;
+            }
+            for (const triangle of triangles) for (const v of triangle) {
+                const x = v[0], y = v[1] + centerY, surface = cupSurfaceAt(y);
+                const z = Math.sqrt(Math.max(.01, surface.radius * surface.radius - x * x));
+                const n = norm([v[3] + v[5] * x / z, v[4] - v[5] * surface.dr * surface.radius / z, v[5]]);
+                b.a.push(x, y, z + surfaceLift + v[2], ...n, v[6], v[7], v[8]);
+            }
         });
         meshes.cupDrain = build(b=>{ringY(b,.12,-.205,.023,.010,2,64);ringY(b,.092,-.208,.006,.012,1,64);});
         meshes.coffeeSurface = build(b => disk(b, 1.091, 4, 160, 48));
@@ -3487,7 +3572,7 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
         const dock=docking.sample(t),fluid=hydraulics.sample(t),set=dock.set;
         state.docking=dock;state.fluid=fluid;const entry=liftSystem.sample(t,dock.y);
         const seat = ease(.04, 1.07, t), seatHit = t > 1.07 ? .008 * Math.exp(-(t - 1.07) * 19) * Math.sin((t - 1.07) * 50) : 0;
-        const cup = C(set, M.T(0, (1 - seat) * 1.55 - seatHit, 0), M.Ry((1 - seat) * .34));
+        const cup = C(entry.rig, set, M.T(0, (1 - seat) * 1.55 - seatHit, 0), M.Ry((1 - seat) * .34));
         if (t > .02) {
             push(meshes.pedestal, M.I(), 0, [0, 0, 0], [0, 0, 0], false, state.stage * ease(0, .4, t));
             push(meshes.cup, cup);
@@ -3495,7 +3580,7 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
             push(meshes.cupBadge,cup);
             push(meshes.receiver, cup);
             push(meshes.cupDrain,cup);
-            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,mix(.10,dock.railScale,ease(2.60,2.92,t)),1),M.T(0,.45,0)));
+            push(meshes.receiverRails,C(cup,M.T(0,-.45,0),M.S(1,mix(.10,dock.railScale,ease(liftSystem.config.insert[1],liftSystem.config.clamp[1],t)),1),M.T(0,.45,0)));
             const socket=C(M.T(0,docking.config.deckY,-2.4));
             const sanctumOpen=entry.hatch*.78*(1-dock.closed);
             push(meshes.dockSleeve,socket);
@@ -3504,11 +3589,16 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
             for(let i=0;i<8;i++)push(meshes.dockLeaf,C(socket,M.T(0,-.055-i*.0003,0),M.Ry(i*TAU/8),M.T(sanctumOpen,0,0)));
             if(dock.down>.5)push(meshes.dockBridge,socket,0,[0,0,0],[0,0,0],false,state.stage*ease(.5,1,dock.down));
         }
-        const seated=C(set,M.T(0,-dock.extra,0),M.Ry(dock.rotation));
-        const cartridge=t<2.60?entry.pose:seated;
+        // At contact the two transforms are identical. Thereafter the coil is
+        // parented to the cup, including the impact and the entire straightening.
+        const seated=C(cup,M.T(0,-dock.extra,0),M.Ry(dock.rotation));
+        const cartridge=t<liftSystem.config.insert[1]?entry.pose:seated;
         const lock=entry.lock,clampClose=entry.clamp;
         state.sanctumVent=entry.vent;state.sanctumOrigin=[0,docking.config.deckY,-2.4];
-        state.assembly={...entry,pose:undefined,aligned:entry.transfer,inserted:entry.insert,locked:lock,clamped:clampClose};
+        const relative=C(math.inverse4(cup),cartridge);
+        state.assembly={...entry,pose:undefined,rig:undefined,aligned:entry.transfer,inserted:entry.insert,locked:lock,clamped:clampClose,
+            receiverAxisError:Math.hypot(relative[4],relative[6]),receiverRadialError:Math.hypot(relative[12],relative[14]),
+            cupPose:Array.from(cup),coilPose:Array.from(cartridge)};
         if (t > .02) {
             const reveal = state.stage;
             for (const m of [meshes.neck, meshes.coil, meshes.bayonet])
@@ -3544,7 +3634,32 @@ GuziczakModules.define("scene/camera", ["math", "config/camera"], (math, config)
         const val = (k, sub = -1) => { const get = s => sub < 0 ? s[k] : s[k][sub], v0 = get(a), v1 = get(b), m0 = i === 0 ? 0 : (get(b) - get(p)) / (b[0] - p[0]), m1 = b[0] >= config.settledAt ? 0 : (get(n) - get(a)) / (n[0] - a[0]); return (2 * u3 - 3 * u2 + 1) * v0 + (u3 - 2 * u2 + u) * dur * m0 + (-2 * u3 + 3 * u2) * v1 + (u3 - u2) * dur * m1; };
         return { yaw: val(1), pitch: val(2), distance: val(3), target: [val(4, 0), val(4, 1), val(4, 2)] };
     }
-    function sampleCamera(frame, viewport) {
+    function fitLoading(shot,frame,viewport,assembly){
+        const {M,C,dot,mix,ease}=math,t=frame.time;
+        if(viewport.width>=651||!assembly?.cupPose||t<=.85||t>=3.65)return shot;
+        const focus=ease(.85,1.46,t)*(1-ease(3.03,3.65,t));
+        const yaw=shot.yaw,pitch=shot.pitch;
+        const right=[Math.cos(yaw),0,-Math.sin(yaw)];
+        const up=[-Math.sin(yaw)*Math.sin(pitch),Math.cos(pitch),-Math.cos(yaw)*Math.sin(pitch)];
+        const back=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
+        const points=[];
+        // Actual rim and full coil envelope. Frame the two components together,
+        // not the empty point halfway between the old camera targets.
+        for(let i=0;i<48;i++){
+            const a=i*Math.PI/24,c=Math.cos(a),q=Math.sin(a);
+            points.push(M.point(assembly.cupPose,[1.19*c,1.04,1.19*q]));
+            for(const y of [-1.70,-.22])points.push(M.point(assembly.coilPose,[.54*c,y,.54*q]));
+        }
+        const axes=[right,up,back];
+        const center=axes.map(axis=>{const values=points.map(p=>dot(p,axis));return (Math.min(...values)+Math.max(...values))*.5;});
+        const framed=[0,1,2].map(k=>axes.reduce((sum,axis,i)=>sum+axis[k]*center[i],0));
+        const target=shot.target.map((v,i)=>mix(v,framed[i],focus));
+        const tan=Math.tan(35*Math.PI/360),aspect=viewport.width/viewport.height;
+        let fit=0;
+        for(const p of points){const q=p.map((v,i)=>v-target[i]);fit=Math.max(fit,dot(q,back)+Math.max(Math.abs(dot(q,right))/(tan*aspect*.86),Math.abs(dot(q,up))/(tan*.76)));}
+        return {...shot,target,distance:mix(shot.distance,Math.max(shot.distance,fit),focus)};
+    }
+    function sampleCamera(frame, viewport, assembly=frame.assembly) {
         const original=cameraTrack(frame.time);
         const r=frame.phase==='reclaim'?frame.phaseProgress:0;
         const focus=math.ease(0,.17,r)*(1-math.ease(.88,1,r));
@@ -3565,7 +3680,7 @@ GuziczakModules.define("scene/camera", ["math", "config/camera"], (math, config)
         if(quenching?.visible&&frame.time>=10.8&&frame.time<12.54)for(const e of quenching.events){const age=quenching.time-e.at;quenchFocus=Math.max(quenchFocus,math.ease(1.05,2.55,age)*(1-math.ease(5.5,7.1,age)));}
         quenchFocus*=1-math.ease(12.40,12.54,frame.time);
         if(quenchFocus>0)return {yaw:math.mix(shot.yaw,.07,quenchFocus),pitch:math.mix(shot.pitch,.97,quenchFocus),distance:math.mix(distance,mobile?7.8:5.0,quenchFocus),target:shot.target.map((v,i)=>math.mix(v,[0,-2.015,1.0][i],quenchFocus))};
-        return { ...shot, distance };
+        return fitLoading({ ...shot, distance },frame,viewport,assembly);
     }
     return { sampleCamera, cameraTrack };
 });
@@ -3950,7 +4065,11 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             brandCache={key,value};return value;
         }
         function render(frame, packet, project, viewport) {
-            const metrics = { rect: $('header-logo').getBoundingClientRect(), wr: $('header-word').getBoundingClientRect() };
+            const headerWord=$('header-word'),headerText=document.createRange();
+            headerText.selectNodeContents(headerWord);
+            const textBounds=headerText.getBoundingClientRect(),wordBounds=headerWord.getBoundingClientRect(),headerType=getComputedStyle(headerWord);
+            const targetFont=parseFloat(headerType.fontSize),targetTracking=(parseFloat(headerType.letterSpacing)||0)/targetFont;
+            const metrics = { rect: $('header-logo').getBoundingClientRect(), wr:{left:textBounds.left,width:textBounds.width,top:wordBounds.top,height:wordBounds.height} };
             const t = frame.time, mobile = viewport.width < 651, markReveal = ease(...cues.markReveal, t), tail = ease(...cues.canvasFade, t), dock = ease(...cues.dock, t), hero = ease(...cues.hero, t), header = ease(...cues.header, t);
             const castTransform = packet.castTransform;
             $('intro-controls').style.opacity = '1';
@@ -3964,7 +4083,8 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             body.classList.toggle('handoff', t > cues.handoff);
             body.style.setProperty('--hero-reveal', hero.toFixed(5));
             body.style.setProperty('--header-reveal', header.toFixed(5));
-            canvas.style.opacity = '1';
+            // Reveal the established opening shot, not the first unpopulated frame.
+            canvas.style.opacity = String(ease(.02,.25,t));
             $('cinema-shade').style.opacity = String(1 - tail);
             const vesselShadow = ease(...cues.vesselShadow, t) * (1 - tail);
             $('vessel-shadow').style.opacity = String(vesselShadow * .98);
@@ -3989,8 +4109,8 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             const cy=r.y-(m.claimSize+m.claimGap)*.5;
             word.style.left=mix(left+m.wordWidth*.5,wr.left+wr.width*.5,dock)+'px';
             word.style.top=(mix(cy,wr.top+wr.height*.5,dock)-Math.sin(dock*PI)*viewport.height*.042)+'px';
-            word.style.fontSize=mix(m.fontSize,mobile?11:14,dock)+'px';
-            word.style.letterSpacing=mix(m.tracking,.205,dock)+'em';
+            word.style.fontSize=mix(m.fontSize,targetFont,dock)+'px';
+            word.style.letterSpacing=mix(m.tracking,targetTracking,dock)+'em';
             word.style.fontWeight='400';word.style.textAlign='left';
             word.style.opacity=String(wordIn*(1-header));
             word.style.clipPath=`inset(0 ${(1-wordIn)*100}% 0 0)`;
@@ -4003,7 +4123,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             lastLayout={mark:{...r},word:{left,width:m.wordWidth,centerY:cy},metrics:m,dock,wordIn};
 
         }
-        function enter(boot = false) { markRect = null; body.classList.add('intro'); body.classList.remove('handoff','page-brand-ready'); body.classList.toggle('booting', boot); $('site').inert = true; $('header').inert = true; canvas.style.display = 'block'; canvas.style.opacity = '1'; }
+        function enter(boot = false) { markRect = null; body.classList.add('intro'); body.classList.remove('handoff','page-brand-ready'); body.classList.toggle('booting', boot); $('site').inert = true; $('header').inert = true; canvas.style.display = 'block'; canvas.style.opacity = '0'; }
         function finish() {
             body.classList.remove('intro', 'booting', 'handoff');
             body.classList.add('page-brand-ready');
@@ -4012,6 +4132,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             $('site').inert = false;
             $('header').inert = false;
             canvas.style.display = 'block';
+            canvas.style.opacity = '1';
             $('intro-controls').style.opacity = '1';
             for (const id of ['cinema-shade', 'vessel-shadow', 'intro-caption', 'intro-progress', 'signature-line'])
                 $(id).style.opacity = '0';
@@ -4237,8 +4358,15 @@ GuziczakModules.define('audio/offline',['config/music','audio/library'],(scores,
 GuziczakModules.define('config/mechanics',[],()=>Object.freeze({
  // World-space bounds, including neck, winding, keys and retaining collars.
  coil:Object.freeze({minY:-1.70,maxY:-.22,radius:.515}),
- open:[.06,.40],lift:[.48,1.38],transfer:[1.52,2.08],insert:[2.24,2.60],lock:[2.64,2.79],clamp:[2.83,2.94],
- travelY:-.51,clearance:.06
+ open:[.06,.40],lift:[.48,1.38],transfer:[1.52,2.08],insert:[2.30,2.40],lock:[2.50,2.66],clamp:[2.68,2.82],
+ travelY:-.51,clearance:.06,
+ loading:Object.freeze({
+  // Tilt around the receiver, in the camera's screen-left plane. Both parts
+  // use this same rigid frame; the cartridge can only slide along its Y axis.
+  lean:[1.60,2.08],straighten:[2.55,3.03],angle:.52,viewYaw:.39,pivotY:-.22,
+  preload:[2.08,2.25],preloadTravel:.065,drivePower:2.65,
+  recoilTravel:.15,recoilAngle:.045,recoilDecay:12,recoilFrequency:23,recoilEnd:.50
+ })
 }));
 
 // Original sources used before ARCH 20; no replacement melody or automatic harmony.
@@ -4374,7 +4502,7 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
    float speck=pow(noise(q*135.),22.)*smoothstep(.55,.7,macro);
    c+=vec3(1.4,.65,.13)*speck*exp(-dot(p.xz,p.xz)*.7)*shade;
   }
-  color=vec4(max(c,0.),uOpacity);
+  color=vec4(max(c,0.),uOpacity*(uMirror>.5||uType<.5?1.:0.));
  }`;
  const shadowVS=`#version 300 es
  precision highp float;layout(location=0)in vec3 aP;uniform mat4 uM,uLightVP;void main(){gl_Position=uLightVP*uM*vec4(aP,1);}`;
@@ -4395,7 +4523,7 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
   float aa=max(fwidth(rad),.0016),ring=1.-smoothstep(.0,aa*1.15,abs(rad-1.26));
   float light=.10+.30*smoothstep(-.5,1.2,a.y)+.8*exp(-pow((angle-.76)*18.,2.));
   c+=vec3(.62,.31,.065)*ring*arc*light+vec3(.012,.006,.0017)*exp(-abs(rad-1.26)*90.)*arc;
-  color=vec4(c,1);
+  color=vec4(c,0);
  }`;
  const waterFS=`#version 300 es
  precision highp float;in vec2 uv;uniform mat4 uInvVP,uVP;uniform vec3 uCam;uniform float uTime,uWaterY;uniform sampler2D uReflection,uUnderlying,uSceneDepth;uniform vec2 uSize,uTilt;out vec4 color;
@@ -4454,7 +4582,7 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
  vec3 sampleLight(vec2 v){vec3 c=texture(uImage,v).rgb;if(any(isnan(c))||any(isinf(c)))c=vec3(0.);if(uExtract>.5){float l=max(c.r,max(c.g,c.b));c*=smoothstep(.65,2.,l);}return c;}
  void main(){vec3 c=sampleLight(uv)*.227027;c+=(sampleLight(uv+uDir*1.384615)+sampleLight(uv-uDir*1.384615))*.316216;c+=(sampleLight(uv+uDir*3.230769)+sampleLight(uv-uDir*3.230769))*.070270;color=vec4(c,1);}`;
  const postFS=`#version 300 es
- precision highp float;in vec2 uv;uniform sampler2D uImage,uBloom,uFog;uniform vec2 uSize;uniform float uTime,uTextFade;out vec4 color;
+ precision highp float;in vec2 uv;uniform sampler2D uImage,uBloom,uFog;uniform vec2 uSize;uniform float uTime,uTextFade,uOpacity,uEnvironmentReveal;out vec4 color;
  float luma(vec3 c){return dot(c,vec3(.299,.587,.114));}
  vec3 film(vec3 x){return pow(clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.),vec3(1./2.2));}
  void main(){vec2 px=1./uSize;vec3 c=texture(uImage,uv).rgb;vec3 l=texture(uImage,uv-vec2(px.x,0)).rgb,r=texture(uImage,uv+vec2(px.x,0)).rgb,a=texture(uImage,uv+vec2(0,px.y)).rgb,b=texture(uImage,uv-vec2(0,px.y)).rgb;float lo=min(luma(c),min(min(luma(l),luma(r)),min(luma(a),luma(b)))),hi=max(luma(c),max(max(luma(l),luma(r)),max(luma(a),luma(b))));c=mix(c,(l+r+a+b+c*4.)/8.,smoothstep(.13,.80,hi-lo)*.30);
@@ -4464,7 +4592,8 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
   c=mix(c,vec3(.0018,.0021,.0022),shade*.97);
   c=film(c*.98);
   float vig=1.-.12*pow(length((uv-.5)*vec2(1.,.85)),2.);c*=vig;
-  color=vec4(c,1);
+  float coverage=clamp(texture(uImage,uv).a,0.,1.);
+  color=vec4(c,uOpacity*mix(uEnvironmentReveal,1.,coverage));
  }`;
  const dustVS=`#version 300 es
  precision highp float;layout(location=0)in vec3 aP;uniform mat4 uVP;uniform float uTime,uRatio;out float fade;
@@ -4502,10 +4631,13 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
   function screen(p){gl.useProgram(p.p);gl.bindVertexArray(null);gl.drawArrays(gl.TRIANGLES,0,3);}
   function drawMesh(mesh,pose,type,VP,cam,refl=false){gl.useProgram(mat.p);m4(mat,'uM',pose);m4(mat,'uVP',VP);m4(mat,'uLightVP',lightVP);gl.uniformMatrix3fv(u(mat,'uN'),false,M.normal(pose));f3(mat,'uCam',cam);f1(mat,'uType',type);f1(mat,'uOpacity',1);f1(mat,'uMirror',refl?1:0);f1(mat,'uWaterY',world.waterY);tex(mat,'uShadow',shadowRT.t,1);tex(mat,'uStone',stoneTex,2);gl.bindVertexArray(mesh.vao);gl.drawArrays(gl.TRIANGLES,0,mesh.count);}
   function render(rect,angle=0,pitch=0,overlay=false,opacity=1,clock=0,motion={}){
-   if(overlay){handoff.render(rect,angle,pitch,true,opacity);return;}
-   const region=canvas.parentElement.getBoundingClientRect();if(region.width<2||region.height<2)return;
-   const prof=profiles.choose({width:region.width,height:region.height,dpr:devicePixelRatio||1},limits,'exhibit');
-   device.claimSurface(prof.width,prof.height,'exhibit');
+   const region=overlay?{x:0,y:0,width:innerWidth,height:innerHeight}:canvas.parentElement.getBoundingClientRect();
+   if(region.width<2||region.height<2)return;
+   // Overlay must not resize or clear the cinema's drawing surface.
+   const prof=overlay?{width:gl.drawingBufferWidth,height:gl.drawingBufferHeight,ratio:gl.drawingBufferWidth/region.width}
+     :profiles.choose({width:region.width,height:region.height,dpr:devicePixelRatio||1},limits,'exhibit');
+   if(!overlay)device.claimSurface(prof.width,prof.height,'exhibit');
+   const environmentReveal=overlay?m.clamp(motion.environmentReveal??0,0,1):1;
    if(prof.width!==W||prof.height!==H||!main){W=prof.width;H=prof.height;dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);
     main=target(W,H,false,true);waterBase=target(W,H,false,true);mirror=target(Math.max(160,Math.floor(W*.55)),Math.max(160,Math.floor(H*.55)));
     bloomA=target(Math.max(96,Math.floor(W/4)),Math.max(96,Math.floor(H/4)));bloomB=target(bloomA.w,bloomA.h);fogRT=target(bloomA.w,bloomA.h);}
@@ -4524,7 +4656,7 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    bind(mirror);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
    for(const pose of rocks)drawMesh(world.rock,pose,1,VP,cam,true);
    for(const n of ['signatureA','signatureB'])drawMesh(meshes[n],model,0,VP,cam,true);
-   bind(main);gl.clearColor(.003,.004,.004,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
+   bind(main);gl.clearColor(.003,.004,.004,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
    gl.useProgram(sky.p);m4(sky,'uInvVP',inv);f3(sky,'uCam',cam);f1(sky,'uTime',clock);screen(sky);
    gl.enable(gl.DEPTH_TEST);
    for(const pose of rocks)drawMesh(world.rock,pose,1,VP,cam);
@@ -4533,16 +4665,20 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    // not an opaque hump obscuring the altar with a flat black reflection.
    gl.bindFramebuffer(gl.READ_FRAMEBUFFER,main.fb);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,waterBase.fb);
    gl.blitFramebuffer(0,0,W,H,0,0,W,H,gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT,gl.NEAREST);bind(main);
-   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(water.p);
+   gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ZERO,gl.ONE);gl.useProgram(water.p);
    m4(water,'uInvVP',inv);m4(water,'uVP',VP);f3(water,'uCam',cam);f1(water,'uTime',clock);f1(water,'uWaterY',world.waterY);f2(water,'uSize',W,H);f2(water,'uTilt',...(motion.tilt||[0,0]));drive.uniforms(gl,water,motion.water);
    tex(water,'uReflection',mirror.t,0);tex(water,'uUnderlying',waterBase.t,1);tex(water,'uSceneDepth',waterBase.d,2);screen(water);gl.disable(gl.BLEND);
-   gl.useProgram(dust.p);m4(dust,'uVP',VP);f1(dust,'uTime',clock);f1(dust,'uRatio',prof.ratio);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);gl.bindVertexArray(dustV);gl.drawArrays(gl.POINTS,0,points.length/3);gl.depthMask(true);gl.disable(gl.BLEND);
+   gl.useProgram(dust.p);m4(dust,'uVP',VP);f1(dust,'uTime',clock);f1(dust,'uRatio',prof.ratio);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE,gl.ZERO,gl.ONE);gl.depthMask(false);gl.bindVertexArray(dustV);gl.drawArrays(gl.POINTS,0,points.length/3);gl.depthMask(true);gl.disable(gl.BLEND);
    gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);
    bind(fogRT);gl.useProgram(fog.p);m4(fog,'uInvVP',inv);f3(fog,'uCam',cam);f1(fog,'uTime',clock);tex(fog,'uDepth',main.d,0);screen(fog);
    bind(bloomA);gl.useProgram(blur.p);tex(blur,'uImage',main.t,0);f2(blur,'uDir',1/W,1/H);f1(blur,'uExtract',1);screen(blur);
    bind(bloomB);tex(blur,'uImage',bloomA.t,0);f2(blur,'uDir',2/bloomA.w,0);f1(blur,'uExtract',0);screen(blur);
    bind(bloomA);tex(blur,'uImage',bloomB.t,0);f2(blur,'uDir',0,2/bloomB.h);screen(blur);
-   bind(null);gl.disable(gl.DEPTH_TEST);gl.useProgram(post.p);tex(post,'uImage',main.t,0);tex(post,'uBloom',bloomA.t,1);tex(post,'uFog',fogRT.t,2);f2(post,'uSize',W,H);f1(post,'uTime',clock);f1(post,'uTextFade',innerWidth>700?1:0);screen(post);gl.bindVertexArray(null);frames++;
+   bind(null);gl.disable(gl.DEPTH_TEST);
+   if(overlay){gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);}
+   gl.useProgram(post.p);tex(post,'uImage',main.t,0);tex(post,'uBloom',bloomA.t,1);tex(post,'uFog',fogRT.t,2);f2(post,'uSize',W,H);f1(post,'uTime',clock);
+   f1(post,'uTextFade',innerWidth>700?environmentReveal:0);f1(post,'uOpacity',opacity);f1(post,'uEnvironmentReveal',environmentReveal);
+   screen(post);gl.disable(gl.BLEND);gl.bindVertexArray(null);frames++;
   }
   return {render,suspend(){suspended=true;dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);main=mirror=bloomA=bloomB=fogRT=waterBase=null;W=H=0;},stats:()=>({frames,angle:lastAngle,clock:lastClock,width:W,height:H,suspended,hdr,parts:2,triangles:(meshes.signatureA.count+meshes.signatureB.count)/3,rockTriangles:world.rock.count/3,mode:'solid-mesh / procedural rock / planar water reflection',depth:.16,bevel:.018,rect:lastRect,surface:device.surface()}),destroy(){dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);dispose(shadowRT);for(const p of [mat,sky,water,post,shadow,dust,blur,fog])gl.deleteProgram(p.p);handoff.destroy();}};
  }
@@ -4635,21 +4771,42 @@ GuziczakModules.define('render/profile',[],()=>{
 
 
 GuziczakModules.define('scene/lift',['math','config/mechanics','config/docking'],(m,cfg,dock)=>{
- 'use strict';const {ease,mix,M,C}=m;
+ 'use strict';const {ease,mix,clamp,M,C}=m,loading=cfg.loading;
  function sample(t,targetY){
-  const hatch=ease(...cfg.open,t),lift=ease(...cfg.lift,t),transfer=ease(...cfg.transfer,t),insert=ease(...cfg.insert,t);
+  const hatch=ease(...cfg.open,t),lift=ease(...cfg.lift,t),transfer=ease(...cfg.transfer,t);
   const storedY=dock.deckY-.17-cfg.coil.maxY;
+  const u=clamp((t-cfg.insert[0])/(cfg.insert[1]-cfg.insert[0]),0,1);
+  // Accelerate into the stop, rather than easing to a halt before contact.
+  const insert=Math.pow(u,loading.drivePower),contact=t>=cfg.insert[1];
+  const preload=loading.preloadTravel*ease(...loading.preload,t)*(1-insert);
   let y=mix(storedY,cfg.travelY,lift),z=dock.finalZ;
   if(t>=cfg.transfer[0]){y=cfg.travelY;z=mix(dock.finalZ,0,transfer);}
-  if(t>=cfg.insert[0]){z=0;y=mix(cfg.travelY,targetY,insert);}
-  const bottom=y+cfg.coil.minY,top=y+cfg.coil.maxY;
-  const phase=t<cfg.open[1]?'opening':t<cfg.lift[0]?'pressure':t<cfg.lift[1]?'vertical-lift':t<cfg.transfer[0]?'clearance-hold':t<cfg.transfer[1]?'horizontal-transfer':t<cfg.insert[0]?'alignment-hold':t<cfg.insert[1]?'insertion':t<cfg.clamp[1]?'locking':'seated';
-  // Support head withdraws only after the coil has moved away.
-  const pistonY=mix(bottom-.008,dock.deckY-.29,ease(cfg.transfer[0]+.07,cfg.transfer[1],t));
+  if(t>=loading.preload[0])y-=preload;
+  if(t>=cfg.insert[0]){z=0;y=mix(cfg.travelY,targetY,insert)-preload;}
+
+  // The well and its lift do NOT tilt. This transform is exactly identity
+  // before horizontal transfer and again before pouring starts.
+  const lean=ease(...loading.lean,t)*(1-ease(...loading.straighten,t));
+  const age=t-cfg.insert[1];
+  const response=age>0&&age<loading.recoilEnd
+    ?Math.exp(-loading.recoilDecay*age)*Math.sin(loading.recoilFrequency*age)*(1-ease(.28,loading.recoilEnd,age)):0;
+  const angle=loading.angle*lean+loading.recoilAngle*response;
+  const recoil=loading.recoilTravel*response;
+  const rotation=C(M.Ry(loading.viewYaw),M.Rz(angle),M.Ry(-loading.viewYaw));
+  const pivot=targetY+loading.pivotY;
+  const rig=angle===0&&recoil===0?M.I():C(M.T(0,pivot,0),rotation,M.T(0,recoil-pivot,0));
+  // Preserve Z all the way out of the well. The old patch dropped it here.
+  const pose=C(rig,M.T(0,y,z));
+  const radialY=cfg.coil.radius*Math.hypot(pose[1],pose[9]);
+  const bottom=pose[13]+Math.min(pose[5]*cfg.coil.minY,pose[5]*cfg.coil.maxY)-radialY;
+  const top=pose[13]+Math.max(pose[5]*cfg.coil.minY,pose[5]*cfg.coil.maxY)+radialY;
+  const phase=t<cfg.open[1]?'opening':t<cfg.lift[0]?'pressure':t<cfg.lift[1]?'vertical-lift':t<cfg.transfer[0]?'clearance-hold':t<cfg.transfer[1]?'horizontal-transfer':t<cfg.insert[0]?'alignment-hold':!contact?'insertion':t<cfg.clamp[1]?'locking':t<loading.straighten[1]?'straightening':'seated';
+  const pistonY=mix(y+cfg.coil.minY-.008,dock.deckY-.29,ease(cfg.transfer[0]+.07,cfg.transfer[1],t));
   const vent=.70*ease(.36,.50,t)*(1-ease(.67,.92,t))+.45*ease(1.23,1.37,t)*(1-ease(1.46,1.68,t));
   return {phase,y,z,bottom,top,pistonY,hatch,lift,transfer,insert,lock:ease(...cfg.lock,t),clamp:ease(...cfg.clamp,t),vent,
+   lean,angle,recoil,contact,rig,pose,storedY,
    safeTransfer:transfer===0||bottom>dock.deckY+.071+cfg.clearance,
-   insideBore:Math.abs(z-dock.finalZ)<1e-8,pose:C(M.T(0,y,z)),storedY};
+   insideBore:Math.abs(z-dock.finalZ)<1e-8};
  }
  return {sample,config:cfg};
 });
@@ -4657,9 +4814,10 @@ GuziczakModules.define('scene/lift',['math','config/mechanics','config/docking']
 
 GuziczakModules.define('ui/exhibit',['core/scope','math'],(scopes,math)=>{
  'use strict';const {clamp}=math;
+ const initialPose=Object.freeze({yaw:-.64,pitch:.018});
  function create(win,doc,changed){
   const scope=scopes.createScope(),slot=doc.getElementById('artifact-slot'),toggle=doc.getElementById('artifact-toggle');
-  const reduced=win.matchMedia('(prefers-reduced-motion:reduce)');let paused=reduced.matches,visible=true,active=false,clock=0,last=null,yaw=-.84,pitch=.018,drag=null,autoAnchor=0,renderedYaw=yaw,renderedPitch=pitch;
+  const reduced=win.matchMedia('(prefers-reduced-motion:reduce)');let paused=reduced.matches,visible=true,active=false,clock=0,last=null,yaw=initialPose.yaw,pitch=initialPose.pitch,drag=null,autoAnchor=0,renderedYaw=yaw,renderedPitch=pitch;
   const paint=()=>{toggle.setAttribute('aria-pressed',String(paused));toggle.textContent=paused?'Wznów obrót ▷':'Wstrzymaj obrót Ⅱ';};paint();
   function absorbAuto(){
    // Accumulate pending input, not the last GPU-rendered angle. Rapid keypresses
@@ -4683,9 +4841,9 @@ GuziczakModules.define('ui/exhibit',['core/scope','math'],(scopes,math)=>{
    renderedYaw=yaw+angle;renderedPitch=pitch+(u>0?.025*Math.sin(phase):0);return {yaw:renderedYaw,pitch:renderedPitch,clock,paused,visible};
   }
   function rect(){const r=slot.getBoundingClientRect();const h=Math.min(r.height*.99,r.width*1.06),w=h*2.2/2.24;return {x:r.x+(r.width-w)/2,y:r.y+(r.height-h)/2-6,w,h};}
-  return {sample,rect,slot,setPaused,activate(){active=true;last=null;clock=0;autoAnchor=0;yaw=-.84;pitch=.018;renderedYaw=yaw;renderedPitch=pitch;changed();},deactivate(){active=false;last=null;},needsFrame:()=>active&&visible&&(!paused||!!drag),visible:()=>visible,diagnostics:()=>({active,visible,paused,clock,yaw,pitch}),destroy(){scope.dispose();observer.disconnect();resize.disconnect();}};
+  return {sample,rect,slot,setPaused,activate(){active=true;last=null;clock=0;autoAnchor=0;yaw=initialPose.yaw;pitch=initialPose.pitch;renderedYaw=yaw;renderedPitch=pitch;changed();},deactivate(){active=false;last=null;},needsFrame:()=>active&&visible&&(!paused||!!drag),visible:()=>visible,diagnostics:()=>({active,visible,paused,clock,yaw,pitch}),destroy(){scope.dispose();observer.disconnect();resize.disconnect();}};
  }
- return {create};
+ return {create,initialPose};
 });
 
 GuziczakModules.define('config/cup-effects', [], () => Object.freeze({
