@@ -182,7 +182,7 @@ h1 em{font-size:1.105em;line-height:1.07;margin-top:.035em;letter-spacing:-.062e
 <meta content="GUZICZAK — Przekuwam AI w wartość" data-l10n="n3" property="og:title"/><meta content="Łukasz Guziczak — inżynier AI. Systemy Document AI, produkty i automatyzacja: od pomysłu do wdrożenia i przekazania zespołowi." data-l10n="n4" property="og:description"/>
 <meta content="https://guziczak.github.io/" data-l10n="n5" property="og:url"/><meta content="pl_PL" data-l10n="n6" property="og:locale"/>
 <meta content="summary_large_image" name="twitter:card"/><meta content="GUZICZAK — Przekuwam AI w wartość" data-l10n="n7" name="twitter:title"/><meta content="Łukasz Guziczak — inżynier AI. Systemy Document AI, produkty i automatyzacja: od pomysłu do wdrożenia i przekazania zespołowi." data-l10n="n8" name="twitter:description"/><style id="portfolio-style">/* Portfolio: shared spacing, typography and controls. The cinematic canvas is preserved. */
-:root{--content:1480px;--section-pad:clamp(64px,8vw,120px)}
+:root{--content:1480px;--section-pad:clamp(64px,8vw,120px);--chrome-top:0px;--chrome-safe-top:env(safe-area-inset-top,0px);--chrome-safe-left:env(safe-area-inset-left,0px);--chrome-safe-right:env(safe-area-inset-right,0px)}
 html{scroll-padding-top:28px}
 [hidden]{display:none!important}
 #header{max-width:none;padding-right:calc(var(--pad) + 132px);gap:30px}
@@ -195,7 +195,7 @@ html{scroll-padding-top:28px}
 .language-switch a[aria-current=page]:after{content:'';position:absolute;bottom:6px;left:9px;right:9px;height:1px;background:var(--gold)}
 #nav-toggle{display:none;align-items:center;gap:10px;padding:0;font-size:12px}
 #nav-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.25}
-body:not(.intro) #intro-controls{gap:2px;right:var(--pad);top:28px}
+body:not(.intro) #intro-controls{gap:2px;right:max(var(--pad),var(--chrome-safe-right));top:calc(28px + var(--chrome-top))}
 body:not(.intro) #intro-controls .sound-label{display:none}
 body:not(.intro) #intro-controls>button{min-width:40px;justify-content:center}
 body:not(.intro) #intro-controls #water-surge{font-size:25px}
@@ -268,12 +268,13 @@ body:not(.intro) #intro-controls #water-surge{font-size:25px}
 #error-detail{display:none}
 html[lang=de] h1{font-size:clamp(58px,min(6.2vw,11vh),112px)}
 html[lang=de] .hero-copy .eyebrow{letter-spacing:.13em}
-@media(min-width:1051px) and (max-height:780px){body:not(.intro) #intro-controls{top:19px}}
+@media(min-width:1051px) and (max-height:780px){body:not(.intro) #intro-controls{top:calc(19px + var(--chrome-top))}}
 @media(max-width:1200px) and (min-width:1051px){.identity strong{font-size:16px}.identity{gap:13px}.site-nav{gap:16px;font-size:11px}.header-links{gap:16px}.identity small{font-size:8px}}
 @media(max-width:1050px){
- :root{--head:112px}
- #header{display:grid;grid-template-columns:1fr;grid-template-rows:64px 48px;gap:0;padding:0 var(--pad);height:var(--head)}
- #header .identity{grid-row:1;width:max-content;max-width:calc(100% - 130px)}
+ :root{--chrome-main-row:68px;--head:calc(var(--chrome-safe-top) + var(--chrome-main-row) + 49px)}
+ /* Safe inset is part of the header height, never taken out of a content row. */
+ #header{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:var(--chrome-main-row) 48px;gap:0;padding:var(--chrome-safe-top) max(var(--pad),var(--chrome-safe-right)) 0 max(var(--pad),var(--chrome-safe-left));height:var(--head);min-height:var(--head);align-content:start;align-items:center;box-sizing:border-box}
+ #header .identity{grid-row:1;width:max-content;max-width:calc(100% - 130px);min-height:44px;align-self:center;margin:0}
  .identity strong{font-size:15px}.identity small{font-size:7px}.identity svg{width:31px;height:33px}.identity{gap:12px}
  .header-links{grid-row:2;display:flex;flex-direction:row-reverse;justify-content:space-between;width:100%;border-top:1px solid #d3c7a31a;gap:0}
  #nav-toggle{display:flex;min-width:90px;min-height:44px}
@@ -282,7 +283,7 @@ html[lang=de] .hero-copy .eyebrow{letter-spacing:.13em}
  .menu-open .site-nav{display:flex}
  .menu-open #header{z-index:65}
  .language-switch a{min-width:38px;font-size:10px}
- body:not(.intro) #intro-controls{top:10px;right:var(--pad)}
+ body:not(.intro) #intro-controls{top:calc(var(--chrome-top) + var(--chrome-safe-top) + (var(--chrome-main-row) - 44px)/2);right:max(var(--pad),var(--chrome-safe-right))}
  .portfolio-heading{grid-template-columns:1fr;gap:20px;margin-bottom:35px}
  .portfolio-heading .eyebrow{padding:0}.section-intro{max-width:670px}
  .handover-grid{grid-template-columns:1fr 1fr;gap:28px}.handover-top{flex-direction:column;gap:17px}
@@ -291,9 +292,9 @@ html[lang=de] .hero-copy .eyebrow{letter-spacing:.13em}
  html[lang=de] h1{font-size:clamp(45px,6.2vw,68px)}
 }
 @media(max-width:700px){
- :root{--head:calc(110px + env(safe-area-inset-top,0px));--section-pad:64px}
- #header{grid-template-rows:62px 48px;padding-top:env(safe-area-inset-top,0px)}
- body:not(.intro) #intro-controls{top:calc(9px + env(safe-area-inset-top,0px));right:var(--pad);gap:0}
+ :root{--section-pad:64px}
+ /* The same two-row geometry is used on phones and tablets. */
+ body:not(.intro) #intro-controls{gap:0}
  body:not(.intro) #intro-controls>button{min-width:36px}
  .identity strong{font-size:13px;letter-spacing:.18em}.identity small{font-size:6.5px;letter-spacing:.08em}.identity{gap:9px}
  .hero .hero-copy{padding-top:18px}.hero-copy .eyebrow{line-height:1.8;white-space:normal}
@@ -528,13 +529,13 @@ body:is(.route-cv,.route-score) .site-nav a[aria-current=page]{color:var(--gold)
 
 </style><style id="six-interactions-style">
 /* Persistent navigation. Its original box remains in the document flow. */
-html{scroll-padding-top:calc(var(--sticky-header-size,var(--head)) + 20px)}
+html{scroll-padding-top:calc(var(--sticky-header-size,var(--head)) + var(--chrome-top,0px) + 20px)}
 body:not(.intro):not(.route-cv):not(.route-score) #header{
- position:sticky;top:0;z-index:72;background:#080a0af5;
+ position:sticky;top:var(--chrome-top,0px);z-index:72;background:#080a0a;
  border-bottom:1px solid transparent;transition:background .2s,border-color .2s,box-shadow .2s;
 }
 body.header-scrolled:not(.intro):not(.route-cv):not(.route-score) #header{
- background:#080c0bf7;border-bottom-color:#d4b77b2a;box-shadow:0 8px 30px #0003;
+ background:#080c0b;border-bottom-color:#d4b77b2a;box-shadow:0 8px 30px #0003;
 }
 body:not(.intro) #intro-controls{position:fixed;z-index:75}
 body.intro #intro-controls{z-index:75}
@@ -564,7 +565,7 @@ body.intro #back-to-top,body:is(.route-cv,.route-score) #back-to-top,body.menu-o
 </style>
 <style id="finale-style">
 /* Reading progress, not an intro timeline. It never occupies layout space. */
-#reading-progress{position:fixed;z-index:115;top:0;left:0;right:0;height:2px;pointer-events:none;background:transparent;opacity:0;transition:opacity .18s}
+#reading-progress{position:fixed;z-index:115;top:var(--chrome-top,0px);left:0;right:0;height:2px;pointer-events:none;background:transparent;opacity:0;transition:opacity .18s}
 #reading-progress.is-visible{opacity:1}
 #reading-progress>i{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#9f7836,#dfbc70 65%,#f7df9e);box-shadow:0 0 6px #d6ac5550;will-change:transform}
 body:is(.intro,.route-cv,.route-score) #reading-progress{visibility:hidden}
@@ -722,6 +723,10 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
  #page-ending>.footer{padding:15px 24px}
 }
 
+
+/* Rapid-fire button: each native click is one request. No global zoom ban,
+   touch cancellation, synthetic click or double-tap debounce. */
+#finale-replay{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style></head>
 <body><div id="reading-progress" aria-hidden="true"><i></i></div><script>document.body.classList.add('intro','booting');</script><a class="skip-content" data-l10n="n12" href="#hero-heading">Przejdź do treści</a>
 <canvas aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak." data-l10n="n13" id="scene" role="img"></canvas>
@@ -7011,10 +7016,17 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
  if(!button||!header||!fill)return;
  const words={pl:'Wróć na górę',en:'Back to top',de:'Nach oben'};
  const preference=window.matchMedia('(prefers-reduced-motion:reduce)');
- let raf=0,focusTop=false,focusTimer=0,lastHeight=0,fraction=0,progressVisible=false;
+ let raf=0,focusTop=false,focusTimer=0,lastHeight=0,fraction=0,progressVisible=false,visualTop=0;
  function label(){const text=words[window.GUZICZAK_I18N?.lang||'pl'];button.setAttribute('aria-label',text);button.title=text;button.querySelector('span').textContent=text;}
+ function syncChrome(){
+   const v=window.visualViewport;
+   // Keep sticky chrome below Safari's moving visible top at normal scale.
+   // Do not chase/invert a user's intentional pinch zoom.
+   const next=v&&Math.abs((v.scale||1)-1)<.01?Math.max(0,v.offsetTop||0):0;
+   if(Math.abs(next-visualTop)>.1){visualTop=next;document.documentElement.style.setProperty('--chrome-top',visualTop+'px');}
+ }
  function paint(){
-   raf=0;const body=document.body,home=!body.classList.contains('intro')&&!body.classList.contains('route-cv')&&!body.classList.contains('route-score');
+   raf=0;syncChrome();const body=document.body,home=!body.classList.contains('intro')&&!body.classList.contains('route-cv')&&!body.classList.contains('route-score');
    const show=home&&window.scrollY>Math.max(300,innerHeight*.55),height=header.getBoundingClientRect().height;
    body.classList.toggle('header-scrolled',home&&scrollY>16);
    button.classList.toggle('is-visible',show);button.tabIndex=show?0:-1;button.setAttribute('aria-hidden',String(!show));
@@ -7034,19 +7046,25 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
    window.scrollTo({top:0,left:0,behavior:preference.matches?'instant':'smooth'});schedule();
  });
  window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});
+ if(window.visualViewport)for(const type of ['scroll','resize'])window.visualViewport.addEventListener(type,schedule,{passive:true});
+ window.addEventListener('orientationchange',schedule,{passive:true});
+ window.addEventListener('focus',schedule);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
  for(const name of ['guziczak:brand-start','guziczak:brand-complete','guziczak:brand-fallback','guziczak:routechange'])window.addEventListener(name,schedule);
  window.addEventListener('guziczak:languagechange',()=>{label();schedule();});
  const observer=new ResizeObserver(schedule);observer.observe(header);observer.observe(document.getElementById('site'));
  if(document.fonts?.ready)document.fonts.ready.then(schedule);
  window.addEventListener('pagehide',()=>{if(raf)cancelAnimationFrame(raf);raf=0;clearTimeout(focusTimer);});window.addEventListener('pageshow',schedule);
- window.GUZICZAK_SCROLL=Object.freeze({diagnostics:()=>({stickyHeader:true,headerHeight:lastHeight,backToTop:button.classList.contains('is-visible'),reduced:preference.matches,progress:fraction,progressVisible})});
+ window.GUZICZAK_SCROLL=Object.freeze({diagnostics:()=>({stickyHeader:true,headerHeight:lastHeight,visualTop,backToTop:button.classList.contains('is-visible'),reduced:preference.matches,progress:fraction,progressVisible})});
 })();
 
 </script>
 <script id="finale-effects">
-/* Bottom-gated, additive Canvas 2D fireworks. No idle rocket is drawn.
-   Every click is accepted into a counted queue; only simultaneous live effects
-   are bounded. No framework, audio side effects or external dependencies. */
+/* Automatic welcome starts at the DOCUMENT bottom; it is not a per-frame
+   gate. Explicit clicks launch wherever the finale is visible. A changing
+   mobile toolbar must neither strand requests nor require a scroll to wake.
+   Every native click adds one request. Only simultaneous live effects are
+   bounded; the queue is drained by the painter, not by scroll events. */
 (function(){
  'use strict';
  const section=document.getElementById('kontakt'),stage=document.getElementById('finale-stage'),canvas=document.getElementById('finale-canvas'),button=document.getElementById('finale-replay');
@@ -7058,13 +7076,13 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
  const bottomTolerance=2,concurrentLimit=8,launchSpacing=.18;
  let width=0,height=0,dpr=1,raf=0,checkRaf=0,lastMs=null,elapsed=0,played=false,active=false,plays=0,frames=0,visible=false,finished=false;
  let particles=[],rockets=[],rings=[],maxParticles=0,maxConcurrent=0,measuredTop=0,effectTop=0,effectHeight=1,effectScale=1;
- let atBottom=false,bottomDistance=Infinity,automaticPlayed=false,automaticStarts=0;
+ let atBottom=false,bottomDistance=Infinity,visualBottomDistance=Infinity,automaticPlayed=false,automaticStarts=0;
  let pendingManual=0,manualRequests=0,manualLaunched=0,launched=0,completedFireworks=0,cancelledRequests=0,nextManualAt=0,serial=0;
  let seed=0x45d9f3b;
  const rand=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
  const allowed=()=>!motion.matches&&!colors.matches;
  const onHome=()=>!document.body.classList.contains('intro')&&!document.body.classList.contains('route-cv')&&!document.body.classList.contains('route-score')&&!document.body.classList.contains('menu-open');
- const canRun=()=>allowed()&&onHome()&&!document.hidden&&visible&&atBottom;
+ const canRun=()=>allowed()&&onHome()&&!document.hidden&&visible;
  function stopFrame(){if(raf)cancelAnimationFrame(raf);raf=0;lastMs=null;}
  function clear(){ctx.clearRect(0,0,width,height);}
  function suspend(){stopFrame();clear();section.classList.remove('finale-playing');}
@@ -7073,7 +7091,12 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
    const vy=v?.offsetTop||0,vh=v?.height||innerHeight,scroller=document.scrollingElement||document.documentElement;
    const pageTop=Number.isFinite(v?.pageTop)?v.pageTop:(window.scrollY||scroller.scrollTop||0)+vy;
    measuredTop=r.top;
-   bottomDistance=Math.max(0,scroller.scrollHeight-(pageTop+vh));
+   // A toolbar/pinch changes the visual viewport, not the document's
+   // scrollbar end. Clamp fractional/elastic scroll values, never demand an
+   // exact visual-viewport equality from every animation frame.
+   const range=Math.max(0,scroller.scrollHeight-scroller.clientHeight);
+   bottomDistance=Math.max(0,range-Math.max(0,scroller.scrollTop));
+   visualBottomDistance=Math.max(0,scroller.scrollHeight-(pageTop+vh));
    atBottom=bottomDistance<=bottomTolerance;
    effectTop=clamp(Math.max(vy,h.bottom)+12-r.top,0,height);
    const bottom=clamp(vy+vh-12-r.top,effectTop,height);
@@ -7128,7 +7151,7 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
    section.classList.remove('finale-lit');
  }
  function automatic(){
-   if(automaticPlayed||!canRun())return false;
+   if(automaticPlayed||!atBottom||!canRun())return false;
    begin();automaticPlayed=true;automaticStarts++;played=true;plays++;
    for(const spec of [{at:.16,duration:1.14,from:.5,x:.5,y:.25,bend:.016,size:1},
      {at:.48,duration:1.38,from:.44,x:.27,y:.33,bend:-.024,size:.43},
@@ -7198,8 +7221,9 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
  function tick(ms){
    raf=0;frameEffect();
    if(!allowed()){end(true);return;}
-   // Test the scroll position in the painter too: a pending scroll callback
-   // must never leave an offscreen or half-frozen rocket behind.
+   // Keep advancing for as long as the finale can be seen. Tiny toolbar
+   // or scroll changes cannot freeze an already-started sequence. Offscreen,
+   // hidden tabs, menus and other routes still suspend and clear the canvas.
    if(!active||!canRun()){suspend();return;}
    const dt=lastMs===null?0:clamp((ms-lastMs)/1000,0,.05);lastMs=ms;elapsed+=dt;frames++;
    prune();drainQueue();
@@ -7215,11 +7239,12 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
    automatic();scheduleFrame();
  }
  function requestSpark(){
-   frameEffect();
-   if(!allowed()||!onHome()||document.hidden||!visible)return false;
-   // Clicking before the last scroll pixels queues the spark; nothing is
-   // painted until the actual bottom. The button is never locked mid-show.
-   pendingManual++;manualRequests++;plays++;begin();check();return true;
+   size();
+   if(!canRun())return false;
+   // Explicit intent is not gated on the scrollbar. Enqueue and wake in THIS
+   // event; do not depend on an observer/scroll to drain pendingManual.
+   pendingManual++;manualRequests++;plays++;begin();
+   automatic();drainQueue();scheduleFrame();return true;
  }
  function scheduleCheck(){if(!checkRaf)checkRaf=requestAnimationFrame(check);}
  size();button.hidden=!allowed();button.disabled=false;scheduleCheck();
@@ -7228,14 +7253,15 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
  const resize=new ResizeObserver(()=>{size();scheduleCheck();});resize.observe(stage);
  // A height change elsewhere can move the true bottom without moving stage.
  const documentResize=new ResizeObserver(scheduleCheck);documentResize.observe(document.documentElement);
- for(const name of ['scroll','resize'])window.addEventListener(name,scheduleCheck,{passive:true});
+ for(const name of ['scroll','resize','orientationchange'])window.addEventListener(name,scheduleCheck,{passive:true});
+ window.addEventListener('focus',scheduleCheck);
  if(window.visualViewport)for(const name of ['scroll','resize'])window.visualViewport.addEventListener(name,scheduleCheck,{passive:true});
  for(const name of ['guziczak:routechange','guziczak:languagechange','guziczak:brand-complete','guziczak:brand-fallback','guziczak:brand-start'])window.addEventListener(name,scheduleCheck);
  document.addEventListener('visibilitychange',()=>{if(document.hidden){suspend();if(checkRaf)cancelAnimationFrame(checkRaf);checkRaf=0;}else scheduleCheck();});
  const bodyChanges=new MutationObserver(scheduleCheck);bodyChanges.observe(document.body,{attributes:true,attributeFilter:['class']});
  for(const mq of [motion,colors])mq.addEventListener('change',()=>{if(!allowed()&&(active||pendingManual))end(true);scheduleCheck();});
  window.addEventListener('pagehide',()=>{suspend();if(checkRaf)cancelAnimationFrame(checkRaf);checkRaf=0;});window.addEventListener('pageshow',scheduleCheck);
- window.GUZICZAK_FINALE=Object.freeze({replay:requestSpark,diagnostics:()=>({played,active,finished,visible,atBottom,bottomDistance,bottomTolerance,
+ window.GUZICZAK_FINALE=Object.freeze({replay:requestSpark,diagnostics:()=>({played,active,finished,visible,atBottom,bottomDistance,visualBottomDistance,bottomTolerance,
    automaticPlayed,automaticStarts,manualRequests,manualLaunched,pendingManual,launched,completedFireworks,cancelledRequests,
    liveFireworks:rockets.length,maxConcurrent,concurrentLimit,flying:rockets.filter(r=>elapsed>=r.at&&elapsed<r.at+r.duration).length,
    elapsed,plays,frames,particles:particles.length,maxParticles,reduced:motion.matches,forcedColors:colors.matches,width,height,dpr,
