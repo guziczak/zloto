@@ -728,40 +728,91 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
    touch cancellation, synthetic click or double-tap debounce. */
 #finale-replay{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style><style id="live-trace-style">
-/* A small source inspector anchored to the scene that is actually running. */
-.live-trace[hidden],.live-trace [hidden]{display:none!important}
-.live-trace{--trace-gold:#d5bd85;--trace-dim:#97a09e;--trace-line:#d7bd7a23;box-sizing:border-box;color:#e1e4dc;background:linear-gradient(135deg,#111a1cf2,#080e10ed);border:1px solid #cbb3823b;border-radius:5px;box-shadow:0 14px 44px #0005,inset 0 1px #eee2ba09;backdrop-filter:blur(16px);font-family:Arial,Helvetica,sans-serif;z-index:30;overflow:hidden;isolation:isolate;text-align:left;letter-spacing:0}
-.live-trace[data-mode=intro]{position:fixed;left:var(--pad,32px);bottom:108px;width:min(355px,calc(100vw - 48px))}
-.live-trace[data-mode=page]{position:absolute;right:10px;bottom:40px;width:min(345px,calc(100% - 20px));z-index:5}
-.live-trace-toggle{appearance:none;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;display:flex;align-items:center;gap:9px;width:100%;min-height:39px;padding:10px 13px;cursor:pointer;text-align:left;letter-spacing:0}
-.live-trace-toggle:hover{background:#cbb38209}.live-trace-toggle:focus-visible,.live-trace-history:focus-visible{outline:2px solid var(--trace-gold);outline-offset:-3px}
-.live-trace-dot{width:5px;height:5px;flex:0 0 5px;border-radius:50%;background:var(--trace-gold);box-shadow:0 0 9px #d5bd8577}
-.live-trace-title{font-size:10px;font-weight:500;letter-spacing:.075em}
-.live-trace-status{margin-left:auto;color:var(--trace-gold);font-size:7px;letter-spacing:.14em;line-height:1.4;padding:2px 4px;border:1px solid #cbb38232;border-radius:2px}
-.live-trace-chevron{font:12px/1 monospace;color:var(--trace-dim);margin-left:3px;transform:rotate(0);transition:transform .2s}
-.live-trace[data-expanded=false] .live-trace-chevron{transform:rotate(180deg)}
-.live-trace[data-paused=true] .live-trace-dot{box-shadow:none;background:#849693}.live-trace[data-paused=true] .live-trace-status{color:#a7b1af;border-color:#a7b1af38}
-.live-trace-body{border-top:1px solid var(--trace-line)}
-.live-trace-operation{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 13px 7px;min-width:0}
-.live-trace-name{color:var(--trace-gold);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.live-trace-object{font:8px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;color:#88958e;white-space:nowrap;max-width:43%;overflow:hidden;text-overflow:ellipsis}
-.live-trace-history{position:relative;height:116px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#6c6548 #0b1212;background:#03090844;mask-image:linear-gradient(transparent,#000 5px,#000 calc(100% - 5px),transparent);scroll-behavior:smooth}
-.live-trace-code{min-width:100%;width:max-content;box-sizing:border-box;padding:3px 12px 9px 0;color:#79857f;opacity:.48;border-left:2px solid transparent}
-.live-trace-code.is-current{color:#d0d8ca;opacity:1;border-left-color:var(--trace-gold);background:linear-gradient(90deg,#cbb38209,transparent 65%)}
-.live-trace-code-label{padding:4px 0 6px 36px;font:8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.045em;color:#a5b6a0}
-.live-trace-line{display:flex;align-items:baseline;min-height:17px;font:10px/17px ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;white-space:pre}
-.live-trace-line-number{display:inline-block;flex:0 0 35px;width:35px;padding-right:9px;box-sizing:border-box;text-align:right;color:#74807866;font-size:8px;user-select:none}
-.live-trace-line code{font:inherit;display:block;color:inherit;white-space:pre;tab-size:2}
-.live-trace-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:8px 13px 7px;margin:0;border-top:1px solid #cbb38213}
-.live-trace-value{min-width:0}.live-trace-value dt{margin:0 0 3px;color:#8f9a92;font:7px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.live-trace-value dd{margin:0;color:#dbc992;font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.live-trace-audio{display:flex;align-items:center;gap:8px;padding:7px 13px 9px;min-height:13px;border-top:1px solid #cbb38213;font-size:8px}
-.live-trace-audio-label{color:#718b89;font-size:7px;text-transform:uppercase;letter-spacing:.06em}.live-trace-audio-value{color:#91b0aa;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;font:8px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace}.live-trace-bands{display:flex;align-items:flex-end;height:10px;gap:2px;flex:0 0 auto}.live-trace-bands i{display:block;width:2px;height:10px;background:#8eb9ae;opacity:calc(.25 + var(--level,0)*.75);transform-origin:bottom;transform:scaleY(calc(.15 + var(--level,0)*.85));transition:transform .12s linear,opacity .12s linear}.live-trace-audio[data-running=false] .live-trace-bands{opacity:.3}
-@media(min-width:1100px){.live-trace[data-mode=intro]{width:350px;left:30px}}
-@media(min-width:701px) and (max-height:560px){.live-trace[data-mode=intro]{top:96px;bottom:auto;left:20px;width:300px}.live-trace-history{height:76px}.live-trace-values{padding-top:6px;padding-bottom:5px}}
-@media(max-width:700px){.live-trace[data-mode=intro]{left:18px;right:18px;bottom:108px;width:auto;max-width:410px;margin:0 auto}.live-trace-toggle{min-height:32px;padding:7px 11px}.live-trace-title{font-size:9px}.live-trace-operation{padding:6px 11px 4px}.live-trace-name{font-size:9px}.live-trace-history{height:57px}.live-trace-code-label{display:none}.live-trace-line{font-size:8px;line-height:14px;min-height:14px}.live-trace-values{padding:5px 11px;gap:5px}.live-trace-value dt{font-size:6.5px;margin-bottom:2px}.live-trace-value dd{font-size:8px}.live-trace-audio{padding:5px 11px 6px;min-height:10px}.live-trace-audio-value{font-size:7px}.live-trace[data-mode=page]{bottom:34px;right:0;width:100%;max-width:345px}.live-trace-open-intro #quench-controls{bottom:286px;max-height:calc(100svh - 390px);overflow:auto}}
-@media(max-width:700px) and (max-height:540px){.live-trace[data-mode=intro]{left:14px;right:auto;bottom:89px;width:260px;max-width:calc(100vw - 28px)}.live-trace-history{height:42px}.live-trace-values{display:none}.live-trace-open-intro #quench-controls{bottom:220px;max-height:calc(100svh - 285px)}}
-@media(prefers-reduced-motion:reduce){.live-trace{backdrop-filter:none}.live-trace-history{scroll-behavior:auto}.live-trace-chevron,.live-trace-bands i{transition:none}}
-@media print{.live-trace{display:none!important}}
+/* Actual source, two live results and an optional deeper view. The camera reserves
+   space for this dock; its source is never an overlay on the instrument's front. */
+.live-trace[hidden],.live-trace [hidden],.live-trace-tether[hidden]{display:none!important}
+.live-trace{--trace-gold:#edc578;--trace-soft:#ceb784;--trace-dim:#94a19d;--trace-border:#e6bc6c80;box-sizing:border-box;color:#e6e9e1;background:linear-gradient(120deg,#111b1de8,#080f11f2);border:1px solid var(--trace-border);border-radius:12px;box-shadow:0 15px 50px #0005,inset 0 1px 0 #fff0bc0d;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:Arial,Helvetica,sans-serif;z-index:31;overflow:hidden;isolation:isolate;text-align:left;letter-spacing:0;padding:8px 14px 7px}
+.live-trace *{box-sizing:border-box}
+.live-trace[data-mode=intro]{position:fixed;left:50%;bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(660px,calc(100vw - 48px));transform:translateX(-50%);max-height:calc(100svh - 104px)}
+.live-trace[data-mode=page]{position:absolute;right:0;bottom:var(--trace-page-bottom,0px);width:min(370px,100%);z-index:5;border-color:#d5b16b60;border-radius:9px;padding:5px 10px}
+.live-trace-header{display:flex;align-items:center;gap:9px;min-height:35px;margin-bottom:5px}
+.live-trace-object-button{appearance:none;border:0;border-radius:3px;background:transparent;color:var(--trace-gold);font:inherit;display:flex;align-items:center;gap:12px;flex:1;min-width:0;min-height:35px;padding:0;text-align:left;cursor:pointer;letter-spacing:0}
+.live-trace-object-button:hover .live-trace-name{color:#ffe0a2}
+.live-trace-object-button:focus-visible,.live-trace-toggle:focus-visible,.live-trace-history:focus-visible{outline:2px solid var(--trace-gold);outline-offset:3px}
+.live-trace-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#ffdb95;box-shadow:0 0 9px #ffd183a3,0 0 20px #ffd18333}
+.live-trace-name{font-size:15px;line-height:1.3;font-weight:400;letter-spacing:.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-pin{font-size:16px;line-height:1;color:#ffda94;flex:0 0 auto}
+.live-trace-status{color:var(--trace-gold);font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.11em;white-space:nowrap;border:1px solid #d6bd7e36;border-radius:5px;background:#070b0d33;padding:4px 7px;flex:0 0 auto}
+.live-trace-status:before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:#ffda95;box-shadow:0 0 6px #ffce7470;vertical-align:1px}
+.live-trace-excerpt{border:1px solid #c5cebd26;border-radius:7px;background:linear-gradient(100deg,#ced8cf06,#e5f0de03);padding:10px 13px;max-height:92px;overflow:hidden;font:15px/1.55 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;color:#e7ece5}
+.live-trace-excerpt-line{margin:0;min-width:0}
+.live-trace-excerpt code{display:block;font:inherit;color:inherit;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;tab-size:2}
+.live-trace-token-number{color:#9fc5e9}.live-trace-token-function{color:#efc271}.live-trace-token-keyword{color:#c5cabd}.live-trace-token-string{color:#b5d1a1}.live-trace-token-comment{color:#7f9291}
+.live-trace-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin-top:9px;min-height:40px}
+.live-trace-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;padding:0;margin:0}
+.live-trace-value{min-width:0}
+.live-trace-values .live-trace-value+.live-trace-value{padding-left:15px;border-left:1px solid #d2ae6640}
+.live-trace-value dt{margin:0 0 3px;color:var(--trace-dim);font:10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-value dd{margin:0;color:#efd392;font:18px/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.live-trace-toggle{appearance:none;display:flex;align-items:center;justify-content:flex-end;gap:9px;min-height:38px;max-width:148px;padding:0 0 0 15px;border:0;border-left:1px solid #d2ae6640;border-radius:0;background:transparent;color:var(--trace-gold);font:11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;cursor:pointer;text-align:right}
+.live-trace-toggle:hover{color:#ffe4ac}
+.live-trace-chevron{font:17px/1 monospace;transform:translateY(-2px);transition:transform .18s}
+.live-trace[data-expanded=true] .live-trace-chevron{transform:translateY(2px) rotate(180deg)}
+.live-trace-snapshot{margin:7px 2px 0;color:#97a7a2;font:10px/1.45 Arial,Helvetica,sans-serif;letter-spacing:0}
+.live-trace[data-paused=true] .live-trace-status,.live-trace[data-waiting=true] .live-trace-status{color:#aab8b1;border-color:#aab8b138}
+.live-trace[data-paused=true] .live-trace-status:before,.live-trace[data-waiting=true] .live-trace-status:before{background:#9baba4;box-shadow:none}
+.live-trace[data-waiting=true] .live-trace-dot{background:#a9b4a8;box-shadow:none}
+.live-trace[data-waiting=true] .live-trace-excerpt,.live-trace[data-waiting=true] .live-trace-values{opacity:.7}
+.live-trace-body{border-top:1px solid #cbb38225;margin-top:9px;padding-top:10px;max-height:min(340px,45svh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#7b704c #0b1212}
+.live-trace-provenance{display:flex;gap:8px;align-items:center;justify-content:space-between;color:#a9b6ad;font:9px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;padding:0 1px}
+.live-trace-origin{min-width:0}.live-trace-frame{color:#9c9e82;white-space:nowrap}
+.live-trace-object{font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;color:#788e87;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:4px 1px 8px}
+.live-trace-history{position:relative;max-height:210px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#817345 #081011;background:#040b0d50;border-radius:5px;scroll-behavior:smooth}
+.live-trace-code{min-width:100%;width:max-content;padding:6px 12px 8px 0;color:#86928c;opacity:.5;border-left:2px solid transparent}
+.live-trace-code.is-current{color:#cad5c9;opacity:1;border-left-color:#e9c78080}
+.live-trace-code-label{padding:4px 0 7px 36px;font:9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a6b89e;letter-spacing:.02em}
+.live-trace-line{display:flex;align-items:baseline;min-height:20px;font:11px/20px ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;white-space:pre}
+.live-trace-line.is-relevant{background:linear-gradient(90deg,#dab87216,#dab87203);color:#e8e6d7}
+.live-trace-line-number{flex:0 0 35px;width:35px;padding-right:9px;text-align:right;color:#7183787a;font-size:8px;user-select:none}
+.live-trace-line code{display:block;font:inherit;color:inherit;white-space:pre;tab-size:2}
+.live-trace-details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 1px 0;padding:0}
+.live-trace-details:empty{display:none}.live-trace-details .live-trace-value dt{font-size:8px}.live-trace-details .live-trace-value dd{font-size:11px}
+.live-trace-audio{display:flex;align-items:center;gap:8px;margin-top:9px;padding:9px 1px 3px;min-height:22px;border-top:1px solid #cbb38217;font-size:9px}
+.live-trace-audio-label{color:#91a69c;font-size:8px;text-transform:uppercase;letter-spacing:.07em}
+.live-trace-audio-value{color:#acc1b7;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;font:9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace}
+.live-trace-bands{display:flex;align-items:flex-end;height:12px;gap:3px;flex:0 0 auto}
+.live-trace-bands i{display:block;width:2px;height:12px;background:#b9caa4;opacity:calc(.25 + var(--level,0)*.75);transform-origin:bottom;transform:scaleY(calc(.15 + var(--level,0)*.85));transition:transform .12s linear,opacity .12s linear}
+.live-trace-audio[data-running=false] .live-trace-bands{opacity:.3}
+.live-trace-tether{position:fixed;inset:0;width:100%;height:100%;overflow:visible;z-index:30;pointer-events:none;color:#f1cc83;filter:drop-shadow(0 0 3px #edc16b45)}
+.live-trace-thread{fill:none;stroke:currentColor;stroke-width:1.15;stroke-opacity:.82}
+.live-trace-target-halo{fill:#e8bf6620;stroke:currentColor;stroke-width:1;stroke-opacity:.8}
+.live-trace-target{fill:#ffe4ad;stroke:#fff0c8;stroke-width:.7}
+.live-trace[data-mode=page] .live-trace-header{min-height:26px;margin-bottom:3px}
+.live-trace[data-mode=page] .live-trace-object-button{min-height:26px;gap:9px}
+.live-trace[data-mode=page] .live-trace-name{font-size:12px}
+.live-trace[data-mode=page] .live-trace-status{font-size:8px;padding:3px 5px}
+.live-trace[data-mode=page] .live-trace-excerpt{padding:6px 8px;font-size:11px;line-height:1.5;max-height:48px}
+.live-trace[data-mode=page] .live-trace-bottom{margin-top:5px;min-height:30px;gap:9px}
+.live-trace[data-mode=page] .live-trace-value dt{font-size:8px;margin-bottom:2px}
+.live-trace[data-mode=page] .live-trace-value dd{font-size:14px}
+.live-trace[data-mode=page] .live-trace-toggle{min-height:30px;font-size:9px;padding-left:10px;gap:5px}
+@media(min-width:1100px){.live-trace[data-mode=intro]{width:min(640px,calc(100vw - 80px));padding:10px 17px 9px}.live-trace[data-mode=intro] .live-trace-header{min-height:36px}.live-trace[data-mode=intro] .live-trace-name{font-size:16px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:16px;padding:10px 15px}.live-trace[data-mode=intro] .live-trace-value dd{font-size:20px}}
+@media(max-width:700px){.live-trace[data-mode=intro]{left:14px;right:14px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:520px;margin:0 auto;transform:none;border-radius:10px;padding:6px 10px 6px}.live-trace-header{min-height:31px;margin-bottom:4px;gap:7px}.live-trace-object-button{min-height:31px;gap:9px}.live-trace-name{font-size:13px;letter-spacing:.012em}.live-trace-status{font-size:8px;padding:3px 6px}.live-trace-status:before{width:4px;height:4px;margin-right:4px}.live-trace-excerpt{font-size:12.5px;line-height:1.55;padding:8px 10px;border-radius:6px;max-height:76px}.live-trace-bottom{gap:9px;margin-top:7px;min-height:34px}.live-trace-values{gap:11px}.live-trace-values .live-trace-value+.live-trace-value{padding-left:11px}.live-trace-value dt{font-size:9px;margin-bottom:2px}.live-trace-value dd{font-size:16px}.live-trace-toggle{font-size:10px;gap:6px;padding-left:11px;min-height:34px;max-width:116px}.live-trace-chevron{font-size:15px}.live-trace-body{max-height:36svh;margin-top:8px;padding-top:8px}.live-trace-provenance{font-size:8px}.live-trace-frame{font-size:7px}.live-trace-history{max-height:170px}.live-trace-line{font-size:10px;line-height:19px;min-height:19px}.live-trace[data-mode=page]{width:100%;max-width:none}.live-trace-visible-intro #quench-controls{bottom:calc(var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom))) + 158px);max-height:calc(100svh - 330px);overflow:auto}.live-trace-open-intro #quench-controls{visibility:hidden}.live-trace-details{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
+@media(max-width:360px){.live-trace[data-mode=intro]{left:10px;right:10px;padding-right:8px;padding-left:8px}.live-trace-name{font-size:12px}.live-trace-excerpt{font-size:11.5px;padding:7px 8px}.live-trace-values{gap:8px}.live-trace-values .live-trace-value+.live-trace-value{padding-left:8px}.live-trace-toggle{font-size:9px;padding-left:8px;gap:4px}.live-trace-value dd{font-size:15px}}
+@media(max-height:540px){.live-trace[data-mode=intro]{left:16px;right:auto;width:min(420px,calc(100vw - 32px));max-height:calc(100svh - 86px);margin:0;transform:none;bottom:var(--trace-dock-bottom,12px)}.live-trace-header{min-height:27px;margin-bottom:3px}.live-trace-object-button{min-height:27px}.live-trace-name{font-size:12px}.live-trace-excerpt{font-size:11px;padding:6px 9px;max-height:49px}.live-trace-bottom{margin-top:5px;min-height:30px}.live-trace-value dd{font-size:15px}.live-trace-toggle{min-height:30px}.live-trace-body{max-height:28svh}.live-trace-history{max-height:100px}}
+@media(prefers-reduced-motion:reduce){.live-trace{backdrop-filter:none;-webkit-backdrop-filter:none}.live-trace-history{scroll-behavior:auto}.live-trace-chevron,.live-trace-bands i{transition:none}.live-trace-tether{filter:none}}
+@media print{.live-trace,.live-trace-tether{display:none!important}}
+
+/* The compact dock has its own space in both the cinema and the page. */
+body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
+#artifact-slot{bottom:150px}
+.artifact-caption{bottom:111px}
+.artifact-help{display:none}
+@media(min-width:1051px){.hero{grid-template-rows:minmax(475px,1fr) 150px 82px}}
+@media(min-width:1051px) and (max-height:780px){.hero{grid-template-rows:minmax(425px,1fr) 123px 61px}}
+@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(465px,1fr) 112px 60px}}
+@media(max-width:700px){.hero{grid-template-rows:max-content minmax(324px,1fr) 94px auto}#artifact-stage{min-height:324px}#artifact-slot{bottom:150px}.artifact-caption{bottom:111px}}
+@media(max-width:360px){.hero{grid-template-rows:max-content minmax(299px,1fr) 88px auto}#artifact-stage{min-height:299px}}
 
 </style></head>
 <body><div id="reading-progress" aria-hidden="true"><i></i></div><script>document.body.classList.add('intro','booting');</script><a class="skip-content" data-l10n="n12" href="#hero-heading">Przejdź do treści</a>
@@ -1765,6 +1816,96 @@ GuziczakModules.define('app/engine',[
  'audio/music','audio/foley','audio/score','input/motion','math','interaction/quench','ui/quench','world/water-drive','audio/instrument','runtime/trace'
 ],(config,timelines,scopes,devices,geometry,brands,scenes,states,cameras,renderers,exhibits,interfaces,exhibitUI,music,foley,scores,sensors,math,quenchLib,quenchUI,waterDrive,instruments,traces)=>{
  'use strict';
+ // Projections use the renderer's just-drawn matrix. The helpers are also exposed
+ // for CPU regression checks; they neither render nor schedule another frame.
+ function projectTraceTargets(packet,project,viewport,frame={},executed=[]){
+  const targets=[],pickTargets=[],commands=packet?.commands||[],byId=new Map(commands.map(command=>[command.id,command]));
+  const width=viewport.width,height=viewport.height;
+  if(typeof project!=='function'||!(width>0&&height>0)||frame.time>=16.70)return {targets,pickTargets};
+  const aliases={'water/metal-contact':'foundry/meltA/0'};
+  const seen=new Set(),screenCache=new Map();
+  function screenPoint(world){
+   if(!world||world.length<3||!Array.from(world).slice(0,3).every(Number.isFinite))return null;
+   const p=project(world);if(!p||!Number.isFinite(p[0])||!Number.isFinite(p[1])||!Number.isFinite(p[2]))return null;
+   return {x:p[0],y:p[1],depth:p[2],visible:p[2]>0&&p[0]>=0&&p[0]<=width&&p[1]>=0&&p[1]<=height};
+  }
+  function commandScreen(command){
+   if(!command||command.light<.001||!command.mesh?.bounds||!command.m)return null;
+   if(screenCache.has(command.id))return screenCache.get(command.id);
+   const bounds=command.mesh.bounds,local=bounds.min.map((v,i)=>(v+bounds.max[i])*.5);
+   // Mode 5 stores a normalized fill height. Its visible surface lies in this
+   // authored mould plane, not halfway up the undeformed unit-height mesh.
+   if(command.mode===5)local[1]=-.084;
+   const center=screenPoint(math.M.point(command.m,local));if(!center)return null;
+   let left=center.x,right=center.x,top=center.y,bottom=center.y,near=center.depth;
+   for(let corner=0;corner<8;corner++){
+    const p=bounds.min.map((v,i)=>corner&(1<<i)?bounds.max[i]:v);
+    if(command.mode===5)p[1]=-.084;
+    const q=screenPoint(math.M.point(command.m,p));if(!q||q.depth<=0)continue;
+    left=Math.min(left,q.x);right=Math.max(right,q.x);top=Math.min(top,q.y);bottom=Math.max(bottom,q.y);near=Math.min(near,q.depth);
+   }
+   const result={...center,left,right,top,bottom,near,radius:Math.min(64,Math.max(12,Math.min(right-left,bottom-top)*.48))};
+   screenCache.set(command.id,result);return result;
+  }
+  const occluders=['assembly/cup/0','assembly/coil/0','foundry/flask/0'].map(id=>({id,screen:commandScreen(byId.get(id))})).filter(item=>item.screen?.visible);
+  function covered(screen,objectId){
+   // Conservative interior footprints reject taps on pipes behind the cup or
+   // mould. This is a picking aid, not a claim to read the GPU's depth buffer.
+   return occluders.some(item=>{
+    const box=item.screen;if(item.id===objectId||screen.depth<=box.near+.15)return false;
+    const halfX=(box.right-box.left)*.38,halfY=(box.bottom-box.top)*.38;
+    if(halfX<5||halfY<5)return false;
+    const dx=(screen.x-(box.left+box.right)*.5)/halfX,dy=(screen.y-(box.top+box.bottom)*.5)/halfY;
+    return item.id==='foundry/flask/0'?Math.abs(dx)<1&&Math.abs(dy)<1:dx*dx+dy*dy<1;
+   });
+  }
+  function add(key,objectId,screen,pickable,extra={}){
+   if(!screen||seen.has(objectId)||targets.length>=64)return;
+   seen.add(objectId);
+   const visible=screen.visible&&!(key==='organ'&&covered(screen,objectId));
+   targets.push({objectId,x:screen.x,y:screen.y,visible});
+   if(visible&&pickable)pickTargets.push({key,objectId,x:screen.x,y:screen.y,depth:screen.depth,radius:screen.radius||18,visible:true,...extra});
+  }
+  // Instrument mouths exist in the body mesh even between notes. Selecting one
+  // then leaves its real operation in CZEKA until that voice is executed again.
+  for(const target of packet.traceTargets||[]){
+   if(target?.key!=='organ'||!target.objectId||!target.world)continue;
+   const screen=screenPoint(target.world);if(!screen)continue;
+   let radius=9;const worldRadius=Math.max(.04,Math.min(.3,Number(target.radius)||.2));
+   for(let axis=0;axis<3;axis++){
+    const p=Array.from(target.world);p[axis]+=worldRadius;const q=screenPoint(p);
+    if(q&&q.depth>0)radius=Math.max(radius,Math.hypot(q.x-screen.x,q.y-screen.y));
+   }
+   screen.radius=Math.min(25,Math.max(10,radius));
+   add('organ',target.objectId,screen,true,{midi:target.midi});
+  }
+  for(const record of executed){
+   if(!record?.objectId||record.key==='organ'||(frame.frameId&&record.frameId&&frame.frameId!==record.frameId))continue;
+   const command=byId.get(record.objectId)||byId.get(aliases[record.objectId]);
+   const screen=commandScreen(command);if(!screen)continue;
+   const pickable=['gold','cast','lift','assembly','pour','mould','quench'].includes(record.key);
+   add(record.key,record.objectId,screen,pickable);
+  }
+  // A cup tap can select its currently executing lift/assembly operation. The
+  // tether remains attached to the instrumented coil/collar, not to a fake mesh.
+  const cup=commandScreen(byId.get('assembly/cup/0'));
+  if(cup?.visible){
+   const assembly=executed.find(record=>record.key==='assembly'&&byId.has(record.objectId))||executed.find(record=>record.key==='lift'&&byId.has(record.objectId));
+   if(assembly)pickTargets.push({key:assembly.key,objectId:assembly.objectId,x:cup.x,y:cup.y,depth:cup.depth,radius:Math.min(72,Math.max(18,Math.min(cup.right-cup.left,cup.bottom-cup.top)*.42)),visible:true,proxy:'cup'});
+  }
+  return {targets,pickTargets};
+ }
+ function pickTraceTarget(targets,x,y,options={}){
+  if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+  const minimum=options.pointerType==='touch'?15:9;let best=null,bestDistance=Infinity;
+  for(const target of targets||[]){
+   if(!target||target.visible===false||!Number.isFinite(target.x)||!Number.isFinite(target.y)||!(target.depth>0))continue;
+   const radius=Math.max(minimum,Math.min(72,Number(target.radius)||minimum)),distance=Math.hypot(x-target.x,y-target.y);
+   if(distance>radius)continue;
+   if(distance<bestDistance-2||(Math.abs(distance-bestDistance)<=2&&target.depth<(best?.depth??Infinity))){best=target;bestDistance=distance;}
+  }
+  return best;
+ }
  function mount(window,document,options={}){
   const timeline=timelines.createTimeline({...config.durations,...options.durations}),clock=timelines.createClock(timeline),scope=scopes.createScope(),ui=interfaces.createUI(document),canvas=ui.$('scene');
   const params=new URLSearchParams(window.location.search),reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -1775,8 +1916,10 @@ GuziczakModules.define('app/engine',[
   let routeSuspended=false;
   let raf=0,mode='idle',dirty=true,ready=false,failed=false,disposed=false,frameNumber=0,lastFrame=null,lastPacket=null,lastError='',wasPlaying=false,seekFrame=false;
   let waiters=[],lastSceneRect=null,pageEpoch=0,lastPageMs=null;
+  let screenPickTargets=[],tracePointer=null,traceFrameNumber=0,tracePickCount=0;
   const stage=exhibitUI.create(window,document,()=>{dirty=true;schedule();});
-  const viewport=()=>{const v={width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1};return {...v,brand:ui.measureBrand(v)};};
+  const viewport=()=>{const v={width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},mobile=v.width<701;
+   return {...v,brand:ui.measureBrand(v),traceTop:mode==='intro'?Math.min(mobile?56:62,v.height*.13):0,traceInset:mode==='intro'?Math.min(mobile?180:176,v.height*.30):0};};
   const drive=waterDrive.create();let lastWaterMs=null,waterPaused=reduced;
   const quench=quenchLib.create(timeline),quenchPanel=quenchUI.create(document,()=>surge(),()=>motion.enable());
   function surge(options={}){
@@ -1795,32 +1938,42 @@ GuziczakModules.define('app/engine',[
   function resolve(){const q=waiters;waiters=[];for(const r of q)r(diagnostics());}
   function schedule(){if(!raf&&!routeSuspended&&!disposed&&!failed&&!document.hidden)raf=requestAnimationFrame(tick);}
   function cancel(){if(raf)cancelAnimationFrame(raf);raf=0;}
+  function clearTracePicking(){screenPickTargets=[];tracePointer=null;}
+  function projectExhibitTrace(rect,shown=true){
+   const x=rect.x+rect.w*.5,y=rect.y+rect.h*.5,visible=!!shown&&rect.w>0&&rect.h>0&&x>=0&&x<=innerWidth&&y>=0&&y<=innerHeight;
+   trace.projectObject('exhibit/signature',{x,y,visible});
+   screenPickTargets=visible?[{key:'exhibit',objectId:'exhibit/signature',x,y,depth:1,radius:Math.min(72,Math.max(18,Math.min(rect.w,rect.h)*.31)),visible:true}]:[];
+  }
   function initializeBase(){if(device)return;device=devices.createDevice(canvas);brand=brands.create(device.gl);exhibit=exhibits.create(device,brand,canvas);}
   function initializeCinema(){initializeBase();if(renderer)return;catalog=geometry.createGeometry(device.gl,brand);scene=scenes.createScene(catalog);renderer=renderers.createRenderer(device,catalog,canvas,document,config.render);}
-  function fail(e){if(disposed)return;trace.setSuspended(true);failed=true;ready=false;mode='failed';lastError=String(e?.message||e);cancel();clock.pause();if(device)device.dispose();canvas.style.display='none';document.body.classList.remove('exhibit-ready','world-pending');ui.fail(globalThis.GUZICZAK_I18N.t("engine.15"),lastError);canvas.style.display='none';ui.$('artifact-toggle').disabled=true;ui.$('quench-preview').disabled=true;for(const id of ['water-surge','water-wave','water-pause','motion','motion-mobile'])ui.$(id).disabled=true;stage.slot.removeAttribute('tabindex');ui.$('artifact-help').textContent=globalThis.GUZICZAK_I18N.t("engine.16");sound.finish();scoreLayer.finish();sound.ready();dispatch('guziczak:brand-fallback');resolve();console.error('[GUZICZAK]',e);}
+  function fail(e){if(disposed)return;clearTracePicking();trace.setSuspended(true);failed=true;ready=false;mode='failed';lastError=String(e?.message||e);cancel();clock.pause();if(device)device.dispose();canvas.style.display='none';document.body.classList.remove('exhibit-ready','world-pending');ui.fail(globalThis.GUZICZAK_I18N.t("engine.15"),lastError);canvas.style.display='none';ui.$('artifact-toggle').disabled=true;ui.$('quench-preview').disabled=true;for(const id of ['water-surge','water-wave','water-pause','motion','motion-mobile'])ui.$(id).disabled=true;stage.slot.removeAttribute('tabindex');ui.$('artifact-help').textContent=globalThis.GUZICZAK_I18N.t("engine.16");sound.finish();scoreLayer.finish();sound.ready();dispatch('guziczak:brand-fallback');resolve();console.error('[GUZICZAK]',e);}
   sound.attachEffects((ctx,dest)=>{fx=foley.createFoley(ctx,dest,config.mix);fx.reset(lastFrame?.time||0);return fx;});
   function tick(ms){
    raf=0;if(routeSuspended||disposed||failed||document.hidden)return;
    try{
     if(mode==='page'){
-      if(!stage.visible()&&!dirty){lastWaterMs=null;trace.endFrame({visible:false});return;}
-      trace.beginFrame('page',{elapsed:clock.elapsed,time:lastFrame?.time||0},ms);
-      initializeBase();const pose=stage.sample(ms),env=waterFrame(ms,false);lastPageMs=ms;lastInstrument=instrument.sample();
-      if(dirty||stage.needsFrame()||!waterPaused)exhibit.render(stage.rect(),pose.yaw,pose.pitch,false,1,env.water.time,{...env.motion,water:env.water});
+      if(!stage.visible()&&!dirty){lastWaterMs=null;clearTracePicking();trace.endFrame({visible:false});return;}
+      trace.beginFrame('page',{frameId:++traceFrameNumber,elapsed:clock.elapsed,time:lastFrame?.time||0},ms);
+      initializeBase();const pose=stage.sample(ms),env=waterFrame(ms,false),rect=stage.rect();lastPageMs=ms;lastInstrument=instrument.sample();
+      if(dirty||stage.needsFrame()||!waterPaused)exhibit.render(rect,pose.yaw,pose.pitch,false,1,env.water.time,{...env.motion,water:env.water});
+      projectExhibitTrace(rect,stage.visible());
       canvas.style.visibility='visible';canvas.dataset.renderMode='page';document.body.classList.remove('world-pending');
-      document.body.classList.add('exhibit-ready');dirty=false;ready=true;window.__renderReady=true;resolve();
+      document.body.classList.add('exhibit-ready');dirty=false;ready=true;window.__renderReady=true;
       trace.endFrame({audio:lastInstrument,paused:waterPaused&&!stage.needsFrame(),visible:stage.visible()});
+      resolve();
       if(stage.needsFrame()||!waterPaused||lastInstrument.running)schedule();return;
     }
     if(mode!=='intro'||(!dirty&&clock.state!=='playing'&&!lastInstrument?.running))return;
     initializeCinema();if(!renderer.ready()){schedule();return;}
-    const cursor=clock.tick(ms),frame=states.sampleState(cursor),vp=viewport();frame.frozen=clock.state!=='playing';frame.finished=cursor.complete;frame.seek=seekFrame;seekFrame=false;
+    const cursor=clock.tick(ms),frame=states.sampleState(cursor),vp=viewport();frame.frozen=clock.state!=='playing';frame.finished=cursor.complete;frame.seek=seekFrame;frame.reduced=reduced;frame.frameId=++traceFrameNumber;seekFrame=false;
     trace.beginFrame('intro',frame,ms);
     Object.assign(frame,waterFrame(ms,frame.frozen));
     frame.instrument=lastInstrument=instrument.sample();
     frame.quench=quench.sample(frame);
     const packet=scene.sample(frame,vp);Object.assign(frame,{fluid:packet.fluid,docking:packet.docking,reclaim:packet.reclaim,inflow:packet.inflow},packet.atmosphere);
     renderer.render(frame,packet,cameras.sampleCamera(frame,vp,packet.assembly),vp);canvas.style.visibility='visible';canvas.dataset.renderMode='intro';ui.render(frame,packet,renderer.project,vp);
+    const projected=projectTraceTargets(packet,renderer.project,vp,frame,trace.executed());
+    trace.setTargets(projected.targets);screenPickTargets=projected.pickTargets;
     if(frame.time>=16.70){
       const r=ui.markRect||lastSceneRect||{x:vp.width*.5,y:vp.height*.4,w:200,h:204};lastSceneRect=r;
       const target=stage.rect(),a=math.ease(20.35,22.70,frame.time),from={x:r.x-r.w/2,y:r.y-r.h/2,w:r.w,h:r.h};
@@ -1833,6 +1986,7 @@ GuziczakModules.define('app/engine',[
         math.ease(16.70,17.05,frame.time),frame.water.time,
         {...frame.motion,water:frame.water,landing:turn,environmentReveal:math.ease(21.0,22.70,frame.time)});
       device.gl.flush();
+      projectExhibitTrace(rect,frame.time>16.72);
     }
     quenchPanel.update(frame,frame.quench,frame.motion);clock.setRate(frame.phase==='cooling'?frame.quench.coolingRate:1);
     scoreLayer.setScene(frame.time);lastFrame=frame;lastPacket=packet;dirty=false;frameNumber++;window.__frameNumber=frameNumber;
@@ -1844,7 +1998,7 @@ GuziczakModules.define('app/engine',[
    }catch(e){fail(e);}
   }
   function complete(){
-    cancel();clock.setRate(1);quenchPanel.hide();clock.complete();mode='page';dirty=true;pageEpoch++;lastPageMs=null;
+    cancel();clearTracePicking();trace.reset();clock.setRate(1);quenchPanel.hide();clock.complete();mode='page';dirty=true;pageEpoch++;lastPageMs=null;
     canvas.style.visibility='hidden';canvas.dataset.renderMode='pending';document.body.classList.add('world-pending');if(fx)fx.stop();
     if(renderer)renderer.suspend();ui.finish();document.getElementById('exhibit-world').appendChild(canvas);canvas.classList.add('exhibit-canvas');canvas.style.opacity='1';canvas.style.display='block';stage.activate();
     sound.finish();scoreLayer.finish();sound.ready();
@@ -1859,21 +2013,49 @@ GuziczakModules.define('app/engine',[
     dispatch('guziczak:brand-complete');schedule();return new Promise(r=>waiters.push(r));
   }
   function enter(){stage.deactivate();if(exhibit)exhibit.suspend();lastPageMs=null;canvas.style.visibility='hidden';canvas.dataset.renderMode='pending';document.body.classList.remove('world-pending');canvas.classList.remove('exhibit-canvas');document.body.insertBefore(canvas,ui.$('cinema-shade'));ui.enter(!ready);mode='intro';dirty=true;lastSceneRect=null;}
-  function play(){if(disposed||failed)return;trace.reset();instrument.reset();quench.reset();drive.reset();lastWaterMs=null;quenchPanel.hide();lastFrame=null;lastPacket=null;motion.recenter();window.scrollTo({top:0,left:0,behavior:'instant'});clock.play();enter();scoreLayer.reset();if(fx)fx.reset(0);sound.begin(true);seekFrame=true;schedule();dispatch('guziczak:brand-start');}
-  function seek(seconds){if(disposed||failed)return Promise.reject(Error('Player unavailable'));clock.seek(seconds);trace.reset();instrument.reset();quench.reset();drive.reset();lastWaterMs=null;enter();seekFrame=true;if(fx)fx.reset(clock.snapshot().authoredTime);sound.timelinePause(true);schedule();return new Promise(r=>waiters.push(r));}
+  function play(){if(disposed||failed)return;clearTracePicking();trace.reset();instrument.reset();quench.reset();drive.reset();lastWaterMs=null;quenchPanel.hide();lastFrame=null;lastPacket=null;motion.recenter();window.scrollTo({top:0,left:0,behavior:'instant'});clock.play();enter();scoreLayer.reset();if(fx)fx.reset(0);sound.begin(true);seekFrame=true;schedule();dispatch('guziczak:brand-start');}
+  function seek(seconds){if(disposed||failed)return Promise.reject(Error('Player unavailable'));clearTracePicking();clock.seek(seconds);trace.reset();instrument.reset();quench.reset();drive.reset();lastWaterMs=null;enter();seekFrame=true;if(fx)fx.reset(clock.snapshot().authoredTime);sound.timelinePause(true);schedule();return new Promise(r=>waiters.push(r));}
   function pause(){if(mode==='page'){stage.setPaused(true);setWaterPaused(true);return;}if(mode!=='intro')return;clock.pause();dirty=true;sound.timelinePause(true);if(fx)fx.stop();schedule();}
   function resume(){if(mode==='page'){stage.setPaused(false);setWaterPaused(false);return;}if(mode!=='intro'||disposed||failed)return;clock.resume();lastWaterMs=null;sound.timelinePause(false);dirty=true;schedule();}
   function diagnostics(){const f=lastFrame||states.sampleState(clock.snapshot());return {version:config.version,mode,routeSuspended,waterState:drive.diagnostics(),waterPaused,ready,phase:mode==='page'?'page':f.phase,time:clock.elapsed,authoredTime:f.time,total:timeline.total,playback:clock.state,playbackRate:clock.rate,savedCoolingSeconds:clock.saved,quench:quench.diagnostics(),finished:mode==='page',frozen:clock.state==='paused',frame:frameNumber,error:lastError,disposed,
    ...(renderer&&!device?.disposed?renderer.stats():{}),resources:device?device.counts():{},surface:device?device.surface():null,exhibit:exhibit&&!device?.disposed?exhibit.stats():{},exhibitControl:stage.diagnostics(),
-   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial}:null};}
-  function destroy(){if(disposed)return;disposed=true;mode='disposed';clock.pause();cancel();stage.destroy();quench.destroy();quenchPanel.destroy();scope.dispose();motion.destroy();scoreLayer.destroy();instrument.destroy();trace.destroy();if(globalThis.GUZICZAK_TRACE===trace)delete globalThis.GUZICZAK_TRACE;sound.destroy();if(device)device.dispose();ui.finish();canvas.style.display='none';dispatch('guziczak:brand-dispose');resolve();}
+   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),tracePicking:{targets:screenPickTargets.length,picks:tracePickCount,frame:traceFrameNumber},instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial,slots:lastPacket?.instrument?.slots??instruments.layout?.pitches?.length??0,pitches:lastPacket?.instrument?.pitches??instruments.layout?.pitches??[],active:mode==='intro'?(lastPacket?.instrument?.active||0):0,columns:mode==='intro'?(lastPacket?.instrument?.columns||[]):[],strongest:mode==='intro'?(lastPacket?.instrument?.strongest||null):null}:null};}
+  function destroy(){if(disposed)return;disposed=true;mode='disposed';clearTracePicking();clock.pause();cancel();stage.destroy();quench.destroy();quenchPanel.destroy();scope.dispose();motion.destroy();scoreLayer.destroy();instrument.destroy();trace.destroy();if(globalThis.GUZICZAK_TRACE===trace)delete globalThis.GUZICZAK_TRACE;sound.destroy();if(device)device.dispose();ui.finish();canvas.style.display='none';dispatch('guziczak:brand-dispose');resolve();}
   scope.on(ui.$('skip'),'click',()=>{complete();ui.$('replay').focus({preventScroll:true});});scope.on(ui.$('replay'),'click',play);scope.on(ui.$('close-fallback'),'click',ui.closeFallback);
   scope.on(ui.$('scene-pause'),'click',()=>clock.state==='playing'?pause():resume());
   scope.on(window,'keydown',e=>{if(routeSuspended)return;if(e.target?.matches?.('input,textarea,select,[contenteditable]'))return;if(e.code==='KeyW'&&!e.repeat){e.preventDefault();surge();}if(e.code==='Escape'&&mode==='intro'){e.preventDefault();complete();ui.$('replay').focus({preventScroll:true});}if(e.code==='Space'&&mode==='intro'&&e.target===document.body){e.preventDefault();clock.state==='playing'?pause():resume();}});
   scope.on(window,'guziczak:water-input',()=>{dirty=true;schedule();});
   scope.on(window,'guziczak:soundchange',()=>{dirty=true;schedule();});
-  scope.on(window,'resize',()=>{dirty=true;clock.reanchor();schedule();});
-  scope.on(document,'visibilitychange',()=>{if(document.hidden){lastWaterMs=null;wasPlaying=clock.state==='playing';if(wasPlaying)clock.pause();cancel();if(fx)fx.stop();}else{if(wasPlaying){clock.resume();wasPlaying=false;}clock.reanchor();dirty=true;schedule();}});
+  // Only explicit trace UI changes wake the renderer. Projecting targets itself
+  // emits no event and cannot create a recurring frame loop while paused.
+  for(const event of ['guziczak:tracefocus','guziczak:tracelayout'])scope.on(window,event,()=>{dirty=true;schedule();});
+  scope.on(window,'resize',()=>{clearTracePicking();dirty=true;clock.reanchor();schedule();});
+  scope.on(document,'visibilitychange',()=>{if(document.hidden){clearTracePicking();lastWaterMs=null;wasPlaying=clock.state==='playing';if(wasPlaying)clock.pause();cancel();if(fx)fx.stop();}else{if(wasPlaying){clock.resume();wasPlaying=false;}clock.reanchor();dirty=true;schedule();}});
+  const traceControls='a,button,input,select,textarea,[role="button"],[contenteditable],#intro-controls,#audio-panel,#quench-controls,.live-trace';
+  const ignoreTracePointer=event=>event.defaultPrevented||event.target?.closest?.(traceControls)||routeSuspended||disposed||failed||document.hidden||!['intro','page'].includes(mode)||(mode==='page'&&!stage.slot.contains(event.target));
+  scope.on(document,'pointerdown',event=>{
+   if(event.isPrimary===false||event.button!==0){tracePointer=null;return;}
+   if(ignoreTracePointer(event))return;
+   const target=pickTraceTarget(screenPickTargets,event.clientX,event.clientY,{pointerType:event.pointerType});
+   tracePointer=target?{id:event.pointerId,x:event.clientX,y:event.clientY,at:window.performance.now(),key:target.key,objectId:target.objectId,type:event.pointerType}:null;
+  },{passive:true});
+  scope.on(document,'pointermove',event=>{
+   if(tracePointer&&event.pointerId===tracePointer.id&&Math.hypot(event.clientX-tracePointer.x,event.clientY-tracePointer.y)>8)tracePointer=null;
+  },{passive:true});
+  scope.on(window,'pointerup',event=>{
+   const tap=tracePointer;if(!tap||event.pointerId!==tap.id)return;tracePointer=null;
+   if(ignoreTracePointer(event)||window.performance.now()-tap.at>700||Math.hypot(event.clientX-tap.x,event.clientY-tap.y)>8)return;
+   // Recheck the same object against the latest displayed frame. A moving note
+   // or phase transition cannot silently turn a tap into a different selection.
+   const target=pickTraceTarget(screenPickTargets.filter(item=>item.key===tap.key&&item.objectId===tap.objectId),event.clientX,event.clientY,{pointerType:tap.type});
+   if(!target)return;
+   const selected=trace.selection();
+   if(selected?.pinned&&selected.key===target.key&&selected.objectId===target.objectId)trace.unpin();
+   else trace.pin(target.key,target.objectId);
+   tracePickCount++;dirty=true;schedule();
+  },{passive:true});
+  scope.on(window,'pointercancel',event=>{if(tracePointer?.id===event.pointerId)tracePointer=null;},{passive:true});
+  scope.on(window,'scroll',()=>{tracePointer=null;if(mode==='page'){screenPickTargets=[];dirty=true;schedule();}},{passive:true});
   scope.on(canvas,'webglcontextlost',e=>{e.preventDefault();fail(Error(globalThis.GUZICZAK_I18N.t("engine.19")));});
   const panel=ui.$('audio-panel'),menu=ui.$('audio-menu-button');
   scope.on(menu,'click',()=>{panel.hidden=!panel.hidden;menu.setAttribute('aria-expanded',String(!panel.hidden));});
@@ -1897,18 +2079,18 @@ GuziczakModules.define('app/engine',[
   });
   function setRouteSuspended(value){
     const next=!!value;if(next===routeSuspended)return;routeSuspended=next;
-    lastWaterMs=null;stage.reanchor();scoreLayer.setSuspended(next);trace.setSuspended(next);instrument.reset();
+    clearTracePicking();lastWaterMs=null;stage.reanchor();scoreLayer.setSuspended(next);trace.setSuspended(next);instrument.reset();
     if(next){cancel();if(fx)fx.stop();}else{dirty=true;schedule();}
   }
   const api={play,seek,pause,resume,surge,setWaterPaused,setRouteSuspended,skip:()=>complete(),destroy,diagnostics,sound,motion,
    seekPhase(id,p=0){const a=timeline.segments.find(x=>x.id===id);if(!a)throw Error('Unknown phase');return seek(a.start+a.duration*math.clamp(p,0,1));},seekAuthored(t){return seek(timeline.toElapsed(t));},
    get total(){return timeline.total;},get state(){return Object.freeze({...lastFrame,finished:mode==='page',frozen:clock.state==='paused'});},getAudio:()=>fx,
-   sample(seconds){initializeCinema();const f=states.sampleState(timeline.sample(seconds)),p=scene.sample(f,viewport());return {frame:f,camera:cameras.sampleCamera(f,viewport(),p.assembly),packet:{assembly:p.assembly,foundry:p.foundry},commands:p.commands.map(o=>({id:o.id,transform:Array.from(o.m),bounds:o.mesh.bounds,mode:o.mode,light:o.light})),vesselTransform:Array.from(p.vesselTransform),castTransform:p.castTransform?Array.from(p.castTransform):null};}
+   sample(seconds){initializeCinema();const f=states.sampleState(timeline.sample(seconds));f.reduced=reduced;const p=scene.sample(f,viewport());return {frame:f,camera:cameras.sampleCamera(f,viewport(),p.assembly),packet:{assembly:p.assembly,foundry:p.foundry,instrument:p.instrument,traceTargets:p.traceTargets},commands:p.commands.map(o=>({id:o.id,transform:Array.from(o.m),bounds:o.mesh.bounds,mode:o.mode,light:o.light})),vesselTransform:Array.from(p.vesselTransform),castTransform:p.castTransform?Array.from(p.castTransform):null};}
   };
   try{if(params.has('t'))seek(Number(params.get('t'))||0);else if(params.has('page')||window.GUZICZAK_SPA_BOOT?.cv||reduced||window.location.hash||document.documentElement.dataset.intro==='manual')complete();else{window.scrollTo({top:0,left:0,behavior:'instant'});clock.play();enter();sound.begin(false);schedule();dispatch('guziczak:brand-start');}}
   catch(e){fail(e);}return Object.freeze(api);
  }
- return {mount};
+ return {mount,projectTraceTargets,pickTraceTarget};
 });
 
 
@@ -2192,6 +2374,15 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
         let musicAnchor = 0, offset = 0, index = 0, timer = null, loopAt = Infinity, loading = null, epoch = 0, lastWheel = 0;
         const voices = new Set();
         const activeOscillators = new Set();
+        const oscillatorStops = new WeakMap();
+        // The instrument consumes these exact scheduled voices. It never reconstructs
+        // imaginary note-ons from score time, which may differ after a late scheduler tick.
+        const VOICE_ATTACK = .004, VOICE_FLOOR = .0001, VOICE_STOP_PAD = .05;
+        const VOICE_NORMALIZER = Math.sqrt(BELL_PARTIALS.reduce((sum, p) => sum + p[1] * p[1], 0));
+        const MAX_VOICE_HISTORY = 2048;
+        let voiceGeneration = 0, voiceId = 0, voiceHistory = [];
+        const masterEnvelope = [{ at: 0, from: 0, target: 0, tau: 0 }];
+        const themeEnvelope = [{ at: 0, from: musicLevel, target: musicLevel, tau: 0 }];
         let scheduled = 0, stopped = 0, starts = 0;
         let musicNodes = [], lastMusicTarget = -1, lastMasterTarget = -1;
         const sourceURL = name => 'https://raw.githubusercontent.com/guziczak/guziczak.github.io/main/public/' + name;
@@ -2218,21 +2409,41 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
                 status.textContent = text;
             window.dispatchEvent(new CustomEvent('guziczak:soundchange', { detail: { enabled: audible, muted, unlocked, music: scoreState } }));
         }
-        function ramp(param, value, tau = .15) { if (!ctx || !param)
-            return; const t = ctx.currentTime; param.cancelScheduledValues(t); param.setTargetAtTime(Math.max(0, value), t, tau); }
+        function envelopeValue(events, time) {
+            let i = events.length - 1;
+            while (i > 0 && events[i].at > time) i--;
+            const e = events[i];
+            if (time < e.at) return e.from;
+            return e.tau > 0 ? e.target + (e.from - e.target) * Math.exp(-(time - e.at) / e.tau) : e.target;
+        }
+        function ramp(param, value, tau = .15, envelope = null) {
+            if (!ctx || !param) return;
+            const t = ctx.currentTime, target = Math.max(0, value);
+            const from = envelope ? envelopeValue(envelope, t) : null;
+            param.cancelScheduledValues(t);
+            // Explicitly hold the tracked value before replacing the automation. The
+            // same events then describe both the real AudioParam and its visual gain.
+            if (envelope) param.setValueAtTime(from, t);
+            param.setTargetAtTime(target, t, tau);
+            if (envelope) {
+                envelope.push({ at: t, from, target, tau });
+                while (envelope.length > 2 && envelope[1].at < t - 2) envelope.shift();
+                if (envelope.length > 512) envelope.splice(0, envelope.length - 512);
+            }
+        }
         function updateMix() {
             if (!ctx)
                 return;
             const target = muted || document.hidden || timelinePaused ? 0 : volume;
             if (target !== lastMasterTarget) {
                 lastMasterTarget = target;
-                ramp(master.gain, target, .12);
+                ramp(master.gain, target, .12, masterEnvelope);
             }
             // Never replace the score with a synth drone. Music stays intact; only its level changes.
             const musicTarget = musicLevel * (intro ? 1 : .57);
             if (musicTarget !== lastMusicTarget) {
                 lastMusicTarget = musicTarget;
-                ramp(themeOutput.gain, musicTarget, intro ? .40 : 1.45);
+                ramp(themeOutput.gain, musicTarget, intro ? .40 : 1.45, themeEnvelope);
             }
             ramp(fxBus.gain, fxLevel, .10);
         }
@@ -2369,27 +2580,45 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
                 return false;
             }
         }
+        function pruneVoiceHistory() {
+            // Preserve the short output-device delay even after onended has disposed
+            // the Web Audio nodes. Context suspension does not advance this clock.
+            const before = audibleContextTime() - .30;
+            voiceHistory = voiceHistory.filter(voice => voice.stopTime >= before);
+            if (voiceHistory.length > MAX_VOICE_HISTORY)
+                voiceHistory.splice(0, voiceHistory.length - MAX_VOICE_HISTORY);
+        }
         function noteVoice(when, n) {
             const dur = n[1] / 1000, midi = n[2], vel = n[3];
-            if (vel === 0)
-                return;
+            if (vel === 0) return;
             const f = 440 * Math.pow(2, (midi - 69) / 12), velN = Math.pow(vel / 127, 1.3), amp = velN * .13, bright = .35 + .65 * velN;
             const head = ctx.createGain(), pan = ctx.createStereoPanner();
             head.gain.value = amp;
             pan.pan.value = finiteClamp(((midi % 12) - 5.5) / 14 + (Math.sin(n[0] * .113 + midi) * .5) * .18, -.6, .6);
             head.connect(pan);
             pan.connect(themeBus);
-            const item = { head, pan, count: BELL_PARTIALS.length };
+            const event = {
+                id: ++voiceId, generation: voiceGeneration, revision: scoreRevision,
+                midi, velocity: vel, strength: velN, at: when - musicAnchor,
+                scoreAt: n[0] / 1000, startTime: when, stopTime: when,
+                attack: VOICE_ATTACK, floor: VOICE_FLOOR, normalizer: VOICE_NORMALIZER,
+                cancelled: false, cancelAt: null, cancelTau: .008, partials: []
+            };
+            const item = { head, pan, event, count: BELL_PARTIALS.length };
             voices.add(item);
             for (let j = 0; j < BELL_PARTIALS.length; j++) {
                 const [ratio, g, decay] = BELL_PARTIALS[j], o = ctx.createOscillator(), pg = ctx.createGain();
                 o.type = 'sine';
                 o.frequency.value = f * ratio;
                 o.detune.value = Math.sin(n[0] * .037 + midi * 1.2 + j * 2.3) * 2;
-                const peak = Math.max(g * (ratio >= 2 ? bright : 1), .0001), ring = decay * (.85 + .3 * (Math.min(dur, 2) / 2));
-                pg.gain.setValueAtTime(.0001, when);
-                pg.gain.exponentialRampToValueAtTime(peak, when + .004);
-                pg.gain.exponentialRampToValueAtTime(.0001, when + .004 + ring);
+                const peak = Math.max(g * (ratio >= 2 ? bright : 1), VOICE_FLOOR);
+                const ring = decay * (.85 + .3 * (Math.min(dur, 2) / 2));
+                const stopTime = when + VOICE_ATTACK + ring + VOICE_STOP_PAD;
+                pg.gain.setValueAtTime(VOICE_FLOOR, when);
+                pg.gain.exponentialRampToValueAtTime(peak, when + VOICE_ATTACK);
+                pg.gain.exponentialRampToValueAtTime(VOICE_FLOOR, when + VOICE_ATTACK + ring);
+                event.partials.push(Object.freeze({ peak, ring, stopTime }));
+                event.stopTime = Math.max(event.stopTime, stopTime);
                 o.connect(pg);
                 pg.connect(head);
                 activeOscillators.add(o);
@@ -2399,36 +2628,64 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
                     voices.delete(item);
                 } };
                 o.start(when);
-                o.stop(when + .004 + ring + .05);
+                o.stop(stopTime);
+                oscillatorStops.set(o, stopTime);
                 scheduled++;
             }
+            event.partials = Object.freeze(event.partials);
+            voiceHistory.push(event);
+            pruneVoiceHistory();
         }
         function clearVoices() {
-            if (!ctx)
-                return;
+            // A new transport generation invalidates every pending/cancelled note,
+            // including notes scheduled ahead of the speaker's current output time.
+            voiceGeneration++;
+            if (!ctx) return;
+            const now = ctx.currentTime;
             for (const item of voices) {
-                item.head.gain.cancelScheduledValues(ctx.currentTime);
-                item.head.gain.setTargetAtTime(0, ctx.currentTime, .008);
+                if (item.event.cancelled) continue;
+                item.event.cancelled = true;
+                item.event.cancelAt = now;
+                item.event.stopTime = Math.min(item.event.stopTime, now + VOICE_STOP_PAD);
+                item.head.gain.cancelScheduledValues(now);
+                item.head.gain.setTargetAtTime(0, now, item.event.cancelTau);
             }
             for (const o of activeOscillators)
                 try {
-                    o.stop(ctx.currentTime + .05);
-                }
-                catch (_) { }
+                    const stopTime = Math.min(oscillatorStops.get(o) ?? Infinity, now + VOICE_STOP_PAD);
+                    o.stop(stopTime); oscillatorStops.set(o, stopTime);
+                } catch (_) { }
+            pruneVoiceHistory();
         }
         function currentPosition() { return ctx && musicPlaying ? Math.max(0, ctx.currentTime - musicAnchor) : offset; }
-        function audiblePosition(){
-            if(!ctx||!musicPlaying)return offset;
-            let c=ctx.currentTime;
-            try{const ts=ctx.getOutputTimestamp?.();
-                if(ts&&ts.contextTime>0&&Number.isFinite(ts.performanceTime)&&Math.abs(window.performance.now()-ts.performanceTime)<250){
-                    c=Math.min(ctx.currentTime,ts.contextTime+(window.performance.now()-ts.performanceTime)/1000);
-                }else c-=Math.min(.25,ctx.outputLatency||ctx.baseLatency||0);
-            }catch(_){c-=Math.min(.25,ctx.outputLatency||0);}
-            return c-musicAnchor;
+        function audibleContextTime() {
+            if (!ctx) return 0;
+            let c = ctx.currentTime;
+            try {
+                const ts = ctx.getOutputTimestamp?.(), now = window.performance.now();
+                if (ts && ts.contextTime > 0 && Number.isFinite(ts.performanceTime) && Math.abs(now - ts.performanceTime) < 250)
+                    c = Math.min(ctx.currentTime, ts.contextTime + (now - ts.performanceTime) / 1000);
+                else c -= Math.min(.25, ctx.outputLatency || ctx.baseLatency || 0);
+            } catch (_) { c -= Math.min(.25, ctx.outputLatency || ctx.baseLatency || 0); }
+            return Math.max(0, c);
         }
-        function visualState(){return {position:audiblePosition(),running:musicPlaying&&!muted&&!timelinePaused&&ctx?.state==='running'&&!document.hidden,
-            muted,volume,started:musicEverStarted,available:scoreState==='ready',paused:timelinePaused,revision:scoreRevision};}
+        function audiblePosition() { return ctx && musicPlaying ? audibleContextTime() - musicAnchor : offset; }
+        function visualState() { return { position: audiblePosition(), running: musicPlaying && !muted && !timelinePaused && ctx?.state === 'running' && !document.hidden,
+            muted, volume, started: musicEverStarted, available: scoreState === 'ready', paused: timelinePaused, revision: scoreRevision }; }
+        function instrumentState() {
+            const contextTime = audibleContextTime();
+            pruneVoiceHistory();
+            const available = !disposed && scoreState === 'ready';
+            const running = available && musicPlaying && !muted && !timelinePaused && ctx?.state === 'running' && !document.hidden;
+            const gain = ctx ? finiteClamp(envelopeValue(masterEnvelope, contextTime) * envelopeValue(themeEnvelope, contextTime) / Math.max(.001, musicLevel), 0, 1) : 0;
+            return Object.freeze({
+                position: ctx && musicPlaying ? contextTime - musicAnchor : offset,
+                contextTime, running, available, muted, paused: timelinePaused, volume,
+                revision: scoreRevision, generation: voiceGeneration, gain,
+                // These are immutable descriptors, never audio nodes or a second clock.
+                voices: Object.freeze(voiceHistory.map(voice => Object.freeze({ ...voice })))
+            });
+        }
 
         function tickMusic() {
             if (!musicPlaying || !ctx || ctx.state !== 'running' || disposed || muted || document.hidden || timelinePaused)
@@ -2455,6 +2712,9 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
             if (timer)
                 clearInterval(timer);
             timer = null;
+            // Replays and loops cancel the previous generation. Resuming a suspended
+            // AudioContext never comes through here: its live transport is preserved.
+            clearVoices();
             offset = finiteClamp(startOffset, 0, duration + 2.49);
             musicAnchor = ctx.currentTime + .045 - offset;
             index = notes.findIndex(n => n[0] / 1000 >= offset - .025);
@@ -2610,7 +2870,7 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
                 attempt('timeline'); updateMix(); emit(); },
             attachEffects(factory) { fxFactory = factory; if (ctx && ctx.state === 'running')
                 attachFoley(); },
-            attempt, toggle, setMuted, selectTrack, tracks:()=>({main:compositions.main.title,variation:compositions.variation.title,variationAt:trackStart()}), position:audiblePosition, visualState, score:()=>scoreModel,
+            attempt, toggle, setMuted, selectTrack, tracks:()=>({main:compositions.main.title,variation:compositions.variation.title,variationAt:trackStart()}), position:audiblePosition, visualState, instrumentState, score:()=>scoreModel,
             setVolume(v) { volume = finiteClamp(Number(v), 0, 1); updateMix(); },
             get enabled() { return !!ctx && ctx.state === 'running' && !muted && !timelinePaused && !document.hidden; },
             get context() { return ctx; }, get effects() { return fx; },
@@ -2618,7 +2878,7 @@ GuziczakModules.define("audio/music", ["core/scope","config/music","audio/librar
                 const d = new Float32Array(256);
                 musicAnalyser.getFloatTimeDomainData(d);
                 rms = Math.sqrt(d.reduce((s, v) => s + v * v, 0) / d.length);
-            } return { muted, gestureRequested, unlocked, ready, context: ctx ? ctx.state : 'not-created', music: scoreState, musicPlaying, musicEverStarted, position: currentPosition(), duration, notes: notes.length, sources: sources.slice(), requestedTrack, pendingTrack: selectionPending, missingTracks: library.snapshot().missing, scoreError: errorText, intro, timelinePaused, starts, activeOscillators: activeOscillators.size, activeVoices: voices.size, scheduled, stopped, rms, masterGain: master ? master.gain.value : 0, themeGain: themeOutput ? themeOutput.gain.value : 0 }; },
+            } return { muted, gestureRequested, unlocked, ready, context: ctx ? ctx.state : 'not-created', music: scoreState, musicPlaying, musicEverStarted, position: currentPosition(), duration, notes: notes.length, sources: sources.slice(), requestedTrack, pendingTrack: selectionPending, missingTracks: library.snapshot().missing, scoreError: errorText, intro, timelinePaused, starts, activeOscillators: activeOscillators.size, activeVoices: voices.size, scheduled, stopped, voiceGeneration, voiceHistory:voiceHistory.length, rms, masterGain: master ? master.gain.value : 0, themeGain: themeOutput ? themeOutput.gain.value : 0 }; },
             destroy() { if (disposed)
                 return; disposed = true; library.destroy(); scope.dispose(); for (const c of controllers)
                 c.abort(); controllers.clear(); pauseMusic(true); if (fx)
@@ -2699,7 +2959,7 @@ GuziczakModules.define('config/materials', [], () => {
         LIQUID_GOLD: 5, TEXT_LIGHT: 6, FLOOR: 7, ACCENT: 8, GLASS: 9, GOLD_LIGHT: 10,
         RECEIVER: 11, SIGNATURE_A: 12, SIGNATURE_B: 13, RIFT: 14, TIMBER: 15,
         SAND: 16, CAVITY: 17, RIFT_EDGE: 18, CAST_METAL: 20, OVERFLOW_METAL: 21,
-        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28 });
+        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_WATER:29 });
     const ids = new Set(Object.values(Material));
     function validate(id) { if (!Number.isInteger(id) || !ids.has(id))
         throw Error('Unknown material ID: ' + id); }
@@ -3397,7 +3657,14 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
                 gl.vertexAttribPointer(i, n, gl.FLOAT, false, 36, o);
             }
             gl.bindVertexArray(null);
-            return { vao, buffer, count: a.length / 9 };
+            // Packed casts need the same spatial metadata as procedural meshes
+            // so the live-code marker follows the actual mould transform.
+            const bounds={min:[Infinity,Infinity,Infinity],max:[-Infinity,-Infinity,-Infinity]};
+            for(let i=0;i<a.length;i+=9)for(let j=0;j<3;j++){
+                bounds.min[j]=Math.min(bounds.min[j],a[i+j]);
+                bounds.max[j]=Math.max(bounds.max[j],a[i+j]);
+            }
+            return { vao, buffer, count: a.length / 9, bounds };
         }
         meshes.sand = packedMesh(foundryData.sand);
         meshes.meltA = packedMesh(foundryData.melt0);
@@ -3731,6 +3998,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             m4(prog, 'uShadowVP', shadowVP);
             f3(prog, 'uCam', cam);
             f1(prog, 'uTime', time);
+            f1(prog, 'uAudioTime', Number.isFinite(state.instrument?.position) ? state.instrument.position : 0);
             f1(prog, 'uFlow', flow);
             f1(prog, 'uEnergy', state.energy);
             f1(prog, 'uPulse', state.pulse);
@@ -3798,7 +4066,17 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             const aim = shot.target, yaw = shot.yaw, pitch = shot.pitch;
             cam = [aim[0] + Math.sin(yaw) * Math.cos(pitch) * distance, aim[1] + Math.sin(pitch) * distance, aim[2] + Math.cos(yaw) * Math.cos(pitch) * distance];
             view = M.look(cam, aim);
-            projection = M.P(35 * PI / 180, aspect, .1, 1500);
+            // Reserve a real viewport rectangle above the source dock. Keeping the
+            // content aspect here and in the camera avoids cropping the front pipes.
+            // The existing exhibit takeover begins at 16.70 with a full viewport.
+            const reservation = 1 - ease(16.35,16.70,time);
+            const topInset = Math.min(viewport.height*.13, Math.max(0, viewport.traceTop || 0))*reservation;
+            const bottomInset = Math.min(viewport.height*.30, Math.max(0, viewport.traceInset || 0))*reservation;
+            const contentHeight = Math.max(1, viewport.height - topInset - bottomInset);
+            projection = M.P((shot.fov || 35) * PI / 180, viewport.width / contentHeight, .1, 1500);
+            const scaleY = contentHeight / viewport.height, offsetY = (bottomInset - topInset) / viewport.height;
+            for(let column=0;column<4;column++)
+                projection[column*4+1] = projection[column*4+1]*scaleY + projection[column*4+3]*offsetY;
             VP = M.mul(projection, view);
             const objs = packet.commands.filter(o=>!(frame.time>=17.05 && ['signatureA','signatureB','gateTipA','gateTipB'].includes(catalog.names.get(o.mesh))));
             prepareWords();
@@ -3824,6 +4102,10 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for (const o of objs)
                 if (!o.glass)
                     draw(o, meshProg, refl);
+            // Reflect the few active water jets as well as their lit gold mouths.
+            gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+            for(const o of objs)if(o.mesh===meshes.instrumentColumn||o.mesh===meshes.instrumentDrop)draw(o,meshProg,refl);
+            gl.depthMask(true);gl.disable(gl.BLEND);
             drawWords(refl);
             filter(mirrorRT, mirrorBlur, .68 / mirrorRT.w, .28 / mirrorRT.h);
             if(frame.time>=9.28&&frame.time<12.57){
@@ -3931,7 +4213,16 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             gpuSync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
             gl.flush();
             frameCount++;
-            if(time>=9.34&&time<12.57&&objs.some(o=>o.mode===5))globalThis.GUZICZAK_TRACE?.emit('gold',{time,flow:state.fluid?.flow||0,enthalpy:state.quench?.stats?.enthalpy??0,objects:objs.filter(o=>o.mode===5).length},{objectId:'foundry/meltA/0',priority:66});
+            if(time>=9.34&&time<12.57&&objs.some(o=>o.mode===5)) {
+                // These are actual uniform inputs. Fill/level depend on each GPU
+                // vertex's UV and are not fabricated as one CPU "result".
+                const cooling = time >= 11.62;
+                globalThis.GUZICZAK_TRACE?.emit('gold',{
+                    time,flow:state.fluid?.flow||0,enthalpy:state.quench?.stats?.enthalpy??0,
+                    objects:objs.filter(o=>o.mode===5).length
+                },{objectId:'foundry/meltA/0',priority:66,labelKey:cooling?'cooling':'fill',
+                    focus:cooling?['hot = quenchHot']:['float level ='],valueKeys:['time','flow']});
+            }
             if(objs.length)globalThis.GUZICZAK_TRACE?.emit('shader',{time,objects:objs.length,frame:frameCount},{objectId:'renderer/mesh-pass',priority:8});
         }
         function ready() {
@@ -4000,6 +4291,15 @@ vec3 curve(float s){
  return p;
 }
 void deform(inout vec3 p,inout vec3 n,vec2 uv){
+ // Mode 7 belongs to the existing recovery mechanism. Water has its own ABI slot.
+ if(uMode>7.5&&uMode<8.5){
+  float y=max(0.,p.y),phase=uAudioTime*8.+uFrom.x*.43;
+  float a=y*17.-phase,r=1.+.055*sin(a),dr=.935*cos(a);
+  vec2 bend=vec2(.11*sin(phase*.73),.08*cos(phase*.61))*y*y;
+  vec2 slope=vec2(.22*sin(phase*.73),.16*cos(phase*.61))*y+dr*p.xz;
+  n=normalize(vec3(n.x/r,n.y-dot(n.xz/r,slope),n.z/r));
+  p.xz=p.xz*r+bend;return;
+ }
  if(uMode>6.5&&uMode<7.5){
   float a=uTo.x,c=cos(a),s=sin(a),w=smoothstep(0.,1.,uv.x);
   vec3 q=p-uFrom;
@@ -4009,12 +4309,17 @@ void deform(inout vec3 p,inout vec3 n,vec2 uv){
 
  if(uMode>4.5&&uMode<5.5){
   // @live:gold
-  float arrival=9.34+uv.x*.57,fill=smoothstep(arrival,arrival+.76,uTime),hot=1.-smoothstep(11.62,12.52,uTime);
-  hot=quenchHot((uM*vec4(p,1.)).xz,hot);
-  float top=p.y,level=mix(-.146,-.0206,fill),edge=smoothstep(0.,.035,uv.y);
-  float a=p.x*25.+p.z*19.-uTime*9.,b=p.z*31.-p.x*11.+uTime*7.;
-  float ripple=(sin(a)+.47*sin(b))*.0029*hot*edge*fill;
-  p.y=-.147+(level+.147)*top+top*(ripple+.002*(1.-edge)*fill);
+  float arrival = 9.34 + uv.x * .57;
+  float fill = smoothstep(arrival, arrival + .76, uTime);
+  float hot = 1. - smoothstep(11.62, 12.52, uTime);
+  hot = quenchHot((uM * vec4(p, 1.)).xz, hot);
+  float top = p.y;
+  float level = mix(-.146, -.0206, fill);
+  float edge = smoothstep(0., .035, uv.y);
+  float a = p.x * 25. + p.z * 19. - uTime * 9.;
+  float b = p.z * 31. - p.x * 11. + uTime * 7.;
+  float ripple = (sin(a) + .47 * sin(b)) * .0029 * hot * edge * fill;
+  p.y = -.147 + (level + .147) * top + top * (ripple + .002 * (1. - edge) * fill);
   // @live:end
   if(n.y>.5)n=normalize(vec3(-(cos(a)*25.-.47*cos(b)*11.)*.0029*hot*edge,1.,-(cos(a)*19.+.47*cos(b)*31.)*.0029*hot*edge));
   return;
@@ -4055,7 +4360,7 @@ void deform(inout vec3 p,inout vec3 n,vec2 uv){
 precision highp float;
 layout(location=0) in vec3 aP;layout(location=1) in vec3 aN;layout(location=2) in vec2 aUV;layout(location=3) in float aMat;
 uniform mat4 uM,uV,uP,uShadowVP;uniform mat3 uNM;
-uniform float uTime,uFlow,uEnergy,uMode,uPulse,uWave,uStreamBegin,uStreamEnd,uFluidFlow,uDrainProgress;uniform vec3 uFrom,uTo;
+uniform float uTime,uAudioTime,uFlow,uEnergy,uMode,uPulse,uWave,uStreamBegin,uStreamEnd,uFluidFlow,uDrainProgress;uniform vec3 uFrom,uTo;
 out vec3 vWorld,vLocal,vNormal;out vec4 vShadow;out vec2 vUV;flat out float vMat;
 ${liquidField.glsl}
 ${quenchShader.fieldGLSL}
@@ -4074,7 +4379,7 @@ void main(){
     const meshFS = `#version 300 es
 precision highp float;
 in vec3 vWorld,vLocal,vNormal;in vec4 vShadow;in vec2 vUV;flat in float vMat;
-uniform vec3 uCam,uRiftWorld;uniform float uBadgeHeat,uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat,uNoteEnergy;
+uniform vec3 uCam,uRiftWorld;uniform float uBadgeHeat,uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uAudioTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat,uNoteEnergy;
 uniform sampler2D uShadow,uMirror,uLiquidMirror;uniform vec2 uResolution;out vec4 outColor;
 const float PI=3.14159265359;
 ${quenchShader.fieldGLSL}
@@ -4099,6 +4404,20 @@ float shadow(vec3 n){if(uReflection>.5)return 1.;vec3 q=vShadow.xyz/vShadow.w*.5
 void main(){
  vec3 q=vLocal,p=vWorld,n=normalize(vNormal),cam=uCam;if(uReflection>.5){p.y=2.*uReflectY-p.y;n.y=-n.y;cam.y=2.*uReflectY-cam.y;if(p.y<uReflectY-.003)discard;}
  vec3 v=normalize(cam-p);float nv=max(dot(n,v),.001),id=vMat;float rough=.25,metal=.9,occ=1.,alpha=uAlpha;vec3 base=vec3(.13),emission=vec3(0.);
+ if(id>28.5&&id<29.5){
+  if(!gl_FrontFacing)n=-n;
+  float grain=noise3(q*vec3(17.,32.,17.)+vec3(0.,-uAudioTime*.55,0.));
+  n=normalize(n+vec3(.014*(grain-.5),0.,.011*(grain-.5)));
+  nv=max(dot(n,v),.001);
+  float fresnel=.025+.86*pow(1.-nv,5.);
+  vec3 reflection=env(reflect(-v,n),.035);
+  vec3 c=vec3(.018,.039,.046)+reflection*(.18+.65*fresnel);
+  float highlight=pow(max(dot(reflect(-normalize(vec3(-3.4,6.,4.)-p),n),v),0.),64.);
+  c+=vec3(.48,.68,.78)*highlight*(.5+uNoteEnergy);
+  c+=vec3(.52,.25,.047)*exp(-max(q.y,0.)*5.)*uNoteEnergy;
+  float opacity=clamp((.24+.48*fresnel+.12*uNoteEnergy)*uAlpha,0.,.88);
+  outColor=vec4(c*uObjectLight,opacity);return;
+ }
  if(id>6.5&&id<7.5){
   float r=length(p.xz),f=.04+.40*pow(1.-nv,5.);float grain=noise3(vec3(p.xz*22.,0));
   vec2 uv=gl_FragCoord.xy/uResolution;vec2 distortion=vec2(sin(p.x*.3+p.z*.4),sin(p.x*.21-p.z*.31))*.00012;
@@ -4454,68 +4773,141 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
 });
 
 
-GuziczakModules.define("scene/camera", ["math", "config/camera"], (math, config) => {
+GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking'], (math, config, docking) => {
     'use strict';
-    const { clamp } = math, { shots } = config;
+    const { clamp, mix, ease, dot, M, C } = math, { shots } = config;
     function cameraTrack(t) {
         if (t >= config.settledAt)
             return { yaw: 0, pitch: 0, distance: 9.5, target: [0, 0, 0] };
         let i = 0;
-        while (i < shots.length - 2 && t > shots[i + 1][0])
-            i++;
-        const a = shots[i], b = shots[i + 1], p = shots[Math.max(0, i - 1)], n = shots[Math.min(shots.length - 1, i + 2)], dur = b[0] - a[0], u = clamp((t - a[0]) / dur, 0, 1), u2 = u * u, u3 = u2 * u;
-        const val = (k, sub = -1) => { const get = s => sub < 0 ? s[k] : s[k][sub], v0 = get(a), v1 = get(b), m0 = i === 0 ? 0 : (get(b) - get(p)) / (b[0] - p[0]), m1 = b[0] >= config.settledAt ? 0 : (get(n) - get(a)) / (n[0] - a[0]); return (2 * u3 - 3 * u2 + 1) * v0 + (u3 - 2 * u2 + u) * dur * m0 + (-2 * u3 + 3 * u2) * v1 + (u3 - u2) * dur * m1; };
+        while (i < shots.length - 2 && t > shots[i + 1][0]) i++;
+        const a = shots[i], b = shots[i + 1], p = shots[Math.max(0, i - 1)], n = shots[Math.min(shots.length - 1, i + 2)];
+        const dur = b[0] - a[0], u = clamp((t - a[0]) / dur, 0, 1), u2 = u * u, u3 = u2 * u;
+        const val = (k, sub = -1) => {
+            const get = s => sub < 0 ? s[k] : s[k][sub], v0 = get(a), v1 = get(b);
+            const m0 = i === 0 ? 0 : (get(b) - get(p)) / (b[0] - p[0]);
+            const m1 = b[0] >= config.settledAt ? 0 : (get(n) - get(a)) / (n[0] - a[0]);
+            return (2 * u3 - 3 * u2 + 1) * v0 + (u3 - 2 * u2 + u) * dur * m0 + (-2 * u3 + 3 * u2) * v1 + (u3 - u2) * dur * m1;
+        };
         return { yaw: val(1), pitch: val(2), distance: val(3), target: [val(4, 0), val(4, 1), val(4, 2)] };
     }
-    function fitLoading(shot,frame,viewport,assembly){
-        const {M,C,dot,mix,ease}=math,t=frame.time;
-        if(viewport.width>=651||!assembly?.cupPose||t<=.85||t>=3.65)return shot;
-        const focus=ease(.85,1.46,t)*(1-ease(3.03,3.65,t));
-        const yaw=shot.yaw,pitch=shot.pitch;
-        const right=[Math.cos(yaw),0,-Math.sin(yaw)];
-        const up=[-Math.sin(yaw)*Math.sin(pitch),Math.cos(pitch),-Math.cos(yaw)*Math.sin(pitch)];
-        const back=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
-        const points=[];
-        // Actual rim and full coil envelope. Frame the two components together,
-        // not the empty point halfway between the old camera targets.
-        for(let i=0;i<48;i++){
-            const a=i*Math.PI/24,c=Math.cos(a),q=Math.sin(a);
-            points.push(M.point(assembly.cupPose,[1.19*c,1.04,1.19*q]));
-            for(const y of [-1.70,-.22])points.push(M.point(assembly.coilPose,[.54*c,y,.54*q]));
+    function contentViewport(frame, viewport) {
+        const width = Math.max(1, Number(viewport.width) || 1), height = Math.max(1, Number(viewport.height) || 1);
+        const mobile = width <= 700, reservation = 1 - ease(16.35, 16.70, frame.time);
+        const top = clamp(Number.isFinite(viewport.traceTop) ? viewport.traceTop : mobile ? 56 : 62, 0, height * .13) * reservation;
+        const bottom = clamp(Number.isFinite(viewport.traceInset) ? viewport.traceInset : mobile ? 180 : 176, 0, height * .30) * reservation;
+        const contentHeight = Math.max(1, height - top - bottom);
+        return { width, height, top, bottom, contentHeight, aspect: width / contentHeight, reservation };
+    }
+    function cameraAxes(yaw, pitch) {
+        return [
+            [Math.cos(yaw), 0, -Math.sin(yaw)],
+            [-Math.sin(yaw) * Math.sin(pitch), Math.cos(pitch), -Math.cos(yaw) * Math.sin(pitch)],
+            [Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)]
+        ];
+    }
+    function fitLoading(shot, frame, viewport, assembly) {
+        const t = frame.time;
+        if (viewport.width >= 651 || !assembly?.cupPose || t <= .85 || t >= 3.65) return shot;
+        const focus = ease(.85, 1.46, t) * (1 - ease(3.03, 3.65, t));
+        const axes = cameraAxes(shot.yaw, shot.pitch), [right, up, back] = axes, points = [];
+        // Preserve the established loading shot around the actual mating components.
+        for (let i = 0; i < 48; i++) {
+            const a = i * Math.PI / 24, c = Math.cos(a), s = Math.sin(a);
+            points.push(M.point(assembly.cupPose, [1.19 * c, 1.04, 1.19 * s]));
+            if (assembly.coilPose) for (const y of [-1.70, -.22]) points.push(M.point(assembly.coilPose, [.54 * c, y, .54 * s]));
         }
-        const axes=[right,up,back];
-        const center=axes.map(axis=>{const values=points.map(p=>dot(p,axis));return (Math.min(...values)+Math.max(...values))*.5;});
-        const framed=[0,1,2].map(k=>axes.reduce((sum,axis,i)=>sum+axis[k]*center[i],0));
-        const target=shot.target.map((v,i)=>mix(v,framed[i],focus));
-        const tan=Math.tan(35*Math.PI/360),aspect=viewport.width/viewport.height;
-        let fit=0;
-        for(const p of points){const q=p.map((v,i)=>v-target[i]);fit=Math.max(fit,dot(q,back)+Math.max(Math.abs(dot(q,right))/(tan*aspect*.86),Math.abs(dot(q,up))/(tan*.76)));}
-        return {...shot,target,distance:mix(shot.distance,Math.max(shot.distance,fit),focus)};
+        const center = axes.map(axis => { const values = points.map(p => dot(p, axis)); return (Math.min(...values) + Math.max(...values)) * .5; });
+        const framed = [0, 1, 2].map(k => axes.reduce((sum, axis, i) => sum + axis[k] * center[i], 0));
+        const target = shot.target.map((v, i) => mix(v, framed[i], focus));
+        const tan = Math.tan(35 * Math.PI / 360), aspect = viewport.width / viewport.height;
+        let fit = 0;
+        for (const p of points) {
+            const q = p.map((v, i) => v - target[i]);
+            fit = Math.max(fit, dot(q, back) + Math.max(Math.abs(dot(q, right)) / (tan * aspect * .86), Math.abs(dot(q, up)) / (tan * .76)));
+        }
+        return { ...shot, target, distance: mix(shot.distance, Math.max(shot.distance, fit), focus) };
     }
-    function sampleCamera(frame, viewport, assembly=frame.assembly) {
-        const original=cameraTrack(frame.time);
-        const r=frame.phase==='reclaim'?frame.phaseProgress:0;
-        const focus=math.ease(0,.17,r)*(1-math.ease(.88,1,r));
-        const q=frame.reclaim?.tool;const close={yaw:.095,pitch:1.025,distance:5.46,target:[q?q.x*.12:0,-2.03,.80+(q?(q.z-.5)*.06:0)]};
-        const shot={yaw:math.mix(original.yaw,close.yaw,focus),pitch:math.mix(original.pitch,close.pitch,focus),distance:math.mix(original.distance,close.distance,focus),target:original.target.map((v,i)=>math.mix(v,close.target[i],focus))}, aspect = viewport.width / viewport.height, mobile = viewport.width < 651;
+    function baseCamera(frame, viewport, assembly) {
+        const original = cameraTrack(frame.time), r = frame.phase === 'reclaim' ? frame.phaseProgress : 0;
+        const focus = ease(0, .17, r) * (1 - ease(.88, 1, r));
+        const q = frame.reclaim?.tool;
+        const close = { yaw: .095, pitch: 1.025, distance: 5.46, target: [q ? q.x * .12 : 0, -2.03, .80 + (q ? (q.z - .5) * .06 : 0)] };
+        const shot = { yaw: mix(original.yaw, close.yaw, focus), pitch: mix(original.pitch, close.pitch, focus),
+            distance: mix(original.distance, close.distance, focus), target: original.target.map((v, i) => mix(v, close.target[i], focus)) };
+        const aspect = viewport.width / viewport.height, mobile = viewport.width < 651;
         let distance = shot.distance;
-        if (mobile)
-            distance *= math.mix(Math.max(1.18, .64 / aspect), 1, math.ease(14.30, 16.70, frame.time));
-        else if (aspect < 1.22)
-            distance *= math.mix(1.10, 1, math.ease(14.30, 16.70, frame.time));
-        if (mobile)
-            distance *= 1 + .40 * math.ease(8.15, 8.85, frame.time) * (1 - math.ease(14.30, 16.70, frame.time));
-        if(mobile)distance*=1+.04*focus;
-        // Let the approaching wave remain legible first; follow its contact with a
-        // gentle macro move, then return before the existing extraction choreography.
-        const quenching=frame.quench;
-        let quenchFocus=0;
-        if(quenching?.visible&&frame.time>=10.8&&frame.time<12.54)for(const e of quenching.events){const age=quenching.time-e.at;quenchFocus=Math.max(quenchFocus,math.ease(1.05,2.55,age)*(1-math.ease(5.5,7.1,age)));}
-        quenchFocus*=1-math.ease(12.40,12.54,frame.time);
-        if(quenchFocus>0)return {yaw:math.mix(shot.yaw,.07,quenchFocus),pitch:math.mix(shot.pitch,.97,quenchFocus),distance:math.mix(distance,mobile?7.8:5.0,quenchFocus),target:shot.target.map((v,i)=>math.mix(v,[0,-2.015,1.0][i],quenchFocus))};
-        return fitLoading({ ...shot, distance },frame,viewport,assembly);
+        if (mobile) distance *= mix(Math.max(1.18, .64 / aspect), 1, ease(14.30, 16.70, frame.time));
+        else if (aspect < 1.22) distance *= mix(1.10, 1, ease(14.30, 16.70, frame.time));
+        if (mobile) distance *= 1 + .40 * ease(8.15, 8.85, frame.time) * (1 - ease(14.30, 16.70, frame.time));
+        if (mobile) distance *= 1 + .04 * focus;
+        const quenching = frame.quench;
+        let quenchFocus = 0;
+        if (quenching?.visible && frame.time >= 10.8 && frame.time < 12.54)
+            for (const e of quenching.events || []) {
+                const age = quenching.time - e.at;
+                quenchFocus = Math.max(quenchFocus, ease(1.05, 2.55, age) * (1 - ease(5.5, 7.1, age)));
+            }
+        quenchFocus *= 1 - ease(12.40, 12.54, frame.time);
+        if (quenchFocus > 0) return { yaw: mix(shot.yaw, .07, quenchFocus), pitch: mix(shot.pitch, .97, quenchFocus),
+            distance: mix(distance, mobile ? 7.8 : 5.0, quenchFocus), target: shot.target.map((v, i) => mix(v, [0, -2.015, 1.0][i], quenchFocus)), quenchFocus };
+        return { ...fitLoading({ ...shot, distance }, frame, viewport, assembly), quenchFocus: 0 };
     }
-    return { sampleCamera, cameraTrack };
+    // Bound the whole visible hull, not just the center points of its pipe mouths.
+    // The upper ring includes the tallest permitted water column and its hardware.
+    const ringBounds = [];
+    for (let i = 0; i < 96; i++) {
+        const a = i * Math.PI / 48, x = docking.hull[0] * 1.045 * Math.cos(a);
+        const z = docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(a);
+        for (const y of [docking.deckY - .32, docking.deckY + .90]) ringBounds.push([x, y, z]);
+    }
+    function worldBounds(frame, assembly) {
+        const points = ringBounds.slice(), cup = assembly?.cupPose || M.I(), coil = assembly?.coilPose || cup;
+        for (let i = 0; i < 48; i++) {
+            const a = i * Math.PI / 24, c = Math.cos(a), s = Math.sin(a);
+            for (const y of [-.35, 1.09]) points.push(M.point(cup, [1.24 * c, y, 1.24 * s]));
+            for (const y of [-1.78, -.21]) points.push(M.point(coil, [.58 * c, y, .58 * s]));
+        }
+        // The pouring vessel is above the cup. Fit its actual transform when present;
+        // easing its bounds away lets the authored entrance/exit leave the frame.
+        const kettle = frame.inflow?.kettle;
+        if (kettle?.pose) {
+            const weight = ease(3.00, 3.55, frame.time) * (1 - ease(7.90, 8.70, frame.time));
+            const pose = C(cup, kettle.pose), center = M.point(cup, [0, .4, 0]);
+            for (const x of [-.85, 1.02]) for (const y of [-.72, .72]) for (const z of [-.55, .55]) {
+                const p = M.point(pose, [x, y, z]);
+                points.push(p.map((v, k) => mix(center[k], v, weight)));
+            }
+        }
+        return points;
+    }
+    function sampleCamera(frame, viewport, assembly = frame.assembly) {
+        const base = baseCamera(frame, viewport, assembly);
+        // Keep the original loading, intentional quench macro, and final handoff.
+        const wide = ease(3.03, 3.55, frame.time) * (1 - ease(15.8, 16.65, frame.time));
+        const focus = wide * (1 - base.quenchFocus);
+        if (focus <= 0) return { ...base, fov: 35 };
+        const yaw = mix(base.yaw, .08, focus), pitch = mix(base.pitch, .98, focus), fov = mix(35, 64, focus);
+        const axes = cameraAxes(yaw, pitch), [right, up, back] = axes, points = worldBounds(frame, assembly);
+        const extrema = axes.map(axis => {
+            let lo = Infinity, hi = -Infinity;
+            for (const p of points) { const value = dot(p, axis); lo = Math.min(lo, value); hi = Math.max(hi, value); }
+            return (lo + hi) * .5;
+        });
+        const framed = [0, 1, 2].map(k => axes.reduce((sum, axis, i) => sum + axis[k] * extrema[i], 0));
+        const target = base.target.map((v, i) => mix(v, framed[i], focus));
+        const content = contentViewport(frame, viewport), tan = Math.tan(fov * Math.PI / 360);
+        let fit = .5;
+        // Each inequality is solved at the point's own depth. A bounding sphere or
+        // a screen-aspect multiplier clips the near/front rim on narrow phones.
+        for (const p of points) {
+            const q = p.map((v, i) => v - target[i]), depthOffset = dot(q, back);
+            fit = Math.max(fit, depthOffset + .35,
+                depthOffset + Math.max(Math.abs(dot(q, right)) / (tan * content.aspect * .92), Math.abs(dot(q, up)) / (tan * .90)));
+        }
+        return { yaw, pitch, fov, target, distance: mix(base.distance, fit, focus), quenchFocus: base.quenchFocus };
+    }
+    return { sampleCamera, cameraTrack, contentViewport };
 });
 
 
@@ -4622,11 +5014,11 @@ GuziczakModules.define("scene/composer", ["scene/commands", "scene/assembly", "s
         return {
             sample(frame, viewport) {
                 const state = { ...frame }, list = commands.createDrawList(catalog, frame);
-                const ctx = { catalog, t: frame.time, e: frame.energy, mobile: viewport.width < 651, meshes: catalog.meshes,
+                const ctx = { catalog, t: frame.time, e: frame.energy, mobile: viewport.width <= 700, reduced: !!frame.reduced, meshes: catalog.meshes,
                     push: list.push, state, viewport, scrapMotion, emit:(...args)=>globalThis.GUZICZAK_TRACE?.emit(...args), letterInstances: [] };
                 systems.forEach((system, i) => { list.family(names[i]); Object.assign(ctx, system.sample(ctx)); });
                 return { commands: list.commands, tokens: ctx.letterInstances, castTransform: ctx.castTransform,presentation:ctx.presentation,
-                    vesselTransform: ctx.cup, foundryTransform: ctx.moldRoot,
+                    vesselTransform: ctx.cup, foundryTransform: ctx.moldRoot, instrument: ctx.instrument, traceTargets: ctx.traceTargets || [],
                     inflow:state.inflow,cupInteraction:state.cupInteraction,
                     atmosphere:{kettleSpout:state.kettleSpout,pitcherSteam:state.pitcherSteam,pourTilt:state.pourTilt,sanctumVent:state.sanctumVent,sanctumOrigin:state.sanctumOrigin,badgeHeat:state.badgeHeat,cupSteamOrigin:state.cupSteamOrigin}, assembly: state.assembly, fluid:state.fluid, docking:state.docking, foundry: state.foundry, reclaim:state.reclaim, rift:state.rift,
                     // Exactly one authored vessel. No "shadowCup" copy is created.
@@ -6527,188 +6919,210 @@ GuziczakModules.define('world/water-drive',['math'],(m)=>{
    Note onsets follow the audible output clock. Never trigger from the scheduler:
    noteVoice() schedules Web Audio voices up to 180 ms before they are heard. */
 GuziczakModules.define('audio/instrument', ['math'], (math) => {
- 'use strict';
- const {clamp}=math;
- const NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
- // These are the six partials and the attack used by audio/music.noteVoice().
- const PARTIALS=[[.5,.30,6.5],[1,1,5.5],[2,.45,3.2],[3,.20,2],[4,.11,1.1],[6,.05,.5]];
- const ATTACK=.004,FLOOR=.0001,MAX_AGE=6.5*1.15+ATTACK,MAX_ACTIVE=512,MAX_GAP=.25;
- const NORMALIZER=Math.sqrt(PARTIALS.reduce((sum,p)=>sum+p[1]*p[1],0));
- function bound(notes,time,inclusive=false){
-  let lo=0,hi=notes.length;
-  while(lo<hi){const mid=(lo+hi)>>>1;if(notes[mid].at<time||(inclusive&&notes[mid].at===time))lo=mid+1;else hi=mid;}
-  return lo;
- }
- function envelope(note,age){
-  if(age<0||age>=note.life)return 0;
-  let power=0;
-  for(let i=0;i<PARTIALS.length;i++){
-   const peak=note.peaks[i],ring=note.rings[i];
-   const gain=age<ATTACK?FLOOR*Math.pow(peak/FLOOR,age/ATTACK)
-    :age<ATTACK+ring?peak*Math.pow(FLOOR/peak,(age-ATTACK)/ring):0;
-   power+=gain*gain;
-  }
-  return note.strength*Math.sqrt(power)/NORMALIZER;
- }
- function create(sound,{reduced=false}={}){
-  let model=null,revision=-1,source=[],low=48,high=83,cursor=0,previous=null,wasRunning=false;
-  let active=[],serial=0,disposed=false;
-  const names=Array.from({length:128},(_,midi)=>NAMES[midi%12]+(Math.floor(midi/12)-1));
-  function reset(){active=[];cursor=0;previous=null;wasRunning=false;}
-  function prepare(score,nextRevision){
-   model=score;revision=nextRevision;source=[];low=127;high=0;
-   for(const n of Array.isArray(score?.notes)?score.notes:[]){
-    if(!Array.isArray(n)||n.length<4||!n.slice(0,4).every(Number.isFinite)
-     ||n[0]<0||n[1]<=0||!Number.isInteger(n[2])||n[2]<0||n[2]>127||n[3]<=0||n[3]>127)continue;
-    const strength=Math.pow(n[3]/127,1.3),bright=.35+.65*strength,stretch=.85+.3*Math.min(n[1]/1000,2)/2;
-    const rings=PARTIALS.map(p=>p[2]*stretch),peaks=PARTIALS.map(p=>Math.max(p[1]*(p[0]>=2?bright:1),FLOOR));
-    source.push({at:n[0]/1000,midi:n[2],velocity:n[3],strength,peaks,rings,life:rings[0]+ATTACK});
-    low=Math.min(low,n[2]);high=Math.max(high,n[2]);
-   }
-   source.sort((a,b)=>a.at-b.at||a.midi-b.midi);
-   if(!source.length){low=48;high=83;}
-   reset();
-  }
-  function snapshot(position,running,available,levels,notes,energy){
-   return Object.freeze({position,running,available,revision,low,high,
-    levels:Object.freeze(levels),notes:Object.freeze(notes),energy,serial});
-  }
-  function sample(){
-   const transport=disposed?{}:sound.visualState(),score=disposed?null:sound.score();
-   const nextRevision=score?.revision??transport.revision??0;
-   if(!disposed&&(score!==model||nextRevision!==revision))prepare(score,nextRevision);
-   const validTime=Number.isFinite(transport.position),position=validTime?transport.position:0;
-   const available=!disposed&&!!transport.available&&source.length>0;
-   const volume=Number.isFinite(transport.volume)?clamp(transport.volume,0,1):1;
-   const running=available&&validTime&&!!transport.running&&!transport.muted&&!transport.paused&&volume>0;
-   const levels=new Array(high-low+1).fill(0),notes=[];
-   if(!running){active=[];previous=position;wasRunning=false;return snapshot(position,false,available,levels,notes,0);}
-   const jumped=previous===null||position<previous-1e-6||position-previous>MAX_GAP;
-   if(!wasRunning||jumped){
-    // A mute/pause, seek, track revision or missed interval invalidates old tails.
-    // Only onsets at or after this new output-clock position may light a pipe.
-    active=[];cursor=bound(source,position);
-   }
-   const until=bound(source,position,true);
-   const first=Math.max(cursor,until-MAX_ACTIVE);
-   serial+=Math.max(0,until-cursor);
-   for(let i=first;i<until;i++)active.push(source[i]);
-   cursor=until;
-   if(active.length>MAX_ACTIVE)active.splice(0,active.length-MAX_ACTIVE);
-   const representatives=new Array(levels.length),power=new Array(levels.length).fill(0);
-   let kept=0;
-   for(const note of active){
-    const age=position-note.at;
-    if(age<0||age>=MAX_AGE||age>=note.life)continue;
-    active[kept++]=note;
-    const level=envelope(note,age),slot=note.midi-low;
-    power[slot]+=level*level;
-    if(!representatives[slot]||note.at>=representatives[slot].at)representatives[slot]=note;
-   }
-   active.length=kept;
-   let total=0;
-   for(let slot=0;slot<levels.length;slot++){
-    const level=clamp(Math.sqrt(power[slot])*(reduced?.58:1),0,1);
-    levels[slot]=level;total+=level*level;
-    if(level<.002||!representatives[slot])continue;
-    const note=representatives[slot];
-    notes.push(Object.freeze({midi:note.midi,name:names[note.midi],velocity:note.velocity,level,at:note.at}));
-   }
-   const energy=clamp(Math.sqrt(total)*.65,0,1);
-   previous=position;wasRunning=true;
-   return snapshot(position,true,available,levels,notes,energy);
-  }
-  return {sample,reset,destroy(){disposed=true;source=[];model=null;reset();}};
- }
- return {create};
+    'use strict';
+    const { clamp } = math;
+    const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+    // Union of the two original scores, verified at their source. One fixed mouth
+    // for each used pitch; switching tracks cannot move a note or fold an octave.
+    const layout = Object.freeze({ low: 28, high: 93, pitches: Object.freeze([
+        28,33,38,40,41,43,45,47,48,50,52,53,55,56,57,58,59,60,61,62,64,65,66,
+        67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,88,89,93
+    ]) });
+    const names = Array.from({ length: 128 }, (_, midi) => NAMES[midi % 12] + (Math.floor(midi / 12) - 1));
+    function voiceLevel(voice, time) {
+        const age = time - voice.startTime;
+        if (age < 0 || time >= voice.stopTime || !Array.isArray(voice.partials)) return 0;
+        const floor = voice.floor > 0 ? voice.floor : .0001, attack = voice.attack > 0 ? voice.attack : .004;
+        let power = 0;
+        for (const partial of voice.partials) {
+            if (!(partial.peak > 0) || !(partial.ring > 0) || time >= partial.stopTime) continue;
+            const gain = age < attack ? floor * Math.pow(partial.peak / floor, age / attack)
+                : age < attack + partial.ring ? partial.peak * Math.pow(floor / partial.peak, (age - attack) / partial.ring) : floor;
+            power += gain * gain;
+        }
+        const cancel = Number.isFinite(voice.cancelAt) && time >= voice.cancelAt
+            ? Math.exp(-(time - voice.cancelAt) / Math.max(.001, voice.cancelTau || .008)) : 1;
+        return (Number(voice.strength) || 0) * Math.sqrt(power) / Math.max(.001, Number(voice.normalizer) || 1) * cancel;
+    }
+    function create(sound, { reduced = false } = {}) {
+        let disposed = false, generation = null, serial = 0;
+        const announced = new Set();
+        function reset() { announced.clear(); generation = null; }
+        function sample() {
+            // A score alone cannot prove that a note was scheduled or heard. No
+            // synthetic fallback is used when the audio event ledger is unavailable.
+            const source = !disposed && typeof sound.instrumentState === 'function' ? sound.instrumentState() : null;
+            const position = Number.isFinite(source?.position) ? source.position : 0;
+            const time = Number.isFinite(source?.contextTime) ? source.contextTime : 0;
+            const available = !disposed && !!source?.available;
+            const volume = Number.isFinite(source?.volume) ? clamp(source.volume, 0, 1) : 0;
+            const running = available && !!source?.running && !source.muted && !source.paused && volume > 0;
+            const levels = new Array(layout.high - layout.low + 1).fill(0), notes = [], voices = [];
+            const nextGeneration = source?.generation ?? null;
+            if (generation !== nextGeneration) { generation = nextGeneration; announced.clear(); }
+            if (running) {
+                const power = new Array(levels.length).fill(0), attacks = new Array(levels.length).fill(0);
+                const representatives = new Array(levels.length);
+                const gain = Number.isFinite(source.gain) ? clamp(source.gain, 0, 1) : 0;
+                for (const voice of Array.isArray(source.voices) ? source.voices : []) {
+                    if (!voice || voice.cancelled || voice.generation !== generation || !Number.isFinite(voice.startTime)
+                        || !Number.isFinite(voice.stopTime) || time < voice.startTime || time >= voice.stopTime) continue;
+                    const slot = voice.midi - layout.low;
+                    if (!Number.isInteger(slot) || slot < 0 || slot >= levels.length) continue;
+                    const age = time - voice.startTime;
+                    const level = clamp(voiceLevel(voice, time) * gain, 0, 1);
+                    // The attack accent is tied to the heard onset, while level keeps
+                    // the exact synthesized release. Neither depends on frame delta.
+                    const attack = clamp(Math.exp(-age / .115) * (Number(voice.strength) || 0) * gain, 0, 1);
+                    power[slot] += level * level;
+                    attacks[slot] = Math.max(attacks[slot], attack);
+                    if (!representatives[slot] || voice.startTime > representatives[slot].startTime)
+                        representatives[slot] = voice;
+                    if (!announced.has(voice.id)) {
+                        announced.add(voice.id); serial++;
+                        if (announced.size > 4096) announced.delete(announced.values().next().value);
+                    }
+                    voices.push(Object.freeze({ id: voice.id, generation, midi: voice.midi, at: voice.at,
+                        startTime: voice.startTime, stopTime: voice.stopTime, age, level, attack, velocity: voice.velocity }));
+                }
+                for (let slot = 0; slot < levels.length; slot++) {
+                    const level = clamp(Math.sqrt(power[slot]), 0, 1), voice = representatives[slot];
+                    levels[slot] = level;
+                    if (!voice || level < .001 && attacks[slot] < .002) continue;
+                    const midi = slot + layout.low;
+                    notes.push(Object.freeze({ id: voice.id, generation, midi, name: names[midi],
+                        velocity: voice.velocity, level, at: voice.at, age: time - voice.startTime, attack: attacks[slot] }));
+                }
+            }
+            const energy = clamp(Math.sqrt(levels.reduce((sum, level) => sum + level * level, 0)) * .65, 0, 1);
+            return Object.freeze({ position, running, available, revision: source?.revision ?? 0,
+                low: layout.low, high: layout.high, pitches: layout.pitches,
+                levels: Object.freeze(levels), notes: Object.freeze(notes), voices: Object.freeze(voices),
+                energy, serial, generation, reduced: !!reduced, motionScale: reduced ? 0 : 1 });
+        }
+        return { sample, reset, destroy() { disposed = true; reset(); } };
+    }
+    return { create, layout };
 });
 
 
-GuziczakModules.define('geometry/instrument', ['math', 'config/docking'], (math, docking) => {
+GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/instrument'], (math, docking, audio) => {
  'use strict';
  const { M, TAU } = math;
- const slots = 128, rimScale = .966;
+ const pitches = audio.layout.pitches, slots = pitches.length, rimScale = .932;
+ const mouthY = .302, radius = .151;
  function position(slot) {
-  const angle = slot / slots * TAU - Math.PI / 2;
+  // A small break marks the beginning of the scale; pitches never move between tracks.
+  const angle = -.5 * Math.PI + .075 + slot / Math.max(1, slots - 1) * (TAU - .15);
   return [docking.hull[0] * rimScale * Math.cos(angle), docking.deckY,
    docking.hull[2] + docking.hull[1] * rimScale * Math.sin(angle)];
  }
- function create(tools) {
-  const { build, ringY } = tools;
-  // All 128 stationary sockets share one draw command and one geometry buffer.
-  // The dark floor is ABOVE the uncut altar, so its surface cannot fill a mouth.
+ function mouth(slot) { const p = position(slot); p[1] += mouthY; return p; }
+ function slotFor(midi) { return pitches.indexOf(midi); }
+ function create({ build, ringY }) {
+  // The whole stationary instrument is one opaque mesh, including its hollow bores.
   const instrumentBody = build(b => {
-   for (const offset of [-.018, .018]) {
+   for (const offset of [-.051, .051]) {
     const rail = [];
-    for (let i = 0; i <= 256; i++) {
-     const angle = i / 256 * TAU - Math.PI / 2, scale = rimScale + offset;
-     rail.push([docking.hull[0] * scale * Math.cos(angle), docking.deckY + .006,
+    for (let i = 0; i <= 192; i++) {
+     const angle = i / 192 * TAU, scale = rimScale + offset;
+     rail.push([docking.hull[0] * scale * Math.cos(angle), docking.deckY + .017,
       docking.hull[2] + docking.hull[1] * scale * Math.sin(angle)]);
     }
-    b.tube(rail, .006, 1, 5);
+    b.tube(rail, .014, 1, 6);
    }
    for (let slot = 0; slot < slots; slot++) {
     b.at(M.T(...position(slot)), () => {
-     // Obsidian socket, gold machined lip, recessed dark bore.
-     b.lathe([[.064, .001], [.064, .017], [.058, .032], [.043, .032],
-      [.043, .007], [0, .007]], 0, 10);
-     b.lathe([[.040, .028], [.060, .028], [.060, .035], [.056, .041],
-      [.043, .041], [.040, .036], [.040, .028]], 1, 10);
-     b.lathe([[.059, .007], [.066, .007], [.066, .014], [.061, .017]], 2, 10);
-     // Every fourth socket has a second fine collar: a quiet visual meter.
-     if (slot % 4 === 0) ringY(b, .062, .022, .004, .006, 1, 8);
+     // The closed dark floor sits above the altar; the bore remains visibly recessed.
+     b.lathe([[0,.016],[.16,.016],[.165,.03],[.163,.064],[.147,.082],
+      [.143,.264],[.151,.282],[.151,.302],[.137,.311],[.112,.311],
+      [.108,.294],[.108,.059],[0,.059]], 1, 20);
+     b.lathe([[0,.062],[.107,.062],[.108,.289]], 0, 20);
+     ringY(b, .153, .057, .019, .025, 2, 20);
+     ringY(b, .143, .296, .018, .014, 1, 20);
+     if (slot === 0 || Math.floor(pitches[slot] / 12) !== Math.floor(pitches[slot - 1] / 12))
+      ringY(b, .158, .036, .012, .009, 1, 20);
     });
    }
   });
-  const instrumentLight = build(b => {
-   // The movable piston retains a real hollow throat; only its inner lip emits.
-   b.lathe([[.034, -.008], [.034, .016], [.031, .022], [.022, .022],
-    [.022, .006], [.026, .002]], 1, 12);
-   ringY(b, .027, .022, .011, .005, 28, 12);
+  const instrumentRestWater = build(b => {
+   for (let slot = 0; slot < slots; slot++) b.at(M.T(...mouth(slot)), () =>
+    b.lathe([[.109,-.023],[.106,-.029],[.085,-.037],[0,-.037]], 29, 16));
   });
-  return { instrumentBody, instrumentLight };
+  const instrumentLight = build(b => ringY(b, .108, -.004, .012, .008, 28, 20));
+  // A shared unit-height water profile; every sounding voice only changes its matrix.
+  const instrumentColumn = build(b => b.lathe([
+   [0,0],[.96,0],[1,.035],[.84,.11],[.79,.20],[.85,.30],
+   [.69,.42],[.72,.55],[.57,.66],[.64,.76],[.49,.88],
+   [.48,.96],[.30,1.015],[0,1.04]
+  ], 29, 16));
+  const instrumentDrop = build(b => b.sphere(1, 29, 6, 10));
+  const instrumentRipple = build(b => ringY(b, 1, 0, .035, .01, 29, 24));
+  return { instrumentBody, instrumentRestWater, instrumentLight, instrumentColumn, instrumentDrop, instrumentRipple };
  }
- return { create, position, slots };
+ return { create, position, mouth, slots, slotFor, pitches, mouthY, radius };
 });
 
 GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (math, geometry) => {
  'use strict';
- const { M, clamp, ease } = math, zero = [0, 0, 0];
+ const { M, C, clamp, ease } = math, zero = [0,0,0];
  function sample(ctx) {
   const { t, state, meshes, push } = ctx, source = state.instrument || {};
   const emit = typeof ctx.emit === 'function' ? ctx.emit : () => {};
   if (t <= .02 || state.stage < .001) return {};
-  // Instrument lighting follows the existing cinematic focus and handoff.
   const focus = state.phase === 'reclaim'
-   ? ease(0, .12, state.phaseProgress) * (1 - ease(.94, 1, state.phaseProgress)) : 0;
-  const light = state.stage * ease(.02, .65, t) * (1 - .62 * focus);
-  push(meshes.instrumentBody, M.I(), 0, zero, zero, false, light * .82);
-  const low = clamp(Math.round(Number.isFinite(source.low) ? source.low : 48), 0, 127);
-  const high = clamp(Math.round(Number.isFinite(source.high) ? source.high : 83), low, 127);
+   ? ease(0,.12,state.phaseProgress) * (1-ease(.94,1,state.phaseProgress)) : 0;
+  const light = state.stage * ease(.02,.65,t) * (1-.62*focus);
+  push(meshes.instrumentBody, M.I(), 0, zero, zero, false, light);
+  push(meshes.instrumentRestWater, M.I(), 0, zero, zero, true, light * .72);
+  const low = Number.isFinite(source.low) ? source.low : 28;
   const levels = source.levels || [], notes = source.notes || [];
-  let strongest = null, active = 0;
-  // @live:organ
-  for (let midi = low; midi <= high; midi++) {
-   const level = clamp(Number(levels[midi - low]) || 0, 0, 1);
-   if (level < .012) continue;
-   const slot = Math.round((midi - low) / Math.max(1, high - low) * 127);
-   const position = geometry.position(slot);
-   position[1] += .004 + Math.sqrt(level) * .043;
-   push(meshes.instrumentLight, M.T(...position), 0, zero, zero, false, light, 0, 1, level);
+  const sounding = notes.filter(n => n.level >= .008 && geometry.slotFor(n.midi) >= 0);
+  // New attacks remain legible in dense chords; all voices still illuminate their own mouth.
+  const visibleColumns = new Set(sounding.slice().sort((a,b) =>
+   (b.level + (b.attack || 0)*.12) - (a.level + (a.attack || 0)*.12) || a.midi-b.midi
+  ).slice(0,8).map(n => n.midi));
+  const byMidi = new Map(notes.map(n => [n.midi,n]));
+  const traceTargets = [], columns = [];
+  let active = 0, strongest = null;
+  const maximumHeight = (ctx.mobile ? .54 : .64) * (1-.35*focus);
+  for (let slot = 0; slot < geometry.slots; slot++) {
+   const midi = geometry.pitches[slot], position = geometry.mouth(slot);
+   const level = clamp(Number(levels[midi-low]) || 0,0,1), note = byMidi.get(midi);
+   const objectId = 'instrument/note/' + midi;
+   traceTargets.push({ key:'organ', objectId, world:position.slice(), radius:.20, midi });
+   if (level < .008) continue;
+   const attack = clamp(note?.attack || 0,0,1), age = Math.max(0,note?.age ?? ((source.position || 0)-(note?.at || 0)));
+   const noteLight = clamp(level*.86 + attack*.35,0,1);
+   push(meshes.instrumentLight, M.T(...position), 0, zero, zero, false, light, 0, 1, noteLight);
+   // @live:organ
+   const height = maximumHeight * Math.sqrt(level);
+   const width = .079 + .018 * Math.sqrt(level);
+   const columnPose = C(M.T(...position), M.S(width, height, width));
+   if (visibleColumns.has(midi))
+    push(meshes.instrumentColumn, columnPose, 8, [midi,0,0], zero, true, light, 0, 1, noteLight);
+   // @live:end
+   if (visibleColumns.has(midi)) {
+    columns.push({ midi, height, width, position:position.slice() });
+    traceTargets[traceTargets.length-1].world[1] += height*.52;
+    // A single small droplet belongs to the actual onset, not an unrelated particle clock.
+    if (age > .035 && age < .48 && !ctx.reduced) {
+     const flight = (age-.035)/.445, rise = .18*4*flight*(1-flight), r = .016*(1-flight*.5);
+     push(meshes.instrumentDrop, C(M.T(position[0]+.019*Math.sin(midi),position[1]+height+rise,position[2]),M.S(r,r*1.5,r)),
+      0,zero,zero,true,light*.8,0,1,noteLight);
+    }
+    const ringAge = clamp(age/.7,0,1), ring = .111+.055*ringAge;
+    if (ringAge<1) push(meshes.instrumentRipple,C(M.T(position[0],position[1]-.020,position[2]),M.S(ring,1,ring)),
+     0,zero,zero,true,light*(1-ringAge)*.55,0,1,noteLight);
+   }
    active++;
-   if (!strongest || level > strongest.level) strongest = { midi, slot, level, position };
+   if (!strongest || level > strongest.level) strongest = { midi,slot,level,position:position.slice() };
+   emit('organ',{ note:note?.name || String(midi),height,level,midi },{
+    objectId,priority:34+level*8,labelKey:'organ',
+    focus:['const height =','const columnPose ='],valueKeys:['note','height']
+   });
   }
-  // @live:end
-  // Pure sampling: pause and seek reproduce the same pose; no independent clock,
-  // spring accumulator, oscillator or wave impulse can drift from the score.
-  if (strongest) {
-   const note = notes.find(n => n.midi === strongest.midi);
-   emit('organ', { note: note?.name || String(strongest.midi), midi: strongest.midi,
-    level: strongest.level, slot: strongest.slot, active,
-    height: strongest.position[1], low, high },
-   { priority: state.frozen ? 90 : 34 + strongest.level * 8 });
-  }
-  return { instrument: { active, strongest, low, high, slots: geometry.slots } };
+  return { instrument:{ active,strongest,columns,slots:geometry.slots,pitches:geometry.pitches },traceTargets };
  }
  return { sample };
 });
@@ -6716,19 +7130,32 @@ GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (mat
 
 GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
     'use strict';
-    const MAX_RECORDS = 24, MAX_LINES = 48, MAX_SOURCES = 32, PAINT_INTERVAL = 125;
+    const MAX_RECORDS = 64, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, PAINT_INTERVAL = 125;
     const TEXT = {
-        pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', expand: 'Rozwiń kod na żywo', collapse: 'Zwiń kod na żywo', source: 'Wykonywane źródło', values: 'Wartości teraz', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', waiting: 'Oczekiwanie na dźwięk', object: 'obiekt', release: 'Wybrzmiewanie', between: 'Cisza między nutami', executed: 'wykonane' },
-        en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', expand: 'Expand live code', collapse: 'Collapse live code', source: 'Executed source', values: 'Current values', notes: 'Notes', bands: 'Bands', silent: 'Sound off', waiting: 'Waiting for audio', object: 'object', release: 'Resonance', between: 'Between notes', executed: 'executed' },
-        de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', expand: 'Live-Code öffnen', collapse: 'Live-Code einklappen', source: 'Ausgeführter Quellcode', values: 'Aktuelle Werte', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', waiting: 'Warte auf Audio', object: 'Objekt', release: 'Nachklang', between: 'Pause zwischen Noten', executed: 'ausgeführt' }
+        pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', waiting: 'CZEKA', expand: 'Rozwiń kod', collapse: 'Zwiń kod', source: 'Rzeczywisty fragment źródła', values: 'Wartości tej klatki', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', loading: 'Oczekiwanie na dźwięk', release: 'Wybrzmiewanie', between: 'Cisza między nutami', pin: 'Przypnij ten obiekt', unpin: 'Wróć do automatycznego wyboru', pinned: 'Przypięty obiekt', last: 'Ostatni zapis · oczekiwanie na tę operację', pending: 'Oczekiwanie na wykonanie tej operacji', cpu: 'Fragment wykonany w tej klatce', gpu: 'Źródło shadera użytego w tej klatce', frame: 'klatka', object: 'obiekt', history: 'Ostatnie operacje' },
+        en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', waiting: 'WAITING', expand: 'Expand code', collapse: 'Collapse code', source: 'Actual source excerpt', values: 'Values from this frame', notes: 'Notes', bands: 'Bands', silent: 'Sound off', loading: 'Waiting for audio', release: 'Resonance', between: 'Between notes', pin: 'Pin this object', unpin: 'Return to automatic selection', pinned: 'Pinned object', last: 'Last capture · waiting for this operation', pending: 'Waiting for this operation to execute', cpu: 'Source executed for this frame', gpu: 'Shader source used for this frame', frame: 'frame', object: 'object', history: 'Recent operations' },
+        de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', waiting: 'WARTET', expand: 'Code öffnen', collapse: 'Code schließen', source: 'Tatsächlicher Quelltext', values: 'Werte dieses Frames', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', loading: 'Warte auf Audio', release: 'Nachklang', between: 'Pause zwischen Noten', pin: 'Dieses Objekt anheften', unpin: 'Zur automatischen Auswahl', pinned: 'Angeheftetes Objekt', last: 'Letzter Stand · wartet auf diese Operation', pending: 'Wartet auf die Ausführung dieser Operation', cpu: 'Für diesen Frame ausgeführter Code', gpu: 'In diesem Frame verwendeter Shader', frame: 'Frame', object: 'Objekt', history: 'Letzte Operationen' }
     };
     const LABELS = {
-        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Dzbanek i strumień kawy', mould: 'Przesunięcie formy', cast: 'Wyjmowanie odlewu', water: 'Powierzchnia wody', quench: 'Hartowanie', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków · GPU', organ: 'Pierścień instrumentu', tokens: 'Tokeny w cieczy', gold: 'Stygnięcie złota · GPU' },
-        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pitcher and coffee stream', mould: 'Moving the mould', cast: 'Releasing the casting', water: 'Water surface', quench: 'Quenching', exhibit: 'Rotating the artifact', shader: 'Vertex transformation · GPU', organ: 'Instrument ring', tokens: 'Tokens in the liquid', gold: 'Cooling gold · GPU' },
-        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kanne und Kaffeestrahl', mould: 'Gussform verschieben', cast: 'Gussstück entnehmen', water: 'Wasseroberfläche', quench: 'Abschrecken', exhibit: 'Artefakt drehen', shader: 'Vertextransformation · GPU', organ: 'Instrumentenring', tokens: 'Token in der Flüssigkeit', gold: 'Gold abkühlen · GPU' }
+        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Grające piszczałki', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
+        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Playing organ pipes', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
+        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Spielende Orgelpfeifen', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
     };
-    // Capture only explicitly marked, executable source already present in this document.
-    // No generated examples and no source evaluation are used by the inspector.
+    // These selectors choose real lines in a marked source block, never replacement code.
+    const PROFILES = {
+        lift: { focus: ['const pose', 'const rig'], values: ['y', 'angle'] },
+        assembly: { focus: ['const seated', 'const cartridge'], values: ['lock', 'clamp'] },
+        pour: { focus: ['const pitcher', 'const origin'], values: ['tilt', 'jet'] },
+        mould: { focus: ['const moldRoot'], values: ['arrival', 'withdraw'] },
+        cast: { focus: ['M.T(0,y,z)', 'M.Ry(yaw)'], values: ['y', 'yaw'] },
+        water: { focus: ['v[k]+=', 's[k] +='], values: ['sloshX', 'sloshZ'] },
+        quench: { focus: ['const power', 'const take'], values: ['enthalpy', 'power'] },
+        exhibit: { focus: ['const rotation', 'const model'], values: ['yaw', 'groundY'] },
+        shader: { focus: ['vec4 w', 'gl_Position'], values: ['time', 'objects'] },
+        organ: { focus: ['const height =', 'const columnPose =', 'position[1]'], values: ['note', 'height'] },
+        tokens: { focus: ['letterInstances.push'], values: ['count', 'inside'] },
+        gold: { focus: ['float level =', 'level=mix'], values: ['time', 'flow'] }
+    };
     function readSources(doc) {
         const sources = new Map();
         for (const script of Array.from(doc.scripts || [])) {
@@ -6747,7 +7174,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
                             sources.set(block.key, block);
                         }
                         block = null;
-                    } else block = { key: marker[1], lines: [], omitted: 0 };
+                    } else block = { key: marker[1], script: script.id || 'scene', lines: [], omitted: 0 };
                 } else if (block) {
                     if (block.lines.length < MAX_LINES) block.lines.push({ number: i + 1, text: lines[i].slice(0, 1600) });
                     else block.omitted++;
@@ -6757,94 +7184,186 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         return sources;
     }
     function create(win, doc) {
-        const scope = scopes.createScope(), sources = readSources(doc), records = new Map();
+        const scope = scopes.createScope(), sources = readSources(doc), records = new Map(), recent = new Map(), targets = new Map();
         const node = (tag, className, parent) => { const el = doc.createElement(tag); if (className) el.className = className; if (parent) parent.appendChild(el); return el; };
+        const text = (el, value) => { const next = String(value); if (el.textContent !== next) el.textContent = next; };
+        const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); };
         const root = node('section', 'live-trace'); root.id = 'live-trace'; root.hidden = true;
-        const button = node('button', 'live-trace-toggle', root); button.type = 'button'; button.setAttribute('aria-controls', 'live-trace-body');
-        const dot = node('span', 'live-trace-dot', button); dot.setAttribute('aria-hidden', 'true');
-        const title = node('span', 'live-trace-title', button);
-        const status = node('span', 'live-trace-status', button);
-        const chevron = node('span', 'live-trace-chevron', button); chevron.textContent = '⌃'; chevron.setAttribute('aria-hidden', 'true');
-        const content = node('div', 'live-trace-body', root); content.id = 'live-trace-body';
-        const heading = node('div', 'live-trace-operation', content);
-        const operation = node('span', 'live-trace-name', heading);
-        const object = node('span', 'live-trace-object', heading);
+        const header = node('div', 'live-trace-header', root);
+        const objectButton = node('button', 'live-trace-object-button', header); objectButton.type = 'button';
+        const dot = node('span', 'live-trace-dot', objectButton); dot.setAttribute('aria-hidden', 'true');
+        const operation = node('span', 'live-trace-name', objectButton);
+        const pinMark = node('span', 'live-trace-pin', objectButton); pinMark.textContent = '⌖'; pinMark.setAttribute('aria-hidden', 'true');
+        const status = node('span', 'live-trace-status', header);
+        const excerpt = node('div', 'live-trace-excerpt', root);
+        const snapshotNote = node('p', 'live-trace-snapshot', root); snapshotNote.hidden = true;
+        const bottom = node('div', 'live-trace-bottom', root);
+        const values = node('dl', 'live-trace-values', bottom);
+        const button = node('button', 'live-trace-toggle', bottom); button.type = 'button'; button.setAttribute('aria-controls', 'live-trace-body');
+        const toggleLabel = node('span', '', button);
+        const chevron = node('span', 'live-trace-chevron', button); chevron.textContent = '⌄'; chevron.setAttribute('aria-hidden', 'true');
+        const content = node('div', 'live-trace-body', root); content.id = 'live-trace-body'; content.hidden = true;
+        const provenance = node('div', 'live-trace-provenance', content);
+        const origin = node('span', 'live-trace-origin', provenance);
+        const frameLabel = node('span', 'live-trace-frame', provenance);
+        const objectLabel = node('div', 'live-trace-object', content);
         const history = node('div', 'live-trace-history', content); history.tabIndex = 0;
-        const values = node('dl', 'live-trace-values', content);
+        const details = node('dl', 'live-trace-details', content);
         const footer = node('div', 'live-trace-audio', content);
         const audioLabel = node('span', 'live-trace-audio-label', footer);
         const audioValue = node('span', 'live-trace-audio-value', footer);
         const audioBars = node('span', 'live-trace-bands', footer); audioBars.setAttribute('aria-hidden', 'true');
         const bars = Array.from({ length: 8 }, () => node('i', '', audioBars));
-        const expanded = { intro: true, page: false };
+        const svg = name => doc.createElementNS('http://www.w3.org/2000/svg', name);
+        const tether = svg('svg'); tether.setAttribute('class', 'live-trace-tether'); tether.setAttribute('aria-hidden', 'true'); tether.setAttribute('focusable', 'false'); tether.setAttribute('hidden', '');
+        const thread = svg('path'); thread.setAttribute('class', 'live-trace-thread'); tether.appendChild(thread);
+        const halo = svg('circle'); halo.setAttribute('class', 'live-trace-target-halo'); halo.setAttribute('r', '10'); tether.appendChild(halo);
+        const point = svg('circle'); point.setAttribute('class', 'live-trace-target'); point.setAttribute('r', '3'); tether.appendChild(point);
+        doc.body.appendChild(tether);
+        const expanded = { intro: false, page: false };
         let mode = 'intro', lang = '', dictionary = TEXT.pl, frame = {}, frameMs = 0, frameOpen = false;
-        let destroyed = false, suspended = false, routeBlocked = false, visible = true, ready = false, paused = false;
-        let current = null, renderedKey = '', lastPaint = -Infinity, lastSwitch = -Infinity, paintedBlocks = [], lastAudio = null;
-        let frameCount = 0, emissionCount = 0, droppedCount = 0, paintCount = 0, selectionCount = 0;
+        let destroyed = false, suspended = false, routeBlocked = false, visible = true, ready = false, paused = false, stale = false;
+        let current = null, pinned = null, lastPaint = -Infinity, lastSwitch = -Infinity, lastAudio = null;
+        let sourceSignature = '', historyVersion = 0, paintedHistoryVersion = -1, dockAnchor = null, dockRect = null, geometryDirty = true;
+        let snapshots = [], excerptLines = [], frameCount = 0, emissionCount = 0, droppedCount = 0, paintCount = 0, selectionCount = 0, tetherVisible = false;
         const now = () => win.performance && typeof win.performance.now === 'function' ? win.performance.now() : Date.now();
+        const idFor = (key, objectId) => key + '\u0000' + objectId;
+        const samePin = record => !!pinned && record.key === pinned.key && (!pinned.objectId || record.objectId === pinned.objectId);
+        const gpu = record => record && (record.key === 'shader' || record.key === 'gold');
+        const historyId = record => record.key + '/' + record.labelKey;
+        function hideTether() { tetherVisible = false; tether.setAttribute('hidden', ''); }
         function routeIsBlocked() { return routeBlocked || doc.body.classList.contains('route-cv') || doc.body.classList.contains('route-score'); }
         function updateVisibility() {
             const hidden = !ready || !visible || suspended || !!doc.hidden || routeIsBlocked();
-            if (root.hidden !== hidden) root.hidden = hidden;
-            doc.body.classList.toggle('live-trace-open-intro', !root.hidden && mode === 'intro' && expanded.intro);
+            if (root.hidden !== hidden) { root.hidden = hidden; geometryDirty = true; }
+            doc.body.classList.toggle('live-trace-visible-intro', !hidden && mode === 'intro');
+            doc.body.classList.toggle('live-trace-visible-page', !hidden && mode === 'page');
+            doc.body.classList.toggle('live-trace-open-intro', !hidden && mode === 'intro' && expanded.intro);
+            if (hidden) hideTether();
+        }
+        function label(record) {
+            if (!record) return dictionary.title;
+            const key = record.labelKey || record.key;
+            return LABELS[lang][key] || LABELS[lang][record.key] || record.key;
         }
         function localize() {
             const next = String(doc.documentElement.lang || 'pl').slice(0, 2).toLowerCase();
             lang = TEXT[next] ? next : 'en'; dictionary = TEXT[lang];
-            title.textContent = dictionary.title; root.setAttribute('aria-label', dictionary.title);
-            history.setAttribute('aria-label', dictionary.source); values.setAttribute('aria-label', dictionary.values);
+            root.setAttribute('aria-label', dictionary.title); excerpt.setAttribute('aria-label', dictionary.source);
+            history.setAttribute('aria-label', dictionary.history); values.setAttribute('aria-label', dictionary.values);
+            paintedHistoryVersion = -1;
             paintControls();
-            if (current) operation.textContent = LABELS[lang][current.key] || current.key;
         }
+        // State labels bypass source/value throttling, including the final frame before pause.
         function paintControls() {
-            const open = expanded[mode]; content.hidden = !open;
-            root.dataset.expanded = String(open); root.dataset.paused = String(paused || suspended);
-            status.textContent = paused || suspended ? dictionary.paused : dictionary.live;
+            const open = expanded[mode], stopped = paused || suspended;
+            content.hidden = !open; root.dataset.expanded = String(open); root.dataset.paused = String(stopped);
+            root.dataset.pinned = String(!!pinned); root.dataset.waiting = String(stale);
+            text(status, stopped ? dictionary.paused : stale ? dictionary.waiting : dictionary.live);
+            text(toggleLabel, open ? dictionary.collapse : dictionary.expand);
             button.setAttribute('aria-expanded', String(open)); button.setAttribute('aria-label', open ? dictionary.collapse : dictionary.expand);
+            objectButton.setAttribute('aria-pressed', String(!!pinned));
+            objectButton.setAttribute('aria-label', label(current) + ' · ' + (pinned ? dictionary.unpin : dictionary.pin));
+            objectButton.title = pinned ? dictionary.unpin : dictionary.pin;
+            text(operation, label(current));
+            pinMark.hidden = !pinned;
+            snapshotNote.hidden = !stale;
+            if (stale) text(snapshotNote, current && current.pending ? dictionary.pending : dictionary.last);
         }
         function mount(nextMode) {
             mode = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro'; root.dataset.mode = mode;
             const parent = mode === 'page' ? doc.getElementById('artifact-stage') : doc.body;
             if (parent && root.parentNode !== parent) parent.appendChild(root);
-            paintControls(); updateVisibility();
+            geometryDirty = true; paintControls(); updateVisibility();
         }
         function compactValue(value) {
-            if (typeof value === 'number') return Number.isFinite(value) ? (Math.abs(value) >= 1000 ? value.toFixed(0) : value.toFixed(3).replace(/\.?0+$/, '')) : '—';
+            if (typeof value === 'number') return Number.isFinite(value) ? (Math.abs(value) >= 1000 ? value.toFixed(0) : (Math.abs(value) < .0005 ? '0' : value.toFixed(3).replace(/\.?0+$/, ''))) : '—';
             if (typeof value === 'boolean') return value ? 'true' : 'false';
             if (typeof value === 'string') return value.slice(0, 46);
             if (Array.isArray(value) || ArrayBuffer.isView(value)) return '[' + Array.prototype.slice.call(value, 0, 3).map(item => typeof item === 'number' ? compactValue(item) : '…').join(', ') + (value.length > 3 ? ', …' : '') + ']';
             return null;
         }
-        function copyValues(input) {
+        function copyValues(input, preferred) {
             const output = [];
             if (!input || typeof input !== 'object') return output;
-            for (const key of Object.keys(input)) {
+            const keys = [...new Set([...(preferred || []), ...Object.keys(input)])];
+            for (const key of keys) {
+                if (!Object.prototype.hasOwnProperty.call(input, key)) continue;
                 const value = compactValue(input[key]);
-                if (value !== null) output.push({ name: key.slice(0, 36), value });
-                if (output.length === 4) break;
+                if (value !== null) output.push({ name: String(key).slice(0, 36), value });
+                if (output.length === 6) break;
             }
             return output;
         }
-        function appendSource(record) {
-            const source = sources.get(record.key); if (!source) return;
-            for (const block of paintedBlocks) block.el.classList.remove('is-current');
-            const block = node('div', 'live-trace-code is-current', history); block.dataset.key = record.key;
-            const caption = node('div', 'live-trace-code-label', block); caption.textContent = record.key + (record.key === 'shader' || record.key === 'gold' ? ' / GPU PASS' : ' / JS');
-            for (const line of source.lines) {
-                const row = node('div', 'live-trace-line', block);
-                const number = node('span', 'live-trace-line-number', row); number.textContent = String(line.number); number.setAttribute('aria-hidden', 'true');
-                const code = node('code', '', row); code.textContent = line.text || ' ';
+        function sourceFocus(record) {
+            const source = sources.get(record.key); if (!source) return [];
+            const picked = [], preferred = record.focus.length ? record.focus : (PROFILES[record.key]?.focus || []);
+            for (const part of preferred) {
+                const found = source.lines.find(line => line.text.includes(part));
+                if (found && !picked.includes(found)) picked.push(found);
+                if (picked.length === 3) break;
             }
-            paintedBlocks.push({ key: record.key, el: block });
-            while (paintedBlocks.length > 3) paintedBlocks.shift().el.remove();
-            renderedKey = record.key;
-            // Reveal the start of the current source, keeping long snippets manually scrollable.
-            history.scrollTop = Math.max(0, block.offsetTop);
+            if (!picked.length) {
+                const first = source.lines.find(line => line.text.trim() && !/^\s*(\/\/|[{}]\s*$)/.test(line.text));
+                if (first) picked.push(first);
+            }
+            picked.sort((a, b) => a.number - b.number);
+            return mode === 'page' ? picked.slice(-1) : picked;
         }
-        function paintValues(record) {
-            while (values.firstChild) values.removeChild(values.firstChild);
-            for (const item of record.values) {
-                const pair = node('div', 'live-trace-value', values);
+        function syntax(parent, source) {
+            // Tokens are emitted as text nodes. Source is never treated as HTML or evaluated.
+            const pattern = /(\/\/.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:const|let|float|vec[234]|mat[234]|if|for|return|void|bool|true|false)\b|(?:\b\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?|\b[A-Za-z_]\w*(?=\s*\())/g;
+            let cursor = 0, match;
+            while ((match = pattern.exec(source))) {
+                if (match.index > cursor) parent.appendChild(doc.createTextNode(source.slice(cursor, match.index)));
+                const token = match[0], kind = token.startsWith('//') ? 'comment' : /^['"]/.test(token) ? 'string' : /^(?:\d|\.)/.test(token) ? 'number' : /^(?:const|let|float|vec[234]|mat[234]|if|for|return|void|bool|true|false)$/.test(token) ? 'keyword' : 'function';
+                node('span', 'live-trace-token-' + kind, parent).textContent = token;
+                cursor = pattern.lastIndex;
+            }
+            if (cursor < source.length) parent.appendChild(doc.createTextNode(source.slice(cursor)));
+        }
+        function paintExcerpt(record) {
+            const next = mode + '/' + record.key + '/' + record.focus.join('|');
+            if (sourceSignature === next) return;
+            sourceSignature = next; excerptLines = sourceFocus(record); clear(excerpt);
+            for (const line of excerptLines) {
+                const row = node('div', 'live-trace-excerpt-line', excerpt); row.dataset.line = String(line.number);
+                syntax(node('code', '', row), line.text.trim());
+            }
+            geometryDirty = true;
+        }
+        function remember(record) {
+            if (record.pending) return;
+            const last = snapshots[snapshots.length - 1];
+            if (last && historyId(last) === historyId(record)) snapshots[snapshots.length - 1] = record;
+            else { snapshots.push(record); if (snapshots.length > MAX_HISTORY) snapshots.shift(); historyVersion++; }
+        }
+        function paintHistory() {
+            if (paintedHistoryVersion === historyVersion) return;
+            paintedHistoryVersion = historyVersion; clear(history);
+            let lastBlock = null;
+            for (let index = 0; index < snapshots.length; index++) {
+                const record = snapshots[index], source = sources.get(record.key); if (!source) continue;
+                const isCurrent = index === snapshots.length - 1;
+                const block = node('div', 'live-trace-code' + (isCurrent ? ' is-current' : ''), history); block.dataset.key = record.key;
+                const caption = node('div', 'live-trace-code-label', block);
+                text(caption, label(record) + ' · ' + (gpu(record) ? 'GLSL' : 'JS'));
+                const focused = new Set(sourceFocus(record).map(line => line.number));
+                for (const line of source.lines) {
+                    const row = node('div', 'live-trace-line' + (isCurrent && focused.has(line.number) ? ' is-relevant' : ''), block);
+                    const number = node('span', 'live-trace-line-number', row); number.textContent = String(line.number); number.setAttribute('aria-hidden', 'true');
+                    syntax(node('code', '', row), line.text || ' ');
+                }
+                lastBlock = block;
+            }
+            if (lastBlock) history.scrollTop = Math.max(0, lastBlock.offsetTop - history.offsetTop);
+        }
+        function paintValues(container, list) {
+            const signature = list.map(item => item.name + ':' + item.value).join('|');
+            if (container.dataset.values === signature) return;
+            container.dataset.values = signature; clear(container);
+            for (const item of list) {
+                const pair = node('div', 'live-trace-value', container);
                 node('dt', '', pair).textContent = item.name; node('dd', '', pair).textContent = item.value;
             }
         }
@@ -6854,93 +7373,175 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             snapshot = snapshot && typeof snapshot === 'object' ? snapshot : {};
             const running = !!snapshot.running, available = snapshot.available !== false;
             const notes = running && Array.isArray(snapshot.notes) ? snapshot.notes.filter(note => note && (note.level ?? note.velocity ?? 0) > .015).slice(0, 5) : [];
-            audioLabel.textContent = notes.length ? dictionary.notes : dictionary.bands;
-            if (!available) audioValue.textContent = dictionary.waiting;
-            else if (!running) audioValue.textContent = dictionary.silent;
-            else if (notes.length) audioValue.textContent = notes.map(note => String(note.name || note.midi || '').slice(0, 10)).join(' · ');
-            else audioValue.textContent = dictionary.between;
-            const levels = snapshot.levels || [];
-            let peak = 0;
+            text(audioLabel, notes.length ? dictionary.notes : dictionary.bands);
+            text(audioValue, !available ? dictionary.loading : !running ? dictionary.silent : notes.length ? notes.map(note => String(note.name || note.midi || '').slice(0, 10)).join(' · ') : dictionary.between);
+            const levels = snapshot.levels || []; let peak = 0;
             bars.forEach((bar, i) => {
                 let level = 0;
                 if (running) for (let j = Math.floor(i * levels.length / bars.length); j < Math.ceil((i + 1) * levels.length / bars.length); j++) level = Math.max(level, Math.max(0, Math.min(1, Number(levels[j]) || 0)));
                 peak = Math.max(peak, level); bar.style.setProperty('--level', String(level));
             });
-            if (available && running && !notes.length) audioValue.textContent = peak > .015 ? dictionary.release : dictionary.between;
+            if (available && running && !notes.length) text(audioValue, peak > .015 ? dictionary.release : dictionary.between);
             footer.dataset.running = String(running);
         }
+        function measureDock() {
+            if (root.hidden || typeof dot.getBoundingClientRect !== 'function') return;
+            const rect = dot.getBoundingClientRect(); dockRect = root.getBoundingClientRect();
+            dockAnchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            geometryDirty = false;
+        }
+        function projectObject(objectId, screen) {
+            if (destroyed || !frameOpen || !screen || targets.size >= MAX_RECORDS) return;
+            const x = Number(screen.x), y = Number(screen.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+            targets.set(String(objectId).slice(0, 96), { x, y, visible: screen.visible !== false });
+        }
+        function setTargets(input) {
+            if (!Array.isArray(input)) return;
+            for (const target of input.slice(0, MAX_RECORDS)) if (target && target.objectId != null) projectObject(target.objectId, target);
+        }
+        function paintTether() {
+            if (root.hidden || stale || !current || current.pending) { hideTether(); return; }
+            const target = targets.get(current.objectId) || targets.get(current.key) || current.screen;
+            if (!target || !target.visible) { hideTether(); return; }
+            if (geometryDirty || !dockAnchor) measureDock();
+            if (!dockAnchor || !dockRect) { hideTether(); return; }
+            const width = win.innerWidth || doc.documentElement.clientWidth, height = win.innerHeight || doc.documentElement.clientHeight;
+            if (!width || !height || target.x < 0 || target.x > width || target.y < 0 || target.y > height || (target.x >= dockRect.left && target.x <= dockRect.right && target.y >= dockRect.top && target.y <= dockRect.bottom)) { hideTether(); return; }
+            const sx = dockAnchor.x, sy = dockAnchor.y, tx = target.x, ty = target.y, direction = ty < sy ? -1 : 1;
+            const bend = Math.max(25, Math.min(105, Math.abs(ty - sy) * .42));
+            tether.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+            thread.setAttribute('d', 'M' + sx.toFixed(1) + ',' + sy.toFixed(1) + ' C' + sx.toFixed(1) + ',' + (sy + direction * bend).toFixed(1) + ' ' + tx.toFixed(1) + ',' + (ty - direction * bend).toFixed(1) + ' ' + tx.toFixed(1) + ',' + ty.toFixed(1));
+            for (const circle of [halo, point]) { circle.setAttribute('cx', String(tx)); circle.setAttribute('cy', String(ty)); }
+            tether.removeAttribute('hidden'); tetherVisible = true;
+        }
         function paint(audio, force = false) {
+            paintControls();
             if (!current || root.hidden || (!force && frameMs - lastPaint < PAINT_INTERVAL)) return;
             lastPaint = frameMs; paintCount++;
             if (String(doc.documentElement.lang || 'pl').slice(0, 2).toLowerCase() !== lang) localize();
-            paintControls();
-            operation.textContent = LABELS[lang][current.key] || current.key;
-            object.textContent = current.objectId ? dictionary.object + ' / ' + current.objectId : current.key === 'shader' || current.key === 'gold' ? 'GPU PASS' : 'JS / ' + dictionary.executed;
-            if (!expanded[mode]) return;
-            if (renderedKey !== current.key) appendSource(current);
-            paintValues(current); paintAudio(audio);
+            root.dataset.key = current.key; root.dataset.frame = String(current.frame.id || 0);
+            paintExcerpt(current); paintValues(values, current.values.slice(0, 2));
+            if (expanded[mode]) {
+                text(origin, current.pending ? dictionary.pending : gpu(current) ? dictionary.gpu : dictionary.cpu);
+                text(frameLabel, current.frame.id ? dictionary.frame + ' ' + current.frame.id : '');
+                text(objectLabel, current.objectId ? dictionary.object + ' / ' + current.objectId : current.key);
+                paintHistory(); paintValues(details, current.values.slice(2)); paintAudio(audio);
+            }
+            if (geometryDirty) measureDock();
         }
         function beginFrame(nextMode, info = {}, ms) {
             if (destroyed) return;
-            records.clear(); frameOpen = true; frameCount++;
+            records.clear(); targets.clear(); frameOpen = true; frameCount++;
             frameMs = Number.isFinite(ms) ? ms : now();
-            frame = { time: info.time ?? info.authoredTime ?? info.authored, elapsed: info.elapsed, phase: info.phase };
+            frame = { id: Number.isFinite(info.frameId) ? info.frameId : frameCount, time: info.time ?? info.authoredTime ?? info.authored, elapsed: info.elapsed, phase: info.phase };
             const next = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro';
             if (next !== mode || !root.parentNode) mount(next);
         }
         function emit(key, input = {}, options = {}) {
             if (destroyed || !frameOpen || suspended || !sources.has(key)) return;
             emissionCount++;
-            const prior = records.get(key), priority = Number.isFinite(options.priority) ? options.priority : 0;
+            const objectId = options.objectId == null ? '' : String(options.objectId).slice(0, 96), id = idFor(key, objectId);
+            const prior = records.get(id), priority = Number.isFinite(options.priority) ? options.priority : 0;
             if (!prior && records.size >= MAX_RECORDS) { droppedCount++; return; }
             if (prior && prior.priority > priority) { prior.count++; return; }
-            records.set(key, { key, values: copyValues(input), objectId: options.objectId == null ? '' : String(options.objectId).slice(0, 48), priority, count: (prior ? prior.count : 0) + 1 });
+            const focus = (Array.isArray(options.focus) ? options.focus : typeof options.focus === 'string' ? [options.focus] : []).filter(item => typeof item === 'string' && item.length).slice(0, 3);
+            const preferred = Array.isArray(options.valueKeys) ? options.valueKeys.filter(item => typeof item === 'string').slice(0, 6) : PROFILES[key]?.values || [];
+            const labelKey = options.labelKey && LABELS.pl[options.labelKey] ? options.labelKey : key === 'gold' ? (Number(frame.time) < 11.62 ? 'fill' : 'cooling') : key;
+            const screen = options.screen && Number.isFinite(options.screen.x) && Number.isFinite(options.screen.y) ? { x: options.screen.x, y: options.screen.y, visible: options.screen.visible !== false } : null;
+            const record = { id, key, values: copyValues(input, preferred), objectId, priority, focus, labelKey, screen, visible: options.visible !== false, count: (prior ? prior.count : 0) + 1, frame: { ...frame }, pending: false };
+            records.set(id, record); recent.delete(id); recent.set(id, record);
+            while (recent.size > MAX_RECORDS) recent.delete(recent.keys().next().value);
+        }
+        function bestRecord(collection, predicate = () => true) {
+            let best = null;
+            for (const record of collection.values()) if (record.visible !== false && predicate(record) && (!best || record.priority > best.priority)) best = record;
+            return best;
         }
         function endFrame(options = {}) {
             if (destroyed) return;
+            const wasPaused = paused, wasStale = stale;
             if (options.audio !== undefined) lastAudio = options.audio;
             if (options.visible !== undefined || frameOpen) visible = options.visible !== false;
             if (options.paused !== undefined || frameOpen) paused = !!options.paused;
-            if (!frameOpen) { frameMs = now(); updateVisibility(); if (ready && paused) paint(lastAudio); return; }
+            if (!frameOpen) { frameMs = now(); paintControls(); updateVisibility(); paint(lastAudio, wasPaused !== paused); paintTether(); return; }
             frameOpen = false;
-            let candidate = null;
-            for (const record of records.values()) if (!candidate || record.priority > candidate.priority) candidate = record;
-            if (candidate) {
-                const retained = current && records.get(current.key);
-                // Only retain an operation actually executed in this frame. Close priorities
-                // stay stable; a materially higher priority operation takes focus immediately.
+            let candidate = bestRecord(records, record => !pinned || samePin(record));
+            if (candidate && !pinned) {
+                const retained = current && records.get(current.id);
                 if (retained && candidate.key !== retained.key && candidate.priority < retained.priority + 12 && (candidate.priority <= retained.priority + 3 || frameMs - lastSwitch < 300)) candidate = retained;
-                if (!current || candidate.key !== current.key) { lastSwitch = frameMs; selectionCount++; }
-                current = candidate; ready = true;
-            } else if (!paused) { current = null; ready = false; }
-            updateVisibility();
-            if (candidate || paused && ready) paint(lastAudio);
+            }
+            let switched = false;
+            if (candidate) {
+                switched = !current || candidate.key !== current.key || candidate.labelKey !== current.labelKey || candidate.objectId !== current.objectId;
+                if (switched) { lastSwitch = frameMs; selectionCount++; }
+                current = candidate; stale = false; ready = true; remember(candidate);
+            } else if (pinned && current && samePin(current)) { stale = true; ready = true; }
+            else if (!paused) { current = null; ready = false; stale = false; }
+            paintControls(); updateVisibility();
+            if (current) paint(lastAudio, switched || wasPaused !== paused || wasStale !== stale);
+            paintTether();
         }
+        function selection() {
+            return current ? { key: current.key, objectId: current.objectId, pinned: !!pinned, frameId: current.frame.id || null, waiting: stale } : null;
+        }
+        function executed() {
+            return Array.from(records.values(), record => ({ key: record.key, objectId: record.objectId, frameId: record.frame.id }));
+        }
+        function announceFocus() {
+            if (typeof win.CustomEvent === 'function' && typeof win.dispatchEvent === 'function') win.dispatchEvent(new win.CustomEvent('guziczak:tracefocus', { detail: selection() }));
+        }
+        function announceLayout() {
+            if (typeof win.CustomEvent === 'function' && typeof win.dispatchEvent === 'function') win.dispatchEvent(new win.CustomEvent('guziczak:tracelayout', { detail: { mode, expanded: expanded[mode] } }));
+        }
+        function pin(key, objectId) {
+            if (destroyed || !sources.has(key)) return false;
+            pinned = { key, objectId: objectId == null ? '' : String(objectId).slice(0, 96) };
+            const active = bestRecord(records, samePin), prior = active || bestRecord(recent, samePin);
+            current = prior || { id: idFor(key, pinned.objectId), key, objectId: pinned.objectId, values: [], focus: [], labelKey: key, screen: null, frame: {}, pending: true };
+            stale = !active; ready = true; if (prior) remember(prior);
+            geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); announceFocus();
+            return selection();
+        }
+        function unpin() {
+            if (destroyed) return;
+            pinned = null;
+            const candidate = bestRecord(records);
+            if (candidate) { current = candidate; ready = true; stale = false; remember(candidate); }
+            else if (!paused) { current = null; ready = false; stale = false; }
+            geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); announceFocus();
+        }
+        function setFocus(key, objectId) { return key == null ? unpin() : pin(key, objectId); }
         function setSuspended(value) {
             if (destroyed) return;
-            suspended = !!value; frameOpen = false; records.clear();
+            suspended = !!value; frameOpen = false; records.clear(); targets.clear();
             if (!suspended) lastPaint = -Infinity;
             paintControls(); updateVisibility();
         }
         function reset() {
             if (destroyed) return;
-            records.clear(); frameOpen = false; current = null; ready = false; renderedKey = '';
-            paintedBlocks.forEach(block => block.el.remove()); paintedBlocks = [];
-            lastPaint = lastSwitch = -Infinity; lastAudio = null; updateVisibility();
+            records.clear(); recent.clear(); targets.clear(); frameOpen = false; current = pinned = null; ready = false; stale = false;
+            sourceSignature = ''; snapshots = []; excerptLines = []; historyVersion++; paintedHistoryVersion = -1; clear(excerpt); clear(history);
+            lastPaint = lastSwitch = -Infinity; lastAudio = null; geometryDirty = true; paintControls(); updateVisibility();
         }
         function destroy() {
             if (destroyed) return;
-            destroyed = true; scope.dispose(); records.clear(); sources.clear(); paintedBlocks = []; lastAudio = current = null;
-            root.remove(); doc.body.classList.remove('live-trace-open-intro');
+            destroyed = true; scope.dispose(); records.clear(); recent.clear(); targets.clear(); sources.clear(); snapshots = []; lastAudio = current = pinned = null;
+            root.remove(); tether.remove(); doc.body.classList.remove('live-trace-open-intro', 'live-trace-visible-intro', 'live-trace-visible-page');
         }
-        scope.on(button, 'click', () => { expanded[mode] = !expanded[mode]; paintControls(); updateVisibility(); paint(lastAudio, true); });
-        scope.on(doc, 'visibilitychange', () => { lastPaint = -Infinity; updateVisibility(); });
-        scope.on(win, 'guziczak:languagechange', () => { localize(); lastPaint = -Infinity; paint(lastAudio, true); });
-        scope.on(win, 'guziczak:routechange', event => { const view = event.detail && event.detail.view; if (view) routeBlocked = view !== 'home'; records.clear(); frameOpen = false; lastPaint = -Infinity; updateVisibility(); });
+        scope.on(button, 'click', () => { expanded[mode] = !expanded[mode]; geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); announceLayout(); });
+        scope.on(objectButton, 'click', () => { if (current) { if (pinned) unpin(); else pin(current.key, current.objectId); } });
+        scope.on(root, 'keydown', event => { if (event.key === 'Escape' && expanded[mode]) { event.preventDefault(); event.stopPropagation(); expanded[mode] = false; geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); button.focus(); announceLayout(); } });
+        scope.on(doc, 'visibilitychange', () => { lastPaint = -Infinity; geometryDirty = true; updateVisibility(); });
+        scope.on(win, 'guziczak:languagechange', () => { localize(); lastPaint = -Infinity; geometryDirty = true; paint(lastAudio, true); paintTether(); });
+        scope.on(win, 'guziczak:routechange', event => { const view = event.detail && event.detail.view; if (view) routeBlocked = view !== 'home'; records.clear(); targets.clear(); frameOpen = false; lastPaint = -Infinity; updateVisibility(); });
+        const reposition = () => { geometryDirty = true; if (!root.hidden) { measureDock(); paintTether(); } };
+        scope.on(win, 'resize', reposition); scope.on(win, 'scroll', reposition, { passive: true });
+        if (win.visualViewport) { scope.on(win.visualViewport, 'resize', reposition); scope.on(win.visualViewport, 'scroll', reposition); }
         localize(); mount('intro');
         return {
-            beginFrame, emit, endFrame, setSuspended, reset, destroy,
-            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, activeKey: current && current.key, expanded: expanded[mode], records: records.size, history: paintedBlocks.length, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: 3, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
+            beginFrame, emit, endFrame, setSuspended, reset, destroy, projectObject, setTargets, pin, unpin, setFocus, selection, executed,
+            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, waiting: stale, activeKey: current && current.key, activeObjectId: current && current.objectId, pinned: pinned && { ...pinned }, expanded: expanded[mode], compactLines: excerptLines.map(line => line.number), records: records.size, history: snapshots.length, targets: targets.size, tether: tetherVisible, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: MAX_HISTORY, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
         };
     }
     return { create };
