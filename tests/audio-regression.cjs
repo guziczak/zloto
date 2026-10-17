@@ -256,7 +256,7 @@ test('repeated cancellation cannot extend an oscillator or overwrite its origina
     } finally { f.dispose(); }
 });
 
-test('track changes stop the prior voice while the 46-mouth mapping stays fixed', async () => {
+test('track changes stop the prior voice while the 46-score-pitch mapping stays fixed', async () => {
     const f = await fixture({ main: [[0, 2000, 28, 127]], variation: [[0, 2000, 93, 127]] });
     try {
         const main = f.advance(.2); assert.ok(hasPitch(main, 28));

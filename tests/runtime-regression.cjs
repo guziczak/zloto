@@ -19,7 +19,7 @@ const scripts = Array.from(html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/
 const findings = [];
 const failures = [];
 function check(name, fn) {
-  const requiresCatalog = /geometry|audio-ledger|airflow|full-scene|renderer|mobile|projection/.test(only);
+  const requiresCatalog = /geometry|keyboard|audio-ledger|airflow|full-scene|renderer|mobile|projection/.test(only);
   if (only && !name.includes(only) && !(requiresCatalog && name === 'cpu-geometry-catalog')) return;
   try { const detail = fn(); findings.push({ name, status: 'pass', ...detail }); }
   catch (error) { failures.push({ name, message: error.message, stack: error.stack?.split('\n').slice(0, 6) }); }
@@ -237,24 +237,89 @@ function legacyAudioSnapshot() {
     notes: [{ midi: 60, name: 'C4', velocity: 110, level: .82, at: .9, age: .1, attack: .6 }, { midi: 67, name: 'G4', velocity: 90, level: .5, at: .85, age: .15, attack: .3 }], energy: .8, serial: 2 };
 }
 
+if (!baseline) check('keyboard-layout-and-picking', () => {
+  const geometry = registry.get('geometry/instrument'), audio = registry.get('audio/instrument');
+  const docking = registry.get('config/docking'), engine = registry.get('app/engine');
+  const chromatic = Array.from({ length: 66 }, (_, i) => i + 28), blackClasses = new Set([1, 3, 6, 8, 10]);
+  assert.deepEqual(Array.from(geometry.pitches), chromatic, 'The physical keyboard covers every chromatic pitch from E1 to A6');
+  assert.equal(geometry.keys.length, 66, 'Every physical key exposes its actual mouth geometry');
+  const positions = chromatic.map(midi => Array.from(geometry.position(geometry.slotFor(midi))));
+  const angles = positions.map(point => Math.atan2((point[2] - docking.hull[2]) / docking.hull[1], point[0] / docking.hull[0]));
+  for (let i = 1; i < angles.length; i++) while (angles[i] < angles[i - 1]) angles[i] += Math.PI * 2;
+  const natural = [], accidental = [];
+  for (const [slot, midi] of chromatic.entries()) {
+    const key = geometry.keys[slot], black = blackClasses.has(midi % 12);
+    assert.equal(geometry.slotFor(midi), slot, 'Chromatic MIDI maps to its own stable slot');
+    assert.equal(key.midi, midi); assert.equal(key.isBlack, black, 'Accidentals follow the piano pitch classes');
+    assert.equal(key.row, black ? 'inner' : 'outer', 'Piano colors occupy distinct radial rows');
+    const radius = Math.hypot(positions[slot][0] / docking.hull[0], (positions[slot][2] - docking.hull[2]) / docking.hull[1]);
+    assert(Number.isFinite(radius) && key.mouthRadius > 0 && key.radius > key.mouthRadius, 'Each mouth has an open bore and a solid rim');
+    (black ? accidental : natural).push({ midi, slot, angle: angles[slot], radius });
+  }
+  assert.equal(natural.length, 39); assert.equal(accidental.length, 27);
+  const step = natural[1].angle - natural[0].angle;
+  for (let i = 1; i < natural.length; i++) assert(Math.abs(natural[i].angle - natural[i - 1].angle - step) < 1e-9, 'Natural keys have uniform angular spacing');
+  for (const key of accidental) {
+    const lower = geometry.slotFor(key.midi - 1), upper = geometry.slotFor(key.midi + 1);
+    assert(!geometry.keys[lower].isBlack && !geometry.keys[upper].isBlack, 'Every black key lies between neighboring white keys');
+    assert(Math.abs(key.angle - (angles[lower] + angles[upper]) * .5) < 1e-9, 'Black key is centered on the diatonic gap');
+  }
+  for (const start of [36, 48, 60, 72]) {
+    const octave = chromatic.filter(midi => midi >= start && midi < start + 12);
+    const blacks = octave.filter(midi => geometry.keys[geometry.slotFor(midi)].isBlack).map(midi => midi - start);
+    assert.deepEqual(blacks, [1, 3, 6, 8, 10], 'Each complete octave has groups of two and three black keys, with E–F and B–C gaps');
+  }
+  assert(Math.min(...natural.map(key => key.radius)) - Math.max(...accidental.map(key => key.radius)) > .10, 'Both rows have clear radial separation');
+  let minimumSolidClearance = Infinity;
+  for (let i = 0; i < positions.length; i++) for (let j = i + 1; j < positions.length; j++) {
+    const gap = Math.hypot(positions[i][0] - positions[j][0], positions[i][2] - positions[j][2]) - geometry.keys[i].radius - geometry.keys[j].radius;
+    minimumSolidClearance = Math.min(minimumSolidClearance, gap);
+  }
+  assert(minimumSolidClearance > 0, 'The circular pipe bodies do not overlap within or across rows');
+  for (const midi of [27, 94, 60.5, NaN]) assert.equal(geometry.slotFor(midi), -1, 'Invalid pitches cannot alias a physical key');
+  const frame = { time: 2, stage: 1, phase: 'assembly', phaseProgress: .5, instrument: { running: false } };
+  const list = registry.get('scene/commands').createDrawList(catalog, frame); list.family('instrument');
+  const quiet = registry.get('scene/instrument').sample({ t: 2, state: frame, meshes: catalog.meshes, push: list.push });
+  const projected = engine.projectTraceTargets({ commands: [], traceTargets: quiet.traceTargets },
+    point => [187 + point[0] * 30, 360 + point[2] * 30, 10 + point[1]], { width: 375, height: 720 }, frame, []);
+  assert.equal(projected.targets.length, 66, 'The projection budget retains all idle chromatic mouths');
+  assert.equal(projected.pickTargets.length, 66, 'Every unobscured idle mouth can be selected');
+  const isolated = makeDom(), trace = registry.get('runtime/trace').create(isolated.win, isolated.doc);
+  trace.beginFrame('intro', { time: 2 }, 1000); trace.setTargets(projected.targets);
+  trace.emit('organ', { midi: 93 }, { objectId: 'instrument/note/93', priority: 80 });
+  trace.endFrame({ audio: legacyAudioSnapshot() });
+  assert.equal(trace.diagnostics().targets, 66, 'The trace target store cannot truncate the final two keys');
+  for (const midi of Array.from(audio.layout.pitches)) {
+    const target = projected.pickTargets.find(item => item.objectId === 'instrument/note/' + midi);
+    assert(target, 'Every original score pitch retains its projected object ID');
+    assert.equal(engine.pickTraceTarget(projected.pickTargets, target.x, target.y)?.objectId, target.objectId, 'Tapping the exact mouth selects its original pitch');
+    assert.equal(trace.pin('organ', target.objectId)?.objectId, target.objectId, 'Original score pitch can still be pinned');
+  }
+  assert.equal(trace.diagnostics().tether, true, 'The highest original pitch retains its projected tether');
+  trace.destroy();
+  return { physicalPitches: 66, naturals: 39, accidentals: 27, completeOctaves: 4, minimumSolidClearance,
+    naturalSpacing: true, accidentalMidpoints: true, idlePickTargets: 66, originalScorePitchesPreserved: 46 };
+});
+
 if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
   const audio = registry.get('audio/instrument'), geometry = registry.get('geometry/instrument');
-  assert.equal(audio.layout.pitches.length, 46, 'One fixed slot for every supported pitch');
-  assert.equal(geometry.slots, 46, 'Geometry follows fixed score union');
+  assert.equal(audio.layout.pitches.length, 46, 'The original scores retain their 46 used pitches');
+  assert.equal(geometry.slots, 66, 'The physical keyboard also includes chromatic notes unused by the scores');
   assert(catalog.meshes.instrumentAir, 'The real scene catalog contains the airflow mesh');
   assert(gpu.summary(catalog.meshes.instrumentAir.buffer).materials.every(id => id === 29), 'Airflow has its dedicated transparent material');
-  assert.equal(new Set(geometry.pitches).size, 46, 'Distinct pitches retain distinct sockets');
-  for (const [i, midi] of Array.from(audio.layout.pitches).entries()) assert.equal(geometry.slotFor(midi), i, 'Pitch-to-slot mapping stable');
+  assert(gpu.summary(catalog.meshes.instrumentBurst.buffer).materials.every(id => id === 32), 'The onset puff has its own material, separate from ivory and ebony');
+  assert.equal(new Set(geometry.pitches).size, 66, 'Distinct chromatic pitches retain distinct sockets');
+  for (const midi of Array.from(audio.layout.pitches)) assert.equal(geometry.pitches[geometry.slotFor(midi)], midi, 'Every score pitch reaches its matching physical socket');
   const noLedger = audio.create({ visualState: () => ({ running: true, available: true, position: 1, volume: 1 }), score: () => ({ notes: [[0, 1000, 60, 127]] }) });
   assert.equal(noLedger.sample().energy, 0, 'Score position without actual voice ledger cannot invent activity'); noLedger.destroy();
-  let ledger = { position: 1, contextTime: .99, running: true, available: true, muted: false, paused: false, volume: 1,
+  let ledger = { position: .99, contextTime: .99, running: true, available: true, muted: false, paused: false, volume: 1,
     revision: 1, generation: 1, gain: 1, voices: [{ id: 1, generation: 1, revision: 1, midi: 60, velocity: 127,
       strength: 1, at: 1, scoreAt: 1, startTime: 1, stopTime: 8, attack: .004, floor: .0001, normalizer: 1,
       cancelled: false, cancelAt: null, partials: [{ peak: 1, ring: 6, stopTime: 8 }] }] };
   const instrument = audio.create({ instrumentState: () => ledger });
   assert.equal(instrument.sample().energy, 0, 'Future scheduled voice stays dark before audible start');
-  ledger.contextTime = 1.1; const onset = instrument.sample(); assert(onset.energy > 0, 'Heard voice lights instrument');
-  ledger.contextTime = 1.8; const afterGap = instrument.sample(); assert(afterGap.energy > 0, '700ms rendering gap preserves still-audible note');
+  ledger.position = ledger.contextTime = 1.1; const onset = instrument.sample(); assert(onset.energy > 0, 'Heard voice lights instrument');
+  ledger.position = ledger.contextTime = 1.8; const afterGap = instrument.sample(); assert(afterGap.energy > 0, '700ms rendering gap preserves still-audible note');
   ledger.generation = 2; assert.equal(instrument.sample().energy, 0, 'Old generation is not displayed after transport replacement');
   ledger.generation = 1; ledger.muted = true; assert.equal(instrument.sample().energy, 0, 'Muted transport has no airflow energy');
   ledger.muted = false; ledger.paused = true; assert.equal(instrument.sample().energy, 0, 'Paused transport has no airflow energy');
@@ -268,38 +333,64 @@ if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
     return { result, commands: list.commands, emissions };
   }
   const flowCommands = sample => sample.commands.filter(command => command.mesh === catalog.meshes.instrumentAir);
+  const burstCommands = sample => sample.commands.filter(command => command.mesh === catalog.meshes.instrumentBurst);
+  const laterSnapshot = (source, elapsed) => ({ ...source, position: source.position + elapsed,
+    notes: source.notes.map(note => ({ ...note, age: note.age + elapsed })) });
   const quiet = sceneSample({ ...onset, running: false, notes: [], levels: onset.levels.map(() => 0), energy: 0 });
   assert.equal(flowCommands(quiet).length, 0, 'Silent input has no airflow');
   const stopped = sceneSample({ ...onset, running: false });
   assert.equal(flowCommands(stopped).length, 0, 'Stopped transport cannot reuse stale positive note levels');
+  assert.equal(burstCommands(stopped).length, 0, 'Stopped transport cannot leave an onset puff');
   assert.equal(stopped.emissions.filter(([key]) => key === 'organ').length, 0, 'Silent pipes cannot claim a live airflow operation');
-  assert.equal(stopped.result.traceTargets.length, 46, 'Silent mouths remain available for stable object selection');
+  assert.equal(stopped.result.traceTargets.length, 66, 'Silent mouths remain available for stable object selection');
   const active = sceneSample(onset);
   assert(flowCommands(active).some(command => command.mode === 8 && command.glass && command.noteEnergy > 0), 'Audible voice creates a transparent airflow draw command');
   assert(active.result.traceTargets.some(target => target.objectId === 'instrument/note/60' && target.world.every(Number.isFinite)), 'Heard note has stable projected selection target');
   assert(active.emissions.some(([key, values, options]) => key === 'organ' && values.midi === 60 && options.objectId === 'instrument/note/60'), 'Airflow trace belongs to the actual sounding pitch');
-  const flowState = sample => flowCommands(sample).map(command => ({ matrix: Array.from(command.m), from: Array.from(command.from), to: Array.from(command.to) }));
+  assert.equal(burstCommands(active).length, 1, 'A genuinely heard onset produces one puff at its own mouth');
+  assert.equal(active.result.instrument.bursts[0].midi, 60);
+  assert(Math.abs(active.result.instrument.bursts[0].age - onset.notes[0].age) < 1e-9, 'Puff age comes from the heard voice');
+  const commandState = commands => commands.map(command => ({ matrix: Array.from(command.m), from: Array.from(command.from), to: Array.from(command.to) }));
+  const flowState = sample => commandState(flowCommands(sample));
   const laterScene = sceneSample(onset, false, false, 4);
   assert.deepEqual(flowState(laterScene), flowState(active), 'Advancing scene time alone cannot advance audio airflow');
-  const laterAudio = sceneSample({ ...onset, position: onset.position + .5 });
+  assert.deepEqual(commandState(burstCommands(laterScene)), commandState(burstCommands(active)), 'The onset puff cannot move on an independent scene clock');
+  const laterAudio = sceneSample(laterSnapshot(onset, .5));
   assert(flowCommands(laterAudio).every(command => command.from[1] === onset.position + .5), 'Airflow receives the heard audio position');
   assert.notDeepEqual(flowState(laterAudio), flowState(active), 'Advancing the audible clock advances airflow phase');
+  assert.equal(burstCommands(laterAudio).length, 0, 'The short onset puff expires while the note continues sounding');
+  const future = sceneSample({ ...onset, notes: onset.notes.map(note => ({ ...note, at: onset.position + .12, age: -.12 })) });
+  assert.equal(flowCommands(future).length + burstCommands(future).length, 0, 'A future scheduled note cannot show flow or an early puff');
+  const oneTone = (level, age) => ({ ...onset, position: 1 + age,
+    levels: onset.levels.map((_value, i) => i === 60 - onset.low ? level : 0),
+    notes: [{ ...onset.notes[0], level, age, at: 1, attack: age < .16 ? .5 : 0 }] });
+  const soft = sceneSample(oneTone(.008, .7), true), strong = sceneSample(oneTone(.4, .7), true);
+  assert(soft.result.instrument.flows[0].height > .50, 'A soft audible note retains a readable plume height on mobile');
+  assert(strong.result.instrument.flows[0].height > soft.result.instrument.flows[0].height, 'Stronger audio still produces a larger visible response');
+  assert.equal(soft.result.instrument.flows[0].level, .008, 'Perceptual display gain preserves the original measured level');
+  assert(soft.emissions.some(([key, values]) => key === 'organ' && values.level === .008), 'Live source values do not mislabel display gain as audio amplitude');
+  const firstPuff = sceneSample(oneTone(.1, .04)).result.instrument.bursts[0];
+  const releasingPuff = sceneSample(oneTone(.1, .4)).result.instrument.bursts[0];
+  assert(firstPuff && releasingPuff && firstPuff.pulse > releasingPuff.pulse, 'The heard onset envelope releases after its initial puff');
+  assert(releasingPuff.radius > firstPuff.radius && releasingPuff.rise > firstPuff.rise, 'A puff expands and rises as its actual note ages');
   const pitches = Array.from(audio.layout.pitches), levels = Array.from({ length: 66 }, (_, i) => pitches.includes(i + 28) ? .9 : 0);
-  const dense = { ...onset, levels, notes: pitches.map(midi => ({ midi, name: String(midi), level: .9, age: .1, attack: .5, at: .9 })) };
+  const dense = { ...onset, levels, notes: pitches.map(midi => ({ midi, name: String(midi), level: .9, age: .1, attack: .5, at: onset.position - .1 })) };
   const denseScene = sceneSample(dense);
   assert.equal(denseScene.commands.filter(command => command.mesh === catalog.meshes.instrumentLight).length, 46, 'All sounding pitches illuminate their mouths');
   assert.equal(flowCommands(denseScene).length, 8, 'A dense chord uses at most eight airflow draws');
+  assert.equal(burstCommands(denseScene).length, 8, 'A dense heard onset uses at most eight puff draws');
   assert(denseScene.commands.every(command => Array.from(command.m).concat(command.from, command.to, command.light, command.noteEnergy).every(Number.isFinite)), 'Dense airflow uniforms and transforms remain finite');
   const reverseDense = sceneSample({ ...dense, notes: dense.notes.slice().reverse() });
   assert.deepEqual(flowCommands(reverseDense).map(command => command.from[0]), flowCommands(denseScene).map(command => command.from[0]), 'Dense-note selection remains deterministic when ledger order changes');
   const mobileScene = sceneSample(onset, true), reducedScene = sceneSample(onset, false, true);
-  assert(mobileScene.result.instrument.flows.every(flow => flow.height > 0 && flow.height <= .650001), 'Mobile airflow stays within its presentation budget');
+  assert(mobileScene.result.instrument.flows.every(flow => flow.height > 0 && flow.height <= 1.050001), 'Mobile airflow stays within its presentation budget');
   assert.equal(flowCommands(reducedScene).length, flowCommands(active).length, 'Reduced motion retains the sounding note cue');
   assert(flowCommands(reducedScene).every(command => command.from[1] === 0 && command.to[1] === 1), 'Reduced motion requests frozen airflow without a moving packet clock');
-  assert.deepEqual(flowState(sceneSample({ ...onset, position: onset.position + .5 }, false, true)), flowState(reducedScene), 'Reduced-motion airflow remains fixed as audio time advances');
+  assert.equal(burstCommands(reducedScene).length, 0, 'Reduced motion omits the expanding onset puff');
+  assert.deepEqual(flowState(sceneSample(laterSnapshot(onset, .5), false, true)), flowState(reducedScene), 'Reduced-motion airflow remains fixed as audio time advances');
   return { pitches: 46, noScoreOnlyFallback: true, futureVoiceDark: true, longFrameGap: true, generationAndPause: true,
-    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true,
-    liveFlows: active.result.instrument.flows.length, denseFlows: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
+    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true, onsetPuffEnvelope: true, softNoteMobileHeight: soft.result.instrument.flows[0].height,
+    liveFlows: active.result.instrument.flows.length, denseFlows: 8, densePuffs: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
 });
 
 if (!baseline) check('mobile-content-projection', () => {
@@ -342,7 +433,7 @@ if (!baseline) check('mobile-content-projection', () => {
         const angle = i * Math.PI / 48;
         ring.push(project([docking.hull[0] * Math.cos(angle), docking.deckY, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
         underside.push(project([docking.hull[0] * Math.cos(angle), docking.deckY - .32, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
-        airflowBound.push(project([docking.hull[0] * Math.cos(angle), docking.deckY + 1.08, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
+        airflowBound.push(project([docking.hull[0] * 1.045 * Math.cos(angle), docking.deckY + 1.65, docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(angle)]));
       }
       const bound = ring.concat(underside, airflowBound); assert(bound.every(point => point.every(Number.isFinite) && point[2] > 0), 'Full rim is in front of camera');
       const minX = Math.min(...bound.map(point => point[0])), maxX = Math.max(...bound.map(point => point[0]));
@@ -486,7 +577,7 @@ check('renderer-javascript-projection-and-uniforms', () => {
       projected = engine.projectTraceTargets(packet, renderer.project, viewport, frame, trace.executed());
       assert(projected.targets.every(target => Number.isFinite(target.x) && Number.isFinite(target.y)), 'Projected object anchors are finite CSS positions');
       assert(projected.pickTargets.every(target => target.visible && target.depth > 0), 'Only visible forward-facing anchors can be picked');
-      if (authored < 16.7) assert.equal(projected.targets.filter(target => target.objectId.startsWith('instrument/note/')).length, 46, 'All fixed mouths have projection anchors');
+      if (authored < 16.7) assert.equal(projected.targets.filter(target => target.objectId.startsWith('instrument/note/')).length, 66, 'All chromatic mouths have projection anchors');
       else assert.equal(projected.targets.length, 0, 'Cinema targets are removed during exhibit handoff');
       trace.setTargets(projected.targets);
       const one = projected.pickTargets[0];

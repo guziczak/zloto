@@ -1864,7 +1864,7 @@ GuziczakModules.define('app/engine',[
    });
   }
   function add(key,objectId,screen,pickable,extra={}){
-   if(!screen||seen.has(objectId)||targets.length>=64)return;
+   if(!screen||seen.has(objectId)||targets.length>=96)return;
    seen.add(objectId);
    const visible=screen.visible&&!(key==='organ'&&covered(screen,objectId));
    targets.push({objectId,x:screen.x,y:screen.y,visible});
@@ -2023,7 +2023,7 @@ GuziczakModules.define('app/engine',[
   function resume(){if(mode==='page'){stage.setPaused(false);setWaterPaused(false);return;}if(mode!=='intro'||disposed||failed)return;clock.resume();lastWaterMs=null;sound.timelinePause(false);dirty=true;schedule();}
   function diagnostics(){const f=lastFrame||states.sampleState(clock.snapshot());return {version:config.version,mode,routeSuspended,waterState:drive.diagnostics(),waterPaused,ready,phase:mode==='page'?'page':f.phase,time:clock.elapsed,authoredTime:f.time,total:timeline.total,playback:clock.state,playbackRate:clock.rate,savedCoolingSeconds:clock.saved,quench:quench.diagnostics(),finished:mode==='page',frozen:clock.state==='paused',frame:frameNumber,error:lastError,disposed,
    ...(renderer&&!device?.disposed?renderer.stats():{}),resources:device?device.counts():{},surface:device?device.surface():null,exhibit:exhibit&&!device?.disposed?exhibit.stats():{},exhibitControl:stage.diagnostics(),
-   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),tracePicking:{targets:screenPickTargets.length,picks:tracePickCount,frame:traceFrameNumber},instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial,slots:lastPacket?.instrument?.slots??instruments.layout?.pitches?.length??0,pitches:lastPacket?.instrument?.pitches??instruments.layout?.pitches??[],active:mode==='intro'?(lastPacket?.instrument?.active||0):0,flows:mode==='intro'?(lastPacket?.instrument?.flows||[]):[],columns:mode==='intro'?(lastPacket?.instrument?.columns||[]):[],strongest:mode==='intro'?(lastPacket?.instrument?.strongest||null):null}:null};}
+   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),tracePicking:{targets:screenPickTargets.length,picks:tracePickCount,frame:traceFrameNumber},instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial,slots:lastPacket?.instrument?.slots??instruments.layout?.pitches?.length??0,pitches:lastPacket?.instrument?.pitches??instruments.layout?.pitches??[],active:mode==='intro'?(lastPacket?.instrument?.active||0):0,flows:mode==='intro'?(lastPacket?.instrument?.flows||[]):[],bursts:mode==='intro'?(lastPacket?.instrument?.bursts||[]):[],columns:mode==='intro'?(lastPacket?.instrument?.columns||[]):[],strongest:mode==='intro'?(lastPacket?.instrument?.strongest||null):null}:null};}
   function destroy(){if(disposed)return;disposed=true;mode='disposed';clearTracePicking();clock.pause();cancel();stage.destroy();quench.destroy();quenchPanel.destroy();scope.dispose();motion.destroy();scoreLayer.destroy();instrument.destroy();trace.destroy();if(globalThis.GUZICZAK_TRACE===trace)delete globalThis.GUZICZAK_TRACE;sound.destroy();if(device)device.dispose();ui.finish();canvas.style.display='none';dispatch('guziczak:brand-dispose');resolve();}
   scope.on(ui.$('skip'),'click',()=>{complete();ui.$('replay').focus({preventScroll:true});});scope.on(ui.$('replay'),'click',play);scope.on(ui.$('close-fallback'),'click',ui.closeFallback);
   scope.on(ui.$('scene-pause'),'click',()=>clock.state==='playing'?pause():resume());
@@ -2963,7 +2963,7 @@ GuziczakModules.define('config/materials', [], () => {
         LIQUID_GOLD: 5, TEXT_LIGHT: 6, FLOOR: 7, ACCENT: 8, GLASS: 9, GOLD_LIGHT: 10,
         RECEIVER: 11, SIGNATURE_A: 12, SIGNATURE_B: 13, RIFT: 14, TIMBER: 15,
         SAND: 16, CAVITY: 17, RIFT_EDGE: 18, CAST_METAL: 20, OVERFLOW_METAL: 21,
-        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29 });
+        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29, ORGAN_BURST:32, ORGAN_IVORY:30, ORGAN_EBONY:31 });
     const ids = new Set(Object.values(Material));
     function validate(id) { if (!Number.isInteger(id) || !ids.has(id))
         throw Error('Unknown material ID: ' + id); }
@@ -4106,9 +4106,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for (const o of objs)
                 if (!o.glass)
                     draw(o, meshProg, refl);
-            // Active air tracers leave a faint echo beside their lit gold mouths.
+            // Air tracers and onset puffs leave a faint echo beside their lit mouths.
             gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
-            for(const o of objs)if(o.mesh===meshes.instrumentAir)draw(o,meshProg,refl);
+            for(const o of objs)if(o.mesh===meshes.instrumentAir||o.mesh===meshes.instrumentBurst)draw(o,meshProg,refl);
             gl.depthMask(true);gl.disable(gl.BLEND);
             drawWords(refl);
             filter(mirrorRT, mirrorBlur, .68 / mirrorRT.w, .28 / mirrorRT.h);
@@ -4301,7 +4301,7 @@ void deform(inout vec3 p,inout vec3 n,vec2 uv){
   float rise=smoothstep(.36,1.,path),clock=uTo.y>.5?0.:uFrom.y;
   float phase=clock*1.8+uFrom.x*.31;
   vec2 breath=vec2(sin(phase+path*5.2),cos(phase*.83-path*4.8));
-  p.xz+=breath*rise*rise*.018;return;
+  p.xz+=breath*rise*rise*(.018+.010*uTo.z);return;
  }
  if(uMode>6.5&&uMode<7.5){
   float a=uTo.x,c=cos(a),s=sin(a),w=smoothstep(0.,1.,uv.x);
@@ -4408,23 +4408,40 @@ void main(){
  vec3 q=vLocal,p=vWorld,n=normalize(vNormal),cam=uCam;if(uReflection>.5){p.y=2.*uReflectY-p.y;n.y=-n.y;cam.y=2.*uReflectY-cam.y;if(p.y<uReflectY-.003)discard;}
  vec3 v=normalize(cam-p);float nv=max(dot(n,v),.001),id=vMat;float rough=.25,metal=.9,occ=1.,alpha=uAlpha;vec3 base=vec3(.13),emission=vec3(0.);
  if(id>28.5&&id<29.5){
-  // Soft crossed ribbons trace air; the bright packet always travels intake -> lip -> curl.
+  // Wide soft air ribbons carry bright, narrow cores and audible-clock packets.
   float lane=floor(vUV.x*.5),path=clamp(vUV.x-lane*2.,0.,1.);
   float phase=uTo.y>.5?.31+lane*.23:(uFrom.y-uFrom.z)*uTo.x+lane*.23;
   float distance=abs(fract(path-phase+.5)-.5);
-  float packet=exp(-pow(distance/.065,2.));
+  float packet=exp(-pow(distance/.090,2.));
   float behind=fract(phase-path+1.);
-  float trail=exp(-behind*13.)*(1.-smoothstep(.17,.30,behind));
-  float edge=1.-smoothstep(.10,.96,abs(vUV.y));
-  float core=exp(-vUV.y*vUV.y*12.);
-  float ends=smoothstep(0.,.065,path)*(1.-smoothstep(.74,1.,path));
-  float strength=.26+.74*sqrt(clamp(uNoteEnergy,0.,1.));
-  float opacity=edge*ends*(.10+.66*packet+.18*trail)*strength*clamp(uObjectLight,0.,1.)*uAlpha;
-  if(uReflection>.5)opacity*=.34;
+  float trail=exp(-behind*10.)*(1.-smoothstep(.21,.36,behind));
+  float edge=1.-smoothstep(.15,.99,abs(vUV.y));
+  float core=exp(-vUV.y*vUV.y*15.);
+  float ends=smoothstep(0.,.040,path)*(1.-smoothstep(.82,1.,path));
+  float strength=.78+.22*sqrt(clamp(uNoteEnergy,0.,1.));
+  float mouthFlash=exp(-pow((path-.37)*9.,2.))*uTo.z;
+  float opacity=edge*ends*(.29+.62*packet+.20*trail+.15*mouthFlash)*strength*clamp(uObjectLight,0.,1.)*uAlpha;
+  if(uReflection>.5)opacity*=.30;
   if(opacity<.002)discard;
-  vec3 tint=mix(vec3(1.,.61,.23),vec3(1.,.96,.85),smoothstep(.16,.67,path));
-  vec3 c=tint*(.66+core*.50+packet*1.70+trail*.34)*uObjectLight;
-  outColor=vec4(c,clamp(opacity,0.,.86));return;
+  vec3 tint=mix(vec3(1.,.69,.32),vec3(1.,.97,.88),smoothstep(.12,.57,path));
+  // Object light is applied once through opacity, so staging cannot square the fade.
+  vec3 c=tint*(1.26+core*.90+packet*2.20+trail*.42+mouthFlash*.95);
+  outColor=vec4(c,clamp(opacity,0.,.95));return;
+ }
+ if(id>31.5&&id<32.5){
+  // The short exhalation is emissive mist: no glass reflections or liquid highlights.
+  if(!gl_FrontFacing)n=-n;
+  float age=max(0.,uFrom.y-uFrom.z),around=atan(q.z,q.x);
+  float grain=noise3(q*vec3(6.2,8.5,6.2)+vec3(uFrom.x*.17,-age*4.3,age*2.1));
+  float curl=.5+.5*sin(around*5.-age*11.+uFrom.x*.37);
+  float facing=pow(clamp(abs(dot(n,v)),0.,1.),.52);
+  float density=(.58+.30*grain+.12*curl)*facing;
+  float opacity=density*uTo.x*(.74+.20*uNoteEnergy)*clamp(uObjectLight,0.,1.)*uAlpha;
+  if(uReflection>.5)opacity*=.20;
+  if(opacity<.003)discard;
+  vec3 tint=mix(vec3(1.,.71,.37),vec3(1.,.975,.90),.58+.35*grain);
+  vec3 c=tint*(2.1+.75*grain+.45*curl);
+  outColor=vec4(c,clamp(opacity,0.,.88));return;
  }
  if(id>6.5&&id<7.5){
   float r=length(p.xz),f=.04+.40*pow(1.-nv,5.);float grain=noise3(vec3(p.xz*22.,0));
@@ -4537,6 +4554,16 @@ void main(){
  }
  else if(id>20.5&&id<21.5){
   float hot=quenchHot(p.xz,1.-smoothstep(11.64,12.50,uTime));base=vec3(.79,.525,.213);metal=.996;rough=mix(.34,.09,hot);emission=vec3(.65,.23,.026)*hot*.14;
+ }
+ else if(id>29.5&&id<30.5){
+  // Warm ivory is a lit dielectric, distinct from the surrounding gold rims.
+  base=mix(vec3(.72,.66,.54),vec3(.79,.73,.61),macro*.40);
+  metal=.045;rough=.29+micro*.025;
+ }
+ else if(id>30.5&&id<31.5){
+  // Soft ebony reflections retain the inner row's silhouette against the table.
+  base=mix(vec3(.010,.014,.016),vec3(.023,.029,.031),macro*.52);
+  metal=.16;rough=.255+micro*.026;
  }
  else if(id>27.5&&id<28.5){
   base=vec3(.82,.54,.20);metal=.92;rough=.16;
@@ -4867,7 +4894,7 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
     for (let i = 0; i < 96; i++) {
         const a = i * Math.PI / 48, x = docking.hull[0] * 1.045 * Math.cos(a);
         const z = docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(a);
-        for (const y of [docking.deckY - .32, docking.deckY + 1.08]) ringBounds.push([x, y, z]);
+        for (const y of [docking.deckY - .32, docking.deckY + 1.65]) ringBounds.push([x, y, z]);
     }
     function worldBounds(frame, assembly) {
         const points = ringBounds.slice(), cup = assembly?.cupPose || M.I(), coil = assembly?.coilPose || cup;
@@ -7014,27 +7041,87 @@ GuziczakModules.define('audio/instrument', ['math'], (math) => {
 });
 
 
-GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/instrument'], (math, docking, audio) => {
+GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/instrument'], (math, docking, audio) => {
  'use strict';
- const { M, TAU, norm, cross, dot, vadd, vsub, vmul } = math;
- const pitches = audio.layout.pitches, slots = pitches.length, rimScale = .932;
- const mouthY = .302, radius = .151, airSegments = 64;
- function position(slot) {
-  // A small break marks the beginning of the scale; pitches never move between tracks.
-  const angle = -.5 * Math.PI + .075 + slot / Math.max(1, slots - 1) * (TAU - .15);
-  return [docking.hull[0] * rimScale * Math.cos(angle), docking.deckY,
-   docking.hull[2] + docking.hull[1] * rimScale * Math.sin(angle)];
+ const { M, TAU } = math;
+ // A complete chromatic keyboard remains present when a score uses only some notes.
+ // Naturals are uniformly spaced on the diatonic axis; each accidental sits halfway
+ // between its two natural neighbours. E–F and B–C have no intervening black mouth.
+ const DIATONIC = Object.freeze([0,.5,1,1.5,2,3,3.5,4,4.5,5,5.5,6]);
+ const BLACK = new Set([1,3,6,8,10]);
+ const low = audio.layout.low, high = audio.layout.high;
+ const pitches = Object.freeze(Array.from({ length:high-low+1 }, (_, slot) => low+slot));
+ const slots = pitches.length, seam = .24, angleStart = -Math.PI/2 + seam/2;
+ const diatonic = midi => Math.floor(midi/12)*7 + DIATONIC[midi%12];
+ const first = diatonic(low), last = diatonic(high);
+ const angularStep = (TAU-seam)/Math.max(1,last-first);
+ const rows = Object.freeze({
+  outer:Object.freeze({ scale:.932,radius:.153,mouthRadius:.111,height:.326,material:30 }),
+  inner:Object.freeze({ scale:.802,radius:.112,mouthRadius:.078,height:.258,material:31 })
+ });
+ const keys = Object.freeze(pitches.map(midi => {
+  const isBlack = BLACK.has(midi%12), row = isBlack ? 'inner' : 'outer';
+  const diatonicIndex = diatonic(midi)-first;
+  return Object.freeze({ midi,isBlack,row,angle:angleStart+diatonicIndex*angularStep,
+   diatonicIndex,...rows[row] });
+ }));
+ function keyAt(slot) {
+  if (!Number.isInteger(slot) || slot < 0 || slot >= slots) throw RangeError('Unknown keyboard slot: '+slot);
+  return keys[slot];
  }
- function mouth(slot) { const p = position(slot); p[1] += mouthY; return p; }
- function slotFor(midi) { return pitches.indexOf(midi); }
+ function position(slot) {
+  const key = keyAt(slot);
+  return [docking.hull[0]*key.scale*Math.cos(key.angle),docking.deckY,
+   docking.hull[2]+docking.hull[1]*key.scale*Math.sin(key.angle)];
+ }
+ function mouth(slot) { const p=position(slot); p[1]+=keyAt(slot).height; return p; }
+ function slotFor(midi) { return Number.isInteger(midi) && midi >= low && midi <= high ? midi-low : -1; }
  function outwardAngle(slot) {
   const p = position(slot);
-  return -Math.atan2((p[2] - docking.hull[2]) / (docking.hull[1] ** 2),
-   p[0] / (docking.hull[0] ** 2));
+  return -Math.atan2((p[2]-docking.hull[2])/(docking.hull[1]**2),p[0]/(docking.hull[0]**2));
  }
+ function lightScale(slot) { return keyAt(slot).mouthRadius/.108; }
+ function create({ build, ringY }) {
+  const instrumentBody = build(b => {
+   // Three delicate rails bind both rows into a single circular instrument.
+   for (const scale of [.984,.866,.758]) {
+    const rail=[];
+    for (let i=0;i<=192;i++) {
+     const angle=i/192*TAU;
+     rail.push([docking.hull[0]*scale*Math.cos(angle),docking.deckY+.018,
+      docking.hull[2]+docking.hull[1]*scale*Math.sin(angle)]);
+    }
+    b.tube(rail,.010,1,6);
+   }
+   for (let slot=0;slot<slots;slot++) {
+    const key=keys[slot], r=key.radius, bore=key.mouthRadius, h=key.height;
+    b.at(M.T(...position(slot)), () => {
+     // Ivory/champagne naturals and smaller ebony accidentals have separate bodies.
+     b.lathe([[0,.011],[r*.94,.011],[r,.027],[r,.051],[r*.94,.075],
+      [r*.91,h-.074],[r*.955,h-.031]],key.material,20);
+     // The gold lip is an annulus. Its inner edge continues into a recessed dark
+     // wall and floor, leaving a real open bore rather than a solid glowing cap.
+     b.lathe([[r*.955,h-.031],[r,h-.021],[r,h-.012],[r*.924,h],
+      [bore,h],[bore*.975,h-.017]],1,20);
+     b.lathe([[bore*.975,h-.017],[bore*.975,.049],[0,.049]],31,20);
+     ringY(b,r*.94,.035,.012,.014,1,20);
+    });
+   }
+  });
+  // Keep one shared light mesh; callers scale only its X/Z radius for each mouth.
+  const instrumentLight=build(b => ringY(b,.108,-.004,.012,.008,28,20));
+  return { instrumentBody,instrumentLight };
+ }
+ return { create,pitches,slots,keys,rows,seam,angularStep,position,mouth,slotFor,outwardAngle,lightScale };
+});
+
+GuziczakModules.define('geometry/airflow', ['math'], math => {
+ 'use strict';
+ const { TAU, norm, cross, dot, vadd, vsub, vmul } = math;
+ const airSegments = 64, burstSegments = 48, burstSides = 10;
  function airPath(s, lane = 0) {
-  // The path enters from above the deck, converges at the lip, then curls and opens.
-  // It is a visible tracer of each heard note, not a pressure or acoustic simulation.
+  // Heard-note tracers approach the lip, turn upward, and separate as they dissipate.
+  // This visual path does not claim to solve fluid pressure or pipe acoustics.
   if (s <= .36) {
    const u = s / .36, v = 1 - u;
    const a = [-.61, .12, lane * .12], b = [-.29, .16, lane * .066];
@@ -7055,11 +7142,11 @@ GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/
     : norm(cross(tangent, [0,0,1]));
    if (Math.hypot(...axis) < .1) axis = norm(cross(tangent, [0,1,0]));
    const across = cross(tangent, axis), s = k / airSegments;
-   const width = (lane === 0 ? .026 : .022) * (.76 + .24*Math.sin(Math.PI*s));
+   // A readable halo spans several phone pixels; the shader supplies its narrow core.
+   const width = (lane === 0 ? .057 : .046) * (.78 + .22*Math.sin(Math.PI*s));
    frames.push({ tangent, axes:[axis, across], width }); previousAxis = axis;
   }
-  // Crossed ribbons keep a soft, readable stroke from both the table and overhead views.
-  // UV.x contains longitudinal progress plus a disjoint lane ID; UV.y crosses its glow.
+  // Crossed ribbons preserve screen coverage from both oblique and overhead views.
   for (let k = 0; k < airSegments; k++) for (let plane = 0; plane < 2; plane++) {
    const f = frames[k], g = frames[k+1], a = f.axes[plane], c = g.axes[plane];
    const p = vadd(points[k], vmul(a, -f.width)), q = vadd(points[k+1], vmul(c, -g.width));
@@ -7070,105 +7157,128 @@ GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/
    b.tri(p,r,z,29,n,m,n,[[u,-1],[v,1],[u,1]]);
   }
  }
- function create({ build, ringY }) {
-  // The whole stationary instrument is one opaque mesh, including its hollow bores.
-  const instrumentBody = build(b => {
-   for (const offset of [-.051, .051]) {
-    const rail = [];
-    for (let i = 0; i <= 192; i++) {
-     const angle = i / 192 * TAU, scale = rimScale + offset;
-     rail.push([docking.hull[0] * scale * Math.cos(angle), docking.deckY + .017,
-      docking.hull[2] + docking.hull[1] * scale * Math.sin(angle)]);
-    }
-    b.tube(rail, .014, 1, 6);
-   }
-   for (let slot = 0; slot < slots; slot++) {
-    b.at(M.T(...position(slot)), () => {
-     // The closed dark floor sits above the altar; the bore remains visibly recessed.
-     b.lathe([[0,.016],[.16,.016],[.165,.03],[.163,.064],[.147,.082],
-      [.143,.264],[.151,.282],[.151,.302],[.137,.311],[.112,.311],
-      [.108,.294],[.108,.059],[0,.059]], 1, 20);
-     b.lathe([[0,.062],[.107,.062],[.108,.289]], 0, 20);
-     ringY(b, .153, .057, .019, .025, 2, 20);
-     ringY(b, .143, .296, .018, .014, 1, 20);
-     if (slot === 0 || Math.floor(pitches[slot] / 12) !== Math.floor(pitches[slot - 1] / 12))
-      ringY(b, .158, .036, .012, .009, 1, 20);
-    });
-   }
-  });
-  const instrumentLight = build(b => ringY(b, .108, -.004, .012, .008, 28, 20));
-  const instrumentAir = build(b => { for (let lane = 0; lane < 3; lane++) airRibbon(b, lane); });
-  return { instrumentBody, instrumentLight, instrumentAir };
+ function burst(b) {
+  // A translucent toroidal puff opens from the mouth on the actual heard onset.
+  // Its broad soft section reads as exhalation instead of a liquid splash or solid ring.
+  const point = (u,v) => {
+   const a=u*TAU,c=v*TAU,r=1+.22*Math.cos(c);
+   return [r*Math.cos(a),.19*Math.sin(c),r*Math.sin(a)];
+  };
+  const normal = (u,v) => {
+   const a=u*TAU,c=v*TAU;
+   return norm([Math.cos(c)*Math.cos(a),Math.sin(c)*(.22/.19),Math.cos(c)*Math.sin(a)]);
+  };
+  for (let i=0;i<burstSegments;i++) for(let j=0;j<burstSides;j++) {
+   const u=i/burstSegments,v=j/burstSides,x=(i+1)/burstSegments,y=(j+1)/burstSides;
+   const a=point(u,v),c=point(x,v),d=point(x,y),e=point(u,y);
+   const na=normal(u,v),nc=normal(x,v),nd=normal(x,y),ne=normal(u,y);
+   b.tri(a,c,d,32,na,nc,nd,[[u,v],[x,v],[x,y]]);
+   b.tri(a,d,e,32,na,nd,ne,[[u,v],[x,y],[u,y]]);
+  }
  }
- return { create, position, mouth, outwardAngle, airPath, airSegments, slots, slotFor, pitches, mouthY, radius };
+ function create({ build }) {
+  const instrumentAir=build(b=>{for(let lane=0;lane<3;lane++)airRibbon(b,lane);});
+  const instrumentBurst=build(burst);
+  return { instrumentAir,instrumentBurst };
+ }
+ const airflowBounds=Object.freeze({ maximumMobileHeight:1.05,maximumDesktopHeight:1.20,
+  maximumWidth:1.29,maximumRibbonHalfWidth:.057,maximumBend:.028,
+  burstDuration:.52,burstOuterRadiusFactor:1.22*2.85,burstMaximumRise:.728 });
+ return { create,airPath,airSegments,airflowBounds };
 });
 
+GuziczakModules.define('geometry/instrument', ['geometry/keyboard', 'geometry/airflow'], (keyboard, airflow) => {
+ 'use strict';
+ // One pitch owns its body, mouth, airflow origin and picking target.
+ // Silent keys complete the keyboard; only heard voices animate these meshes.
+ function create(options) {
+  return { ...keyboard.create(options), ...airflow.create(options) };
+ }
+ return { ...keyboard, airPath:airflow.airPath, airSegments:airflow.airSegments, create };
+});
 
 GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (math, geometry) => {
  'use strict';
- const { M, C, clamp, ease } = math, zero = [0,0,0];
+ const { M, C, clamp, ease } = math, zero=[0,0,0];
  function sample(ctx) {
-  const { t, state, meshes, push } = ctx, source = state.instrument || {};
-  const emit = typeof ctx.emit === 'function' ? ctx.emit : () => {};
-  if (t <= .02 || state.stage < .001) return {};
-  const focus = state.phase === 'reclaim'
-   ? ease(0,.12,state.phaseProgress) * (1-ease(.94,1,state.phaseProgress)) : 0;
-  const light = state.stage * ease(.02,.65,t) * (1-.62*focus);
-  push(meshes.instrumentBody, M.I(), 0, zero, zero, false, light);
-  const low = Number.isFinite(source.low) ? source.low : 28;
-  const audible = source.running === true && source.available !== false && !source.paused && !source.muted;
-  const levels = audible ? source.levels || [] : [], notes = audible ? source.notes || [] : [];
-  const reduced = !!(ctx.reduced || source.reduced || source.motionScale === 0);
-  const motionClock = reduced ? 0 : Math.max(0, Number.isFinite(source.position) ? source.position : 0);
-  const sounding = notes.filter(n => n.level >= .008 && geometry.slotFor(n.midi) >= 0);
-  // New attacks remain legible in dense chords; all voices still illuminate their own mouth.
-  const visibleFlows = new Set(sounding.slice().sort((a,b) =>
-   (b.level + (b.attack || 0)*.12) - (a.level + (a.attack || 0)*.12) || a.midi-b.midi
-  ).slice(0,8).map(n => n.midi));
-  const byMidi = new Map(notes.map(n => [n.midi,n]));
-  const traceTargets = [], flows = [];
-  let active = 0, strongest = null;
-  const maximumHeight = (ctx.mobile ? .65 : .74) * (1-.35*focus);
-  for (let slot = 0; slot < geometry.slots; slot++) {
-   const midi = geometry.pitches[slot], position = geometry.mouth(slot);
-   const level = clamp(Number(levels[midi-low]) || 0,0,1), note = byMidi.get(midi);
-   const objectId = 'instrument/note/' + midi;
-   traceTargets.push({ key:'organ', objectId, world:position.slice(), radius:.20, midi });
-   if (level < .008) continue;
-   const attack = clamp(note?.attack || 0,0,1), noteLight = clamp(level*.86 + attack*.35,0,1);
-   push(meshes.instrumentLight, M.T(...position), 0, zero, zero, false, light, 0, 1, noteLight);
-   if (visibleFlows.has(midi)) {
-    // Fixed rate per note avoids backwards packet jumps as its envelope decays.
-    // The rate is a visual path traversal per second, not a physical air velocity.
-    const flowRate = reduced ? 0 : .68 + (midi % 12)*.014;
-    const onset = Number.isFinite(note?.at) ? note.at : 0;
+  const {t,state,meshes,push}=ctx,source=state.instrument||{};
+  const emit=typeof ctx.emit==='function'?ctx.emit:()=>{};
+  if(t<=.02||state.stage<.001)return {};
+  const focus=state.phase==='reclaim'?ease(0,.12,state.phaseProgress)*(1-ease(.94,1,state.phaseProgress)):0;
+  const light=state.stage*ease(.02,.65,t)*(1-.42*focus);
+  push(meshes.instrumentBody,M.I(),0,zero,zero,false,light);
+  const low=Number.isFinite(source.low)?source.low:28;
+  const audible=source.running===true&&source.available!==false&&!source.paused&&!source.muted;
+  const levels=audible?source.levels||[]:[],notes=audible?source.notes||[]:[];
+  const reduced=!!(ctx.reduced||source.reduced||source.motionScale===0);
+  const audioPosition=Number.isFinite(source.position)?source.position:0;
+  const motionClock=reduced?0:Math.max(0,audioPosition);
+  const heard=[];
+  for(const note of notes){
+   if(geometry.slotFor(note.midi)<0)continue;
+   const level=clamp(Number(levels[note.midi-low])||0,0,1),attack=clamp(Number(note.attack)||0,0,1);
+   const onset=Number.isFinite(note.at)?note.at:audioPosition-(Number.isFinite(note.age)?note.age:0);
+   const age=Number.isFinite(note.age)?note.age:audioPosition-onset;
+   if(age<0||onset>audioPosition+.0001||!Number.isFinite(age))continue;
+   // Scheduled future notes never light up. Heard attacks appear before their level peaks.
+   if(level<.003&&!(age<.16&&attack>=.006))continue;
+   const onsetPulse=reduced?0:ease(0,.018,age)*(1-ease(.08,.52,age));
+   // Perceptual display gain leaves the measured audio level and sound untouched.
+   const visualDrive=clamp(Math.pow(level*6.5,.40),0,1);
+   heard.push({note,level,attack,onset,age,onsetPulse,visualDrive});
+  }
+  const visibleFlows=new Set(heard.slice().sort((a,b)=>
+   (b.level+b.attack*.50+b.onsetPulse*.22)-(a.level+a.attack*.50+a.onsetPulse*.22)||a.note.midi-b.note.midi
+  ).slice(0,8).map(n=>n.note.midi));
+  const byMidi=new Map(heard.map(n=>[n.note.midi,n]));
+  const traceTargets=[],flows=[],bursts=[];
+  let active=0,strongest=null;
+  const maximumHeight=(ctx.mobile?1.05:1.20)*(1-.20*focus);
+  for(let slot=0;slot<geometry.slots;slot++){
+   const midi=geometry.pitches[slot],position=geometry.mouth(slot),objectId='instrument/note/'+midi;
+   traceTargets.push({key:'organ',objectId,world:position.slice(),radius:.20,midi});
+   const voice=byMidi.get(midi);if(!voice)continue;
+   const {note,level,attack,onset,age,onsetPulse,visualDrive}=voice;
+   const noteLight=clamp(.22+.68*visualDrive+.30*onsetPulse,0,1);
+   const lightScale=geometry.lightScale(slot);
+   push(meshes.instrumentLight,C(M.T(...position),M.S(lightScale,1,lightScale)),0,zero,zero,false,light,0,1,noteLight);
+   if(visibleFlows.has(midi)){
+    // Fixed path traversals per second prevent envelope changes from reversing the air.
+    const flowRate=reduced?0:.86+(midi%12)*.018;
+    const visualEnergy=clamp(.42+.58*visualDrive+.20*onsetPulse,0,1);
     // @live:organ
-    const flowHeight = maximumHeight * Math.sqrt(level);
-    const flowWidth = .72 + .24 * Math.sqrt(level);
+    const flowHeight = maximumHeight * (.48 + .42 * visualDrive + .10 * onsetPulse);
+    const flowWidth = .94 + .22 * visualDrive + .13 * onsetPulse;
     const flowPose = C(M.T(...position), M.Ry(geometry.outwardAngle(slot)), M.S(flowWidth, flowHeight, flowWidth));
-    push(meshes.instrumentAir, flowPose, 8, [midi,motionClock,onset], [flowRate,reduced?1:0,0], true, light, 0, 1, noteLight);
+    push(meshes.instrumentAir, flowPose, 8, [midi,motionClock,onset], [flowRate,reduced?1:0,onsetPulse], true, light, 0, 1, visualEnergy);
     // @live:end
-    flows.push({ midi, height:flowHeight, width:flowWidth, position:position.slice(),
-     clock:motionClock, rate:flowRate, rateUnit:'path/s', direction:'toward mouth, then upward' });
-    traceTargets[traceTargets.length-1].world = M.point(flowPose, geometry.airPath(.69));
-    emit('organ',{ note:note?.name || String(midi), flowHeight, flowClock:motionClock, flowRate, level, midi },{
-     objectId,priority:34+level*8,labelKey:'organ',
-     focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']
-    });
+    flows.push({midi,height:flowHeight,width:flowWidth,position:position.slice(),clock:motionClock,
+     age,level,visualDrive,onsetPulse,rate:flowRate,rateUnit:'path/s',direction:'toward mouth, then upward'});
+    traceTargets[traceTargets.length-1].world=M.point(flowPose,geometry.airPath(.69));
+    if(!reduced&&age>0&&age<.52&&onsetPulse>.012){
+     const progress=clamp(age/.52,0,1),mouthRadius=geometry.keys[slot].mouthRadius;
+     const burstRadius=mouthRadius*(1+1.85*Math.pow(progress,.55));
+     const burstRise=.028+.70*Math.pow(progress,.80);
+     const burstPose=C(M.T(position[0],position[1]+burstRise,position[2]),
+      M.Rx(.11*Math.sin(midi)*progress),M.S(burstRadius,burstRadius*.86,burstRadius));
+     push(meshes.instrumentBurst,burstPose,0,[midi,motionClock,onset],[onsetPulse,visualDrive,progress],true,light,0,1,visualEnergy);
+     bursts.push({midi,age,pulse:onsetPulse,radius:burstRadius,rise:burstRise,clock:motionClock,position:position.slice()});
+    }
+    emit('organ',{note:note.name||String(midi),flowHeight,flowClock:motionClock,flowRate,level,visualDrive,onsetPulse,midi},{
+     objectId,priority:34+level*8+onsetPulse*6,labelKey:'organ',focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']});
    }
    active++;
-   if (!strongest || level > strongest.level) strongest = { midi,slot,level,position:position.slice() };
+   if(!strongest||level>strongest.level)strongest={midi,slot,level,position:position.slice()};
   }
-  // Keep the old diagnostic key readable for saved inspection scripts.
-  return { instrument:{ active,strongest,flows,columns:flows,slots:geometry.slots,pitches:geometry.pitches },traceTargets };
+  return {instrument:{active,strongest,flows,columns:flows,bursts,slots:geometry.slots,pitches:geometry.pitches},traceTargets};
  }
- return { sample };
+ return {sample};
 });
 
 
 GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
     'use strict';
-    const MAX_RECORDS = 64, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, MAX_ECHOES = 1, PAINT_INTERVAL = 125;
+    const MAX_RECORDS = 64, MAX_TARGETS = 96, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, MAX_ECHOES = 1, PAINT_INTERVAL = 125;
     const TEXT = {
         pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', waiting: 'CZEKA', expand: 'Pokaż pełne źródło', collapse: 'Ukryj pełne źródło', more: 'Źródło', less: 'Ukryj', source: 'Rzeczywisty fragment źródła', values: 'Wartości tej klatki', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', loading: 'Oczekiwanie na dźwięk', release: 'Wybrzmiewanie', between: 'Cisza między nutami', pin: 'Przypnij ten obiekt', unpin: 'Wróć do automatycznego wyboru', pinned: 'Przypięty obiekt', last: 'Ostatni zapis · oczekiwanie na tę operację', pending: 'Oczekiwanie na wykonanie tej operacji', cpu: 'Fragment wykonany w tej klatce', gpu: 'Źródło shadera użytego w tej klatce', frame: 'klatka', object: 'obiekt', history: 'Ostatnie operacje' },
         en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', waiting: 'WAITING', expand: 'Show full source', collapse: 'Hide full source', more: 'Source', less: 'Hide', source: 'Actual source excerpt', values: 'Values from this frame', notes: 'Notes', bands: 'Bands', silent: 'Sound off', loading: 'Waiting for audio', release: 'Resonance', between: 'Between notes', pin: 'Pin this object', unpin: 'Return to automatic selection', pinned: 'Pinned object', last: 'Last capture · waiting for this operation', pending: 'Waiting for this operation to execute', cpu: 'Source executed for this frame', gpu: 'Shader source used for this frame', frame: 'frame', object: 'object', history: 'Recent operations' },
@@ -7447,14 +7557,14 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             geometryDirty = false;
         }
         function projectObject(objectId, screen) {
-            if (destroyed || !frameOpen || !screen || targets.size >= MAX_RECORDS) return;
+            if (destroyed || !frameOpen || !screen || targets.size >= MAX_TARGETS) return;
             const x = Number(screen.x), y = Number(screen.y);
             if (!Number.isFinite(x) || !Number.isFinite(y)) return;
             targets.set(String(objectId).slice(0, 96), { x, y, visible: screen.visible !== false });
         }
         function setTargets(input) {
             if (!Array.isArray(input)) return;
-            for (const target of input.slice(0, MAX_RECORDS)) if (target && target.objectId != null) projectObject(target.objectId, target);
+            for (const target of input.slice(0, MAX_TARGETS)) if (target && target.objectId != null) projectObject(target.objectId, target);
         }
         function paintTether() {
             if (root.hidden || stale || !current || current.pending) { hideTether(); return; }
