@@ -19,7 +19,7 @@ const scripts = Array.from(html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/
 const findings = [];
 const failures = [];
 function check(name, fn) {
-  const requiresCatalog = /geometry|keyboard|audio-ledger|airflow|full-scene|renderer|mobile|projection/.test(only);
+  const requiresCatalog = /geometry|keyboard|audio-ledger|airflow|steam|full-scene|renderer|mobile|projection/.test(only);
   if (only && !name.includes(only) && !(requiresCatalog && name === 'cpu-geometry-catalog')) return;
   try { const detail = fn(); findings.push({ name, status: 'pass', ...detail }); }
   catch (error) { failures.push({ name, message: error.message, stack: error.stack?.split('\n').slice(0, 6) }); }
@@ -155,7 +155,7 @@ function interfaceValues(source, qualifier) {
 }
 check('shader-source-structure-and-interfaces', () => {
   let programs = 0, shaders = 0;
-  for (const moduleName of ['render/shaders', 'render/atelier-shaders']) {
+  for (const moduleName of ['render/shaders', 'render/atelier-shaders', 'render/steam']) {
     const sources = registry.get(moduleName);
     for (const [name, source] of Object.entries(sources)) {
       if (typeof source !== 'string' || !/[VF]S$/.test(name)) continue;
@@ -166,7 +166,7 @@ check('shader-source-structure-and-interfaces', () => {
       for (const token of strippedGLSL(source)) { if ('([{'.includes(token)) stack.push(token); else if (')]}'.includes(token)) assert.equal(stack.pop(), close[token], moduleName + '/' + name + ': matching delimiter'); }
       assert.equal(stack.length, 0, moduleName + '/' + name + ': balanced delimiters');
     }
-    for (const prefix of ['mesh', 'shadow', 'word', 'dust']) {
+    for (const prefix of ['mesh', 'shadow', 'word', 'dust', 'steam']) {
       const vs = sources[prefix + 'VS'], fsSource = sources[prefix + 'FS']; if (!vs || !fsSource) continue;
       const produced = interfaceValues(vs, 'out');
       for (const [name, type] of interfaceValues(fsSource, 'in')) assert.equal(produced.get(name), type, moduleName + '/' + prefix + ': compatible varying ' + name);
@@ -308,100 +308,129 @@ if (!baseline) check('keyboard-layout-and-picking', () => {
     naturalSpacing: true, accidentalMidpoints: true, raisedBlackMouths, idlePickTargets: 66, originalScorePitchesPreserved: 46 };
 });
 
-if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
+if (!baseline) check('audio-ledger-to-pressure-steam', () => {
   const audio = registry.get('audio/instrument'), geometry = registry.get('geometry/instrument');
+  const simulation = registry.get('scene/instrument'), renderSteam = registry.get('render/steam');
   assert.equal(audio.layout.pitches.length, 46, 'The original scores retain their 46 used pitches');
-  assert.equal(geometry.slots, 66, 'The physical keyboard also includes chromatic notes unused by the scores');
-  assert(catalog.meshes.instrumentAir, 'The real scene catalog contains the airflow mesh');
-  assert(gpu.summary(catalog.meshes.instrumentAir.buffer).materials.every(id => id === 29), 'Airflow has its dedicated transparent material');
-  assert(gpu.summary(catalog.meshes.instrumentBurst.buffer).materials.every(id => id === 32), 'The onset puff has its own material, separate from ivory and ebony');
-  assert.equal(new Set(geometry.pitches).size, 66, 'Distinct chromatic pitches retain distinct sockets');
-  for (const midi of Array.from(audio.layout.pitches)) assert.equal(geometry.pitches[geometry.slotFor(midi)], midi, 'Every score pitch reaches its matching physical socket');
+  assert.equal(geometry.slots, 66, 'Unused chromatic keys remain part of the physical keyboard');
   const noLedger = audio.create({ visualState: () => ({ running: true, available: true, position: 1, volume: 1 }), score: () => ({ notes: [[0, 1000, 60, 127]] }) });
-  assert.equal(noLedger.sample().energy, 0, 'Score position without actual voice ledger cannot invent activity'); noLedger.destroy();
-  let ledger = { position: .99, contextTime: .99, running: true, available: true, muted: false, paused: false, volume: 1,
-    revision: 1, generation: 1, gain: 1, voices: [{ id: 1, generation: 1, revision: 1, midi: 60, velocity: 127,
-      strength: 1, at: 1, scoreAt: 1, startTime: 1, stopTime: 8, attack: .004, floor: .0001, normalizer: 1,
-      cancelled: false, cancelAt: null, partials: [{ peak: 1, ring: 6, stopTime: 8 }] }] };
-  const instrument = audio.create({ instrumentState: () => ledger });
-  assert.equal(instrument.sample().energy, 0, 'Future scheduled voice stays dark before audible start');
-  ledger.position = ledger.contextTime = 1.1; const onset = instrument.sample(); assert(onset.energy > 0, 'Heard voice lights instrument');
-  ledger.position = ledger.contextTime = 1.8; const afterGap = instrument.sample(); assert(afterGap.energy > 0, '700ms rendering gap preserves still-audible note');
-  ledger.generation = 2; assert.equal(instrument.sample().energy, 0, 'Old generation is not displayed after transport replacement');
-  ledger.generation = 1; ledger.muted = true; assert.equal(instrument.sample().energy, 0, 'Muted transport has no airflow energy');
-  ledger.muted = false; ledger.paused = true; assert.equal(instrument.sample().energy, 0, 'Paused transport has no airflow energy');
-  ledger.paused = false; ledger.available = false; assert.equal(instrument.sample().energy, 0, 'Unavailable audio has no airflow energy');
-  instrument.destroy();
-  function sceneSample(source, mobile = false, reduced = false, time = 2) {
+  assert.equal(noLedger.sample().onsets.length, 0, 'Score position cannot invent a heard attack'); noLedger.destroy();
+  const voice = (id, midi = 60, at = 1, strength = .35, duration = .18) => ({ id, midi, at, scoreAt: at,
+    generation: 1, revision: 1, velocity: 100, strength, startTime: at, stopTime: at + duration,
+    attack: .004, floor: .0001, normalizer: 1, cancelled: false, cancelAt: null,
+    partials: [{ peak: 1, ring: duration > 1 ? 6 : .09, stopTime: at + duration }] });
+  function ledgerFixture(voices) {
+    let ledger = { position: .99, contextTime: .99, running: true, available: true, muted: false, paused: false,
+      volume: 1, gain: 1, revision: 1, generation: 1, voices: [] };
+    const sampler = audio.create({ instrumentState: () => ledger });
+    return { sampler, sample(clock, changes = {}) {
+      ledger = { ...ledger, position: clock, contextTime: clock, voices: voices.filter(item => item.stopTime > clock), ...changes };
+      return sampler.sample();
+    } };
+  }
+  function sceneSample(source, motion = simulation.create(), { mobile = false, reduced = false, time = 2 } = {}) {
     const frame = { time, stage: 1, phase: 'assembly', phaseProgress: .5, instrument: source };
     const list = registry.get('scene/commands').createDrawList(catalog, frame); list.family('instrument');
-    const emissions = []; const result = registry.get('scene/instrument').sample({ t: time, state: frame, mobile, reduced,
+    const emissions = [], result = motion.sample({ t: time, state: frame, mobile, reduced,
       meshes: catalog.meshes, push: list.push, emit: (...args) => emissions.push(args) });
+    assert(result.steamLobes.every(lobe => [...lobe.center, ...lobe.radii, lobe.density, lobe.age, lobe.life].every(Number.isFinite)), 'Every simulated volume is finite');
+    assert(result.steamLobes.length <= 128 && result.instrument.puffs.length <= 16 && result.instrument.primary <= 8, 'Cloud admission and GPU work remain bounded');
+    assert(list.commands.every(command => command.mesh !== catalog.meshes.instrumentAir && command.mesh !== catalog.meshes.instrumentBurst), 'Pressure steam uses its volume route instead of mesh plumes or rings');
     return { result, commands: list.commands, emissions };
   }
-  const flowCommands = sample => sample.commands.filter(command => command.mesh === catalog.meshes.instrumentAir);
-  const burstCommands = sample => sample.commands.filter(command => command.mesh === catalog.meshes.instrumentBurst);
-  const laterSnapshot = (source, elapsed) => ({ ...source, position: source.position + elapsed,
-    notes: source.notes.map(note => ({ ...note, age: note.age + elapsed })) });
-  const quiet = sceneSample({ ...onset, running: false, notes: [], levels: onset.levels.map(() => 0), energy: 0 });
-  assert.equal(flowCommands(quiet).length, 0, 'Silent input has no airflow');
-  const stopped = sceneSample({ ...onset, running: false });
-  assert.equal(flowCommands(stopped).length, 0, 'Stopped transport cannot reuse stale positive note levels');
-  assert.equal(burstCommands(stopped).length, 0, 'Stopped transport cannot leave an onset puff');
-  assert.equal(stopped.emissions.filter(([key]) => key === 'organ').length, 0, 'Silent pipes cannot claim a live airflow operation');
-  assert.equal(stopped.result.traceTargets.length, 66, 'Silent mouths remain available for stable object selection');
-  const active = sceneSample(onset);
-  assert(flowCommands(active).some(command => command.mode === 8 && command.glass && command.noteEnergy > 0), 'Audible voice creates a transparent airflow draw command');
-  assert(active.result.traceTargets.some(target => target.objectId === 'instrument/note/60' && target.world.every(Number.isFinite)), 'Heard note has stable projected selection target');
-  assert(active.emissions.some(([key, values, options]) => key === 'organ' && values.midi === 60 && options.objectId === 'instrument/note/60'), 'Airflow trace belongs to the actual sounding pitch');
-  assert.equal(burstCommands(active).length, 1, 'A genuinely heard onset produces one puff at its own mouth');
-  assert.equal(active.result.instrument.bursts[0].midi, 60);
-  assert(Math.abs(active.result.instrument.bursts[0].age - onset.notes[0].age) < 1e-9, 'Puff age comes from the heard voice');
-  const commandState = commands => commands.map(command => ({ matrix: Array.from(command.m), from: Array.from(command.from), to: Array.from(command.to) }));
-  const flowState = sample => commandState(flowCommands(sample));
-  const laterScene = sceneSample(onset, false, false, 4);
-  assert.deepEqual(flowState(laterScene), flowState(active), 'Advancing scene time alone cannot advance audio airflow');
-  assert.deepEqual(commandState(burstCommands(laterScene)), commandState(burstCommands(active)), 'The onset puff cannot move on an independent scene clock');
-  const laterAudio = sceneSample(laterSnapshot(onset, .5));
-  assert(flowCommands(laterAudio).every(command => command.from[1] === onset.position + .5), 'Airflow receives the heard audio position');
-  assert.notDeepEqual(flowState(laterAudio), flowState(active), 'Advancing the audible clock advances airflow phase');
-  assert.equal(burstCommands(laterAudio).length, 0, 'The short onset puff expires while the note continues sounding');
-  const anchorState = sample => Array.from(sample.result.traceTargets, target => ({ objectId: target.objectId, world: Array.from(target.world) }));
-  assert.deepEqual(anchorState(active), anchorState(stopped), 'Playing a note cannot move its selectable mouth into the plume');
-  assert.deepEqual(anchorState(laterAudio), anchorState(active), 'Aging airflow keeps the object marker at the same mouth');
-  const future = sceneSample({ ...onset, notes: onset.notes.map(note => ({ ...note, at: onset.position + .12, age: -.12 })) });
-  assert.equal(flowCommands(future).length + burstCommands(future).length, 0, 'A future scheduled note cannot show flow or an early puff');
-  const oneTone = (level, age) => ({ ...onset, position: 1 + age,
-    levels: onset.levels.map((_value, i) => i === 60 - onset.low ? level : 0),
-    notes: [{ ...onset.notes[0], level, age, at: 1, attack: age < .16 ? .5 : 0 }] });
-  const soft = sceneSample(oneTone(.008, .7), true), strong = sceneSample(oneTone(.4, .7), true);
-  assert(soft.result.instrument.flows[0].height > .50, 'A soft audible note retains a readable plume height on mobile');
-  assert(strong.result.instrument.flows[0].height > soft.result.instrument.flows[0].height, 'Stronger audio still produces a larger visible response');
-  assert.equal(soft.result.instrument.flows[0].level, .008, 'Perceptual display gain preserves the original measured level');
-  assert(soft.emissions.some(([key, values]) => key === 'organ' && values.level === .008), 'Live source values do not mislabel display gain as audio amplitude');
-  const firstPuff = sceneSample(oneTone(.1, .04)).result.instrument.bursts[0];
-  const releasingPuff = sceneSample(oneTone(.1, .4)).result.instrument.bursts[0];
-  assert(firstPuff && releasingPuff && firstPuff.pulse > releasingPuff.pulse, 'The heard onset envelope releases after its initial puff');
-  assert(releasingPuff.radius > firstPuff.radius && releasingPuff.rise > firstPuff.rise, 'A puff expands and rises as its actual note ages');
-  assert(firstPuff.height > 0 && releasingPuff.height > firstPuff.height, 'The onset mist stretches upward as it disperses');
-  const pitches = Array.from(audio.layout.pitches), levels = Array.from({ length: 66 }, (_, i) => pitches.includes(i + 28) ? .9 : 0);
-  const dense = { ...onset, levels, notes: pitches.map(midi => ({ midi, name: String(midi), level: .9, age: .1, attack: .5, at: onset.position - .1 })) };
-  const denseScene = sceneSample(dense);
-  assert.equal(denseScene.commands.filter(command => command.mesh === catalog.meshes.instrumentLight).length, 46, 'All sounding pitches illuminate their mouths');
-  assert.equal(flowCommands(denseScene).length, 8, 'A dense chord uses at most eight airflow draws');
-  assert.equal(burstCommands(denseScene).length, 8, 'A dense heard onset uses at most eight puff draws');
-  assert(denseScene.commands.every(command => Array.from(command.m).concat(command.from, command.to, command.light, command.noteEnergy).every(Number.isFinite)), 'Dense airflow uniforms and transforms remain finite');
-  const reverseDense = sceneSample({ ...dense, notes: dense.notes.slice().reverse() });
-  assert.deepEqual(flowCommands(reverseDense).map(command => command.from[0]), flowCommands(denseScene).map(command => command.from[0]), 'Dense-note selection remains deterministic when ledger order changes');
-  const mobileScene = sceneSample(onset, true), reducedScene = sceneSample(onset, false, true);
-  assert(mobileScene.result.instrument.flows.every(flow => flow.height > 0 && flow.height <= 1.050001), 'Mobile airflow stays within its presentation budget');
-  assert.equal(flowCommands(reducedScene).length, flowCommands(active).length, 'Reduced motion retains the sounding note cue');
-  assert(flowCommands(reducedScene).every(command => command.from[1] === 0 && command.to[1] === 1), 'Reduced motion requests frozen airflow without a moving packet clock');
-  assert.equal(burstCommands(reducedScene).length, 0, 'Reduced motion omits the expanding onset puff');
-  assert.deepEqual(flowState(sceneSample(laterSnapshot(onset, .5), false, true)), flowState(reducedScene), 'Reduced-motion airflow remains fixed as audio time advances');
-  return { pitches: 46, noScoreOnlyFallback: true, futureVoiceDark: true, longFrameGap: true, generationAndPause: true,
-    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true, onsetMistEnvelope: true, fixedMouthAnchors: true, softNoteMobileHeight: soft.result.instrument.flows[0].height,
-    liveFlows: active.result.instrument.flows.length, denseFlows: 8, densePuffs: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
+  const lobes = sample => JSON.parse(JSON.stringify(sample.result.steamLobes));
+  const fixtures = [], fixture = voices => { const f = ledgerFixture(voices); fixtures.push(f); return f; };
+  try {
+    const heard = fixture([voice(1)]), motion = simulation.create();
+    const pending = heard.sample(.99);
+    assert.equal(pending.onsets.length, 0, 'Lookahead does not emit steam before the heard start');
+    assert.equal(sceneSample(pending, motion).result.steamLobes.length, 0);
+    const onset = heard.sample(1.1), active = sceneSample(onset, motion);
+    assert.equal(onset.onsets.length, 1); assert.equal(onset.onsets[0].id, 1);
+    assert(Math.abs(onset.onsets[0].onsetAt - 1) < 1e-9 && Math.abs(onset.onsets[0].age - .1) < 1e-9, 'Attack age is reconstructed from its actual audio start');
+    assert(active.result.steamLobes.length > 0 && active.result.instrument.puffs.length === 1, 'One heard attack creates one pressure cloud');
+    assert.deepEqual(Array.from(active.result.instrument.puffs[0].origin), Array.from(geometry.mouth(geometry.slotFor(60))), 'The puff starts at its own physical mouth');
+    assert(active.emissions.some(([key, values, options]) => key === 'organ' && values.midi === 60 && options.objectId === 'instrument/note/60'), 'Actual puff computation supplies its own source trace');
+    assert.deepEqual(lobes(sceneSample(onset, motion, { time: 4 })), lobes(active), 'Scene time alone cannot move the pressure cloud');
+    assert.equal(sceneSample(onset, motion).result.instrument.admitted, 1, 'Sampling the same attack again cannot duplicate a puff');
+    const off = heard.sample(1.4), detached = sceneSample(off, motion);
+    assert.equal(off.notes.length, 0); assert.equal(off.voices.length, 0);
+    assert.equal(off.onsets.length, 1, 'Heard attack memory survives a naturally finished voice');
+    assert(detached.result.steamLobes.length > 0, 'Steam detaches and survives after note-off while transport runs');
+    assert.notDeepEqual(lobes(detached), lobes(active), 'Advancing audio age changes the actual cloud');
+    const head = sample => sample.result.steamLobes.find(lobe => lobe.kind === 'head');
+    assert(head(detached).center[1] > head(active).center[1] && head(detached).radii[0] > head(active).radii[0], 'Detached steam rises and expands');
+    const expired = sceneSample(heard.sample(2.5), motion);
+    assert.equal(expired.result.steamLobes.length, 0); assert.equal(expired.result.instrument.puffs.length, 0, 'Finite puff life leaves no permanent smoke');
+    const anchors = sample => Array.from(sample.result.traceTargets, target => ({ id: target.objectId, world: Array.from(target.world) }));
+    assert.equal(anchors(active).length, 66); assert.deepEqual(anchors(active), anchors(detached)); assert.deepEqual(anchors(active), anchors(expired), 'Cloud motion never moves its selectable mouth');
+
+    const repeated = fixture([voice(10), voice(11, 60, 1.4)]), repeatedMotion = simulation.create();
+    sceneSample(repeated.sample(1.1), repeatedMotion);
+    const repeatedSource = repeated.sample(1.5), overlapping = sceneSample(repeatedSource, repeatedMotion);
+    assert.equal(overlapping.result.instrument.puffs.length, 2, 'Repeated notes at one mouth retain separate overlapping clouds');
+    assert.equal(new Set(overlapping.result.instrument.puffs.map(puff => puff.onsetId)).size, 2);
+    assert.equal(new Set(overlapping.result.instrument.puffs.map(puff => puff.seed)).size, 2, 'These two real attacks have distinct noise phases');
+    assert.equal(sceneSample(repeatedSource, repeatedMotion).result.instrument.admitted, 2, 'Old retained onsets are not admitted twice');
+    const silent = sceneSample(repeated.sample(1.6, { muted: true }), repeatedMotion);
+    assert.equal(silent.result.steamLobes.length, 0); assert.equal(silent.emissions.filter(([key]) => key === 'organ').length, 0, 'Cleared smoke cannot claim an executing puff');
+    assert.equal(sceneSample(repeated.sample(1.65, { muted: false }), repeatedMotion).result.instrument.puffs.length, 0, 'Unmuting does not replay a previously heard attack');
+    for (const flags of [{ running: false }, { paused: true }, { muted: true }, { available: false }]) {
+      const stopped = sceneSample({ ...onset, ...flags });
+      assert.equal(stopped.result.steamLobes.length, 0, 'An inaudible transport rejects stale positive levels and onset history');
+      assert.equal(stopped.commands.filter(command => command.mesh === catalog.meshes.instrumentLight).length, 0);
+      assert.equal(stopped.result.traceTargets.length, 66);
+    }
+    const futureSource = { ...onset, levels: onset.levels.map((_value, i) => i === 60 - onset.low ? .4 : 0), onsets: onset.onsets.map(event => ({ ...event, onsetAt: 2 })),
+      notes: onset.notes.map(note => ({ ...note, onsetAt: 2, age: -.9 })), voices: [] };
+    const future = sceneSample(futureSource);
+    assert.equal(future.result.steamLobes.length, 0); assert.equal(future.result.instrument.active, 0, 'Future attacks cannot light a mouth or create a cloud');
+    assert.equal(sceneSample({ ...onset, generation: 2 }).result.instrument.puffs.length, 0, 'An old generation cannot create new puffs');
+    const resetMotion = simulation.create(); sceneSample(onset, resetMotion);
+    assert.equal(sceneSample({ ...onset, position: .8, onsets: [], notes: [], voices: [] }, resetMotion).result.steamLobes.length, 0, 'A rewound transport discards detached history');
+    const heldOnset = fixture([voice(50, 60, 1, .35, 7)]).sample(1.1);
+    const reducedMotion = simulation.create(); sceneSample(heldOnset, reducedMotion);
+    const reduced = sceneSample(heldOnset, reducedMotion, { reduced: true });
+    assert.equal(reduced.result.steamLobes.length, 0, 'Reduced motion omits animated volumes');
+    assert(reduced.commands.some(command => command.mesh === catalog.meshes.instrumentLight && command.noteEnergy > 0), 'Reduced motion retains the actual sounding mouth cue');
+    assert.equal(sceneSample(heldOnset, reducedMotion).result.instrument.puffs.length, 0, 'Leaving reduced motion does not replay a past attack');
+
+    const softSource = fixture([voice(30, 60, 1, .008)]).sample(1.1), strongSource = fixture([voice(30, 60, 1, .4)]).sample(1.1);
+    const soft = sceneSample(softSource, simulation.create(), { mobile: true }), strong = sceneSample(strongSource, simulation.create(), { mobile: true });
+    assert(soft.result.steamLobes.length > 0, 'A quiet real attack retains a pressure cloud');
+    assert(head(soft).radii[0] > .09 && head(soft).density > .1, 'The quiet onset has nontrivial volume and density on mobile');
+    assert(head(strong).radii[0] > head(soft).radii[0] && head(strong).density > head(soft).density, 'Stronger real audio still has a larger response');
+    assert(soft.emissions.some(([key, values]) => key === 'organ' && values.level === softSource.onsets[0].level), 'Trace preserves the measured audio level instead of reporting display gain as amplitude');
+    const sustained = fixture([voice(40, 60, 1, .1, 7)]), sustainMotion = simulation.create();
+    sceneSample(sustained.sample(1.1), sustainMotion);
+    const sustainOnly = sceneSample(sustained.sample(2.5), sustainMotion);
+    assert.equal(sustainOnly.result.instrument.puffs.length, 0);
+    assert(sustainOnly.result.steamLobes.some(lobe => lobe.kind === 'sustain'), 'A held real voice keeps its weak feed after the pressure puff expires');
+    assert(sustainOnly.emissions.some(([key, values, options]) => key === 'organ' && Number.isFinite(values.tailAge) && options.focus.includes('const tail =')), 'The admitted sustain feed has a real currently executing source instruction');
+
+    const pitches = Array.from(audio.layout.pitches), denseVoices = pitches.map((midi, i) => voice(100 + i, midi, 5, .9, 7));
+    const denseSource = fixture(denseVoices).sample(5.1), denseMotion = simulation.create(), dense = sceneSample(denseSource, denseMotion);
+    assert.equal(dense.commands.filter(command => command.mesh === catalog.meshes.instrumentLight).length, 46, 'All sounding score pitches illuminate their own mouths');
+    assert.equal(dense.result.instrument.primary, 8, 'A dense chord selects at most eight simultaneous primary pressure puffs');
+    const reversed = sceneSample({ ...denseSource, onsets: denseSource.onsets.slice().reverse(), notes: denseSource.notes.slice().reverse() });
+    assert.deepEqual(lobes(reversed), lobes(dense), 'Cloud admission is deterministic when ledger order changes');
+    const burstHistory = denseSource.onsets.slice(), denseSamples = [dense];
+    for (let n = 1; n <= 3; n++) {
+      const next = denseSource.onsets.slice(0, 8).map(event => ({ ...event, id: event.id + n * 100, onsetAt: 5 + n * .1 }));
+      burstHistory.push(...next);
+      denseSamples.push(sceneSample({ ...denseSource, position: 5 + n * .1 + .05, onsets: burstHistory }, denseMotion));
+    }
+    assert(denseSamples.some(sample => sample.result.instrument.puffs.some(puff => puff.releaseAt !== null)), 'A newer chord releases older clouds instead of making them disappear immediately');
+    assert(denseSamples.some(sample => sample.result.instrument.dropped > 0), 'Repeated dense attacks exercise the fixed residual budget');
+    const prepared = renderSteam.prepareLobes(denseSamples.at(-1).result.steamLobes, registry.get('math').M.look([0, 8, 12], [0, 0, 0]));
+    assert(prepared.count > 0 && prepared.count <= 128 && prepared.data.length === prepared.count * 12, 'Actual renderer preparation respects the fixed instance buffer');
+    assert(Array.from(prepared.data).every(Number.isFinite));
+    assert(prepared.order.every((item, i, items) => i === 0 || items[i - 1].depth >= item.depth), 'Premultiplied volumes are submitted from back to front');
+    return { scorePitches: 46, stableMouths: 66, actualOnsetHistory: true, repeatedPitchClouds: 2,
+      detachedTail: true, audioClockOnly: true, futureAndSilentRejected: true, reducedMotion: true,
+      sustainTrace: true, primaryBudget: 8, puffBudget: 16, lobeBudget: 128, denseLitMouths: 46,
+      quietHeadRadius: head(soft).radii[0], maximumSampledLobes: Math.max(...denseSamples.map(sample => sample.result.steamLobes.length)) };
+  } finally { fixtures.forEach(f => f.sampler.destroy()); }
 });
 
 if (!baseline) check('mobile-content-projection', () => {
@@ -445,7 +474,7 @@ if (!baseline) check('mobile-content-projection', () => {
         const angle = i * Math.PI / 48;
         ring.push(project([docking.hull[0] * Math.cos(angle), docking.deckY, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
         underside.push(project([docking.hull[0] * Math.cos(angle), docking.deckY - .32, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
-        airflowBound.push(project([docking.hull[0] * 1.045 * Math.cos(angle), docking.deckY + 1.65, docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(angle)]));
+        airflowBound.push(project([(docking.hull[0] * .932 + .66) * Math.cos(angle), docking.deckY + 2.37, docking.hull[2] + (docking.hull[1] * .932 + .66) * Math.sin(angle)]));
       }
       const bound = ring.concat(underside, airflowBound); assert(bound.every(point => point.every(Number.isFinite) && point[2] > 0), 'Full rim is in front of camera');
       const minX = Math.min(...bound.map(point => point[0])), maxX = Math.max(...bound.map(point => point[0]));
@@ -656,7 +685,9 @@ check('renderer-javascript-projection-and-uniforms', () => {
   }
   assert(uniformSamples.some(sample => sample.name === 'uNoteEnergy' && sample.values[0] > 0), 'Audible note intensity reaches mesh shader uniform');
   if (!baseline) {
-    assert(uniformSamples.some(sample => sample.name === 'uMode' && sample.values[0] === 8), 'Airflow reaches its renderer mode without colliding with existing deformation');
+    assert(programSources.some(pair => pair[0] === registry.get('render/steam').steamVS && pair[1] === registry.get('render/steam').steamFS), 'The actual renderer links the pressure-volume shader');
+    assert(uniformSamples.some(sample => sample.name === 'uUseDepth' && sample.values[0] === 1), 'Main-pass steam receives its copied opaque depth');
+    assert(renderer.stats().steamRender.draws > 0 && renderer.stats().steamRender.maxLobes === 128, 'The bounded instanced steam route executes in the actual renderer');
   }
   for (const pair of programSources) {
     assert.equal(pair.length, 2, 'Every renderer program has vertex and fragment source');
@@ -803,7 +834,7 @@ if (!baseline) check('trace-layout-and-stable-connectors', () => {
     trace.beginFrame('intro', { time: 2 + (ms - 1000) / 1000 }, ms);
     for (const entry of entries) {
       trace.projectObject('instrument/note/' + entry.midi, { x: entry.x, y: entry.y });
-      trace.emit('organ', { note: entry.note, midi: entry.midi, flowHeight: .7 }, { objectId: 'instrument/note/' + entry.midi, priority: entry.priority });
+      trace.emit('organ', { note: entry.note, midi: entry.midi, puffAge: .1 }, { objectId: 'instrument/note/' + entry.midi, priority: entry.priority });
     }
     trace.endFrame({ audio: legacyAudioSnapshot() });
   }
@@ -938,9 +969,9 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
   frame('lift'); inspect(); frame('pour'); inspect(); frame('mould'); inspect();
   assert.equal(scrollWrites, 0, 'New source captures never force the user-controlled expanded history to scroll');
   assert.equal(history.querySelector('.live-trace-code')?.dataset.key, 'mould', 'Expanded source starts with the latest actual operation');
-  frame('organ', { focus: ['const flowHeight =', 'const flowPose ='] }); inspect();
+  frame('organ', { focus: ['const puffAge =', 'const lobe ='] }); inspect();
   const organ = trace.diagnostics().compactInstructions;
-  assert.equal(organ.length, 2, 'The airflow view retains both short real transform instructions');
+  assert.equal(organ.length, 2, 'The pressure-steam view retains both short real simulation instructions');
   assert(organ.every(unit => unit.text.length <= 48 && unit.line === unit.endLine), 'The sounding-pipe explanation fits as complete short calls');
   frame('cast', { focus: ['M.T(0,y,z)', 'M.Ry(yaw)'] }); inspect();
   const cast = trace.diagnostics().compactInstructions;

@@ -3852,7 +3852,188 @@ GuziczakModules.define('render/device', [], () => {
 });
 
 
-GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/vocabulary", "world/water","render/profile","config/cup-effects","render/quench"], (math, shaders, vocabulary, lake, profiles, cupConfig, quenchRenderer) => {
+GuziczakModules.define('render/steam', ['math'], math => {
+    'use strict';
+    const MAX_LOBES = 128, STRIDE_FLOATS = 12, RAY_STEPS = 6;
+    const steamVS = `#version 300 es
+precision highp float;
+layout(location=0) in vec4 aCenterDensity;
+layout(location=1) in vec4 aRadiiSeed;
+layout(location=2) in vec4 aAgeLife;
+uniform mat4 uVP;
+uniform vec3 uCam,uViewRight,uViewUp;
+uniform float uReflectionPass,uReflectionY;
+flat out vec4 vCenterDensity,vRadiiSeed;
+flat out vec2 vAgeLife;
+void main(){
+    vec3 center=aCenterDensity.xyz;
+    if(uReflectionPass>.5)center.y=2.*uReflectionY-center.y;
+    vCenterDensity=vec4(center,aCenterDensity.w);
+    vRadiiSeed=aRadiiSeed;vAgeLife=aAgeLife.xy;
+    vec2 corner=vec2((gl_VertexID&1)==0?-1.:1.,(gl_VertexID&2)==0?-1.:1.);
+    vec3 radii=aRadiiSeed.xyz;
+    // The quad only bounds the volume. Its plane is never used as cloud depth.
+    float reach=max(radii.x,max(radii.y,radii.z));
+    float distanceToCenter=max(reach+.02,length(center-uCam));
+    float perspectivePad=1.04/(1.-min(.80,reach/distanceToCenter));
+    vec2 extent=vec2(length(uViewRight*radii),length(uViewUp*radii))*perspectivePad;
+    vec3 carrier=center+uViewRight*corner.x*extent.x+uViewUp*corner.y*extent.y;
+    gl_Position=uVP*vec4(carrier,1.);
+}`;
+    const steamFS = `#version 300 es
+precision highp float;
+flat in vec4 vCenterDensity,vRadiiSeed;
+flat in vec2 vAgeLife;
+uniform mat4 uVP,uInvVP;
+uniform vec3 uCam;
+uniform vec2 uResolution;
+uniform highp sampler2D uOpaqueDepth;
+uniform float uLight,uUseDepth,uReflectionPass,uReflectionY;
+out vec4 outColor;
+float hash3(vec3 p){p=fract(p*.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);}
+float densityNoise(vec3 p){
+    vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+    return mix(mix(mix(hash3(i),hash3(i+vec3(1,0,0)),f.x),
+                   mix(hash3(i+vec3(0,1,0)),hash3(i+vec3(1,1,0)),f.x),f.y),
+               mix(mix(hash3(i+vec3(0,0,1)),hash3(i+vec3(1,0,1)),f.x),
+                   mix(hash3(i+vec3(0,1,1)),hash3(i+vec3(1,1,1)),f.x),f.y),f.z);
+}
+void main(){
+    vec2 uv=gl_FragCoord.xy/uResolution;
+    vec4 farPoint=uInvVP*vec4(uv*2.-1.,1.,1.);
+    vec3 ray=normalize(farPoint.xyz/farPoint.w-uCam);
+    vec3 radii=vRadiiSeed.xyz,ro=(uCam-vCenterDensity.xyz)/radii,rd=ray/radii;
+    float A=dot(rd,rd),B=dot(ro,rd),C=dot(ro,ro)-1.;
+    float discriminant=B*B-A*C;
+    if(discriminant<=0.)discard;
+    float root=sqrt(discriminant),entry=max(0.,(-B-root)/A),exit=(-B+root)/A;
+    if(exit<=entry)discard;
+    float solidDistance=1.e6;
+    if(uUseDepth>.5){
+        float depth=texture(uOpaqueDepth,uv).r;
+        if(depth<.999999){
+            vec4 solid=uInvVP*vec4(uv*2.-1.,depth*2.-1.,1.);
+            solidDistance=dot(solid.xyz/solid.w-uCam,ray);
+            exit=min(exit,solidDistance);
+        }
+    }
+    if(exit<=entry)discard;
+    // Six fixed quadrature samples across the actual ellipsoid chord. There is
+    // one 3D value-noise evaluation per sample, no layered octaves or secondary rays.
+    float segment=(exit-entry)/float(${RAY_STEPS});
+    float softContact=max(.012,min(radii.x,min(radii.y,radii.z))*.18);
+    float optical=0.,weight=0.;vec3 mean=vec3(0.);
+    float seed=vRadiiSeed.w;
+    vec3 offset=vec3(seed*.731,seed*.379,seed*.193);
+    float evolution=vAgeLife.x/max(.08,vAgeLife.y);
+    for(int i=0;i<${RAY_STEPS};i++){
+        float distance=entry+(float(i)+.5)*segment;
+        vec3 q=ro+rd*distance;
+        vec3 cloudQ=q;if(uReflectionPass>.5)cloudQ.y=-cloudQ.y;
+        float noise=densityNoise(cloudQ*3.15+offset+vec3(.19,-.31,.13)*evolution);
+        float rim=max(0.,1.-dot(q,q));
+        float body=smoothstep(0.,.72,rim)*(.28+.72*smoothstep(.24,.76,noise));
+        body*=smoothstep(0.,softContact,solidDistance-distance);
+        float rho=body*vCenterDensity.w;
+        weight+=rho;mean+=q*rho;optical+=rho*segment*4.6;
+    }
+    optical*=uLight;
+    float alpha=1.-exp(-optical);
+    if(alpha<.002)discard;
+    vec3 front=ro+rd*(entry+(exit-entry)*.16);
+    vec3 average=mean/max(weight,.0001);
+    vec3 normal=normalize((front*.72+average*.28)/radii+vec3(.0001));
+    if(uReflectionPass>.5)normal.y=-normal.y;
+    vec3 lightDirection=normalize(vec3(-.48,.78,.40));
+    float lit=max(0.,dot(normal,lightDirection));
+    float rimLight=pow(1.-abs(dot(normal,-ray)),2.);
+    float innerShade=.52+.48*exp(-optical*.46);
+    vec3 silver=mix(vec3(.145,.167,.181),vec3(.53,.565,.585),.30+.57*lit);
+    silver*=innerShade;
+    silver+=vec3(.115,.122,.125)*rimLight*(.35+.65*lit);
+    // A little reflected brass warms the underside, never an emissive core.
+    float reflected=max(0.,-normal.y)*.11;
+    silver+=vec3(.27,.205,.115)*reflected;
+    silver=clamp(silver,vec3(0.),vec3(.58));
+    if(uReflectionPass>.5)alpha*=.58;
+    vec3 firstWorld=uCam+ray*entry;
+    vec4 firstClip=uVP*vec4(firstWorld,1.);
+    gl_FragDepth=clamp(firstClip.z/firstClip.w*.5+.5,0.,1.);
+    outColor=vec4(silver*alpha,alpha);
+}`;
+    const finiteVector = value => (Array.isArray(value)||ArrayBuffer.isView(value))&&value.length>=3&&Array.from(value).slice(0,3).every(Number.isFinite);
+    function sanitizeLobes(input){
+        const lobes=[];
+        if(!Array.isArray(input))return lobes;
+        for(let index=0;index<input.length&&lobes.length<MAX_LOBES;index++){
+            const item=input[index];
+            if(!item||!finiteVector(item.center)||!finiteVector(item.radii)||!Number.isFinite(item.density)||item.density<=.0001)continue;
+            if(item.radii.some(value=>!(value>0))||!Number.isFinite(item.seed)||!Number.isFinite(item.age)||!Number.isFinite(item.life)||item.age<0||item.life<=0||item.age>item.life)continue;
+            lobes.push({center:Array.from(item.center).slice(0,3),radii:Array.from(item.radii).slice(0,3).map(value=>Math.max(.008,Math.min(1.2,value))),
+                density:Math.min(4,item.density),seed:item.seed,age:item.age,life:item.life,
+                midi:item.midi,onsetId:item.onsetId,kind:item.kind,index});
+        }
+        return lobes;
+    }
+    function prepareLobes(input,view,reflectionY=null){
+        const lobes=sanitizeLobes(input),reflected=Number.isFinite(reflectionY);
+        const matrix=view&&view.length===16?view:math.M.I();
+        const sorted=lobes.map(lobe=>{
+            const center=lobe.center.slice();if(reflected)center[1]=reflectionY*2-center[1];
+            const depth=-(matrix[2]*center[0]+matrix[6]*center[1]+matrix[10]*center[2]+matrix[14]);
+            return {lobe,depth};
+        }).filter(item=>item.depth+Math.max(...item.lobe.radii)>.1)
+          .sort((a,b)=>b.depth-a.depth||a.lobe.index-b.lobe.index);
+        const data=new Float32Array(sorted.length*STRIDE_FLOATS);
+        sorted.forEach(({lobe},i)=>data.set([...lobe.center,lobe.density,...lobe.radii,lobe.seed,lobe.age,lobe.life,0,0],i*STRIDE_FLOATS));
+        return {data,count:sorted.length,order:sorted.map(({lobe,depth})=>({index:lobe.index,onsetId:lobe.onsetId,midi:lobe.midi,kind:lobe.kind,depth}))};
+    }
+    function create(gl,{program,m4,f1,f2,f3,texture}){
+        const prog=program(steamVS,steamFS),vao=gl.createVertexArray(),instances=gl.createBuffer();
+        gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,instances);
+        gl.bufferData(gl.ARRAY_BUFFER,MAX_LOBES*STRIDE_FLOATS*4,gl.DYNAMIC_DRAW);
+        for(let i=0;i<3;i++){
+            gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,4,gl.FLOAT,false,STRIDE_FLOATS*4,i*16);gl.vertexAttribDivisor(i,1);
+        }
+        gl.bindVertexArray(null);
+        // The reflection pass still binds a complete neutral sampler; it never
+        // samples the depth attachment of the framebuffer it is writing.
+        const farDepth=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,farDepth);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));
+        for(const [key,value]of [[gl.TEXTURE_MIN_FILTER,gl.NEAREST],[gl.TEXTURE_MAG_FILTER,gl.NEAREST],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,key,value);
+        let lobes=[],light=0,submitted=0,draws=0,mainCount=0,reflectionCount=0,lastMainOrder=[];
+        function update(input,visibility=1){
+            submitted=Array.isArray(input)?input.length:0;lobes=sanitizeLobes(input);
+            light=Number.isFinite(visibility)?Math.max(0,Math.min(1,visibility)):0;
+            mainCount=reflectionCount=0;lastMainOrder=[];
+        }
+        function draw({VP,view,cam,opaqueDepth=null,width,height,reflectionY=null}){
+            const reflected=Number.isFinite(reflectionY);
+            if(!lobes.length||light<.001||!(width>0&&height>0))return 0;
+            const prepared=prepareLobes(lobes,view,reflectionY);if(!prepared.count)return 0;
+            gl.useProgram(prog.p);m4(prog,'uVP',VP);m4(prog,'uInvVP',math.inverse4(VP));
+            f3(prog,'uCam',cam);f3(prog,'uViewRight',[view[0],view[4],view[8]]);f3(prog,'uViewUp',[view[1],view[5],view[9]]);
+            f2(prog,'uResolution',width,height);f1(prog,'uLight',light);f1(prog,'uUseDepth',!reflected&&opaqueDepth?1:0);
+            f1(prog,'uReflectionPass',reflected?1:0);f1(prog,'uReflectionY',reflected?reflectionY:0);
+            texture(prog,'uOpaqueDepth',!reflected&&opaqueDepth?opaqueDepth:farDepth,7);
+            gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,instances);gl.bufferSubData(gl.ARRAY_BUFFER,0,prepared.data);
+            gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(false);gl.disable(gl.CULL_FACE);
+            gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+            gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,prepared.count);
+            gl.bindVertexArray(null);gl.depthMask(true);gl.disable(gl.BLEND);draws++;
+            if(reflected)reflectionCount=prepared.count;else{mainCount=prepared.count;lastMainOrder=prepared.order;}
+            return prepared.count;
+        }
+        function clear(){lobes=[];submitted=mainCount=reflectionCount=0;light=0;lastMainOrder=[];}
+        function stats(){return {model:'ray-integrated ellipsoid steam',maxLobes:MAX_LOBES,raySteps:RAY_STEPS,strideBytes:STRIDE_FLOATS*4,
+            submitted,lobes:lobes.length,mainCount,reflectionCount,draws,light,depthTextureUnit:7,
+            blend:'premultiplied alpha',depth:'ellipsoid front surface; clipped by opaque depth',order:lastMainOrder.map(item=>({...item}))};}
+        return {update,draw,clear,stats};
+    }
+    return {create,steamVS,steamFS,prepareLobes,sanitizeLobes,MAX_LOBES,STRIDE_FLOATS,RAY_STEPS};
+});
+
+GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/vocabulary", "world/water","render/profile","config/cup-effects","render/quench","render/steam"], (math, shaders, vocabulary, lake, profiles, cupConfig, quenchRenderer, steamRenderer) => {
     "use strict";
     const { PI, TAU, clamp, mix, vadd, vsub, vmul, dot, cross, norm, M, C, ease, inverse4 } = math;
     function createRenderer(device, catalog, canvas, document, settings) {
@@ -3920,6 +4101,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         }
         const water=lake.create(gl,{program,target,bind,screen,f1,f2,f3,m4,texture});
         const quench=quenchRenderer.create(gl,{program,m4,f1,f2,f3,texture});
+        const steam=steamRenderer.create(gl,{program,m4,f1,f2,f3,texture});
         const shadowSize = settings.shadowSize, shadowTex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, shadowTex);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, shadowSize, shadowSize, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
@@ -4123,6 +4305,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for(const [i,r] of (frame.inflow?.field.ripples||[]).entries())cupRippleData.set([r.x,r.z,r.at,r.amplitude],i*4);
             resize();
             quench.update(frame.quench);
+            steam.update(packet.steamLobes,packet.steamLight);
             water.update(frame);
             state.riftCenter=packet.rift?.center;state.riftLight=packet.rift?.open||0;
             const aspect = W / H, shot = camera;
@@ -4166,10 +4349,8 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for (const o of objs)
                 if (!o.glass)
                     draw(o, meshProg, refl);
-            // Air tracers and onset puffs leave a faint echo beside their lit mouths.
-            gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
-            for(const o of objs)if(o.mesh===meshes.instrumentAir||o.mesh===meshes.instrumentBurst)draw(o,meshProg,refl);
-            gl.depthMask(true);gl.disable(gl.BLEND);
+            // Reflected volume has its own sorted draw and never samples mirrorRT depth.
+            steam.draw({VP,view,cam,opaqueDepth:null,width:mirrorRT.w,height:mirrorRT.h,reflectionY:water.config.level});
             drawWords(refl);
             filter(mirrorRT, mirrorBlur, .68 / mirrorRT.w, .28 / mirrorRT.h);
             if(frame.time>=9.28&&frame.time<12.57){
@@ -4203,6 +4384,8 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             bind(msaa||mainRT);
             water.draw(VP,cam,opaqueRT,mirrorRT,W,H,frame);
             quench.draw(VP,cam,opaqueRT,mirrorRT,W,H);
+            // Integrate steam only up to the already-copied opaque depth.
+            steam.draw({VP,view,cam,opaqueDepth:opaqueRT.dt,width:W,height:H});
             globalUniforms(meshProg);
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -4304,6 +4487,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
         function project(p) { if (!VP)
             return [0, 0, 0]; const q = M.point(VP, p), w = VP[3] * p[0] + VP[7] * p[1] + VP[11] * p[2] + VP[15]; return [(q[0] / w * .5 + .5) * viewport.width, (-q[1] / w * .5 + .5) * viewport.height, w]; }
         function suspend(){
+            steam.clear();
             if(gpuSync){gl.deleteSync(gpuSync);gpuSync=null;}
             for(const rt of [tokenRT,mainRT,opaqueRT,mirrorRT,mirrorBlur,liquidMirror,volumeRT,...blooms.flat()])disposeRT(rt);
             tokenRT=mainRT=opaqueRT=mirrorRT=mirrorBlur=liquidMirror=volumeRT=null;blooms=[];
@@ -4311,7 +4495,7 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             W=H=0;
         }
         return { render, ready, project, suspend,
-            stats: () => ({ width: W, height: H, profile:activeProfile, suspended:W===0, hdr: floatRT, msaa: !!msaa, frames: frameCount, tokenLayer: !!tokenRT, frontTokens: frontWordCount, water:water.stats(), quenchRender:quench.stats(), glError: gl.getError(), resources: device.counts() }),
+            stats: () => ({ width: W, height: H, profile:activeProfile, suspended:W===0, hdr: floatRT, msaa: !!msaa, frames: frameCount, tokenLayer: !!tokenRT, frontTokens: frontWordCount, water:water.stats(), quenchRender:quench.stats(), steamRender:steam.stats(), glError: gl.getError(), resources: device.counts() }),
             dispose: () => device.dispose()
         };
     }
@@ -4959,13 +5143,13 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
             distance: mix(distance, mobile ? 7.8 : 5.0, quenchFocus), target: shot.target.map((v, i) => mix(v, [0, -2.015, 1.0][i], quenchFocus)), quenchFocus };
         return { ...fitLoading({ ...shot, distance }, frame, viewport, assembly), quenchFocus: 0 };
     }
-    // Bound the whole visible hull, not just the center points of its pipe mouths.
-    // The upper ring includes the full air ribbon above each pipe mouth.
+    // Keep a stable envelope around the hull and detached steam. Fitting the
+    // current puffs would make the camera breathe with each played chord.
     const ringBounds = [];
     for (let i = 0; i < 96; i++) {
-        const a = i * Math.PI / 48, x = docking.hull[0] * 1.045 * Math.cos(a);
-        const z = docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(a);
-        for (const y of [docking.deckY - .32, docking.deckY + 1.65]) ringBounds.push([x, y, z]);
+        const a = i * Math.PI / 48, x = (docking.hull[0] * .932 + .66) * Math.cos(a);
+        const z = docking.hull[2] + (docking.hull[1] * .932 + .66) * Math.sin(a);
+        for (const y of [docking.deckY - .32, docking.deckY + 2.37]) ringBounds.push([x, y, z]);
     }
     function worldBounds(frame, assembly) {
         const points = ringBounds.slice(), cup = assembly?.cupPose || M.I(), coil = assembly?.coilPose || cup;
@@ -4993,7 +5177,7 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const wide = ease(3.03, 3.55, frame.time) * (1 - ease(15.8, 16.65, frame.time));
         const focus = wide * (1 - base.quenchFocus);
         if (focus <= 0) return { ...base, fov: 35 };
-        const yaw = mix(base.yaw, .22, focus), pitch = mix(base.pitch, 1.12, focus), fov = mix(35, 64, focus);
+        const yaw = mix(base.yaw, .22, focus), pitch = mix(base.pitch, .92, focus), fov = mix(35, 64, focus);
         const axes = cameraAxes(yaw, pitch), [right, up, back] = axes, points = worldBounds(frame, assembly);
         const extrema = axes.map(axis => {
             let lo = Infinity, hi = -Infinity;
@@ -5113,7 +5297,8 @@ GuziczakModules.define("scene/composer", ["scene/commands", "scene/assembly", "s
     "use strict";
     function createScene(catalog) {
         const scrapMotion=scrapLib.create();
-        const systems = [assembly, pour, tokens, foundry, overflow, signature, instrumentScene];
+        const instrumentMotion=instrumentScene.create();
+        const systems = [assembly, pour, tokens, foundry, overflow, signature, instrumentMotion];
         const names = ["assembly", "pour", "tokens", "foundry", "overflow", "signature", "instrument"];
         return {
             sample(frame, viewport) {
@@ -5123,6 +5308,7 @@ GuziczakModules.define("scene/composer", ["scene/commands", "scene/assembly", "s
                 systems.forEach((system, i) => { list.family(names[i]); Object.assign(ctx, system.sample(ctx)); });
                 return { commands: list.commands, tokens: ctx.letterInstances, castTransform: ctx.castTransform,presentation:ctx.presentation,
                     vesselTransform: ctx.cup, foundryTransform: ctx.moldRoot, instrument: ctx.instrument, traceTargets: ctx.traceTargets || [],
+                    steamLobes:ctx.steamLobes||[], steamLight:ctx.steamLight||0,
                     inflow:state.inflow,cupInteraction:state.cupInteraction,
                     atmosphere:{kettleSpout:state.kettleSpout,pitcherSteam:state.pitcherSteam,pourTilt:state.pourTilt,sanctumVent:state.sanctumVent,sanctumOrigin:state.sanctumOrigin,badgeHeat:state.badgeHeat,cupSteamOrigin:state.cupSteamOrigin}, assembly: state.assembly, fluid:state.fluid, docking:state.docking, foundry: state.foundry, reclaim:state.reclaim, rift:state.rift,
                     // Exactly one authored vessel. No "shadowCup" copy is created.
@@ -7026,8 +7212,8 @@ GuziczakModules.define('audio/instrument', ['math'], (math) => {
     'use strict';
     const { clamp } = math;
     const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
-    // Union of the two original scores, verified at their source. One fixed mouth
-    // for each used pitch; switching tracks cannot move a note or fold an octave.
+    const ONSET_HISTORY_SECONDS = 1.60, MAX_ONSET_HISTORY = 256;
+    // The original score mapping stays fixed; the keyboard supplies silent gaps.
     const layout = Object.freeze({ low: 28, high: 93, pitches: Object.freeze([
         28,33,38,40,41,43,45,47,48,50,52,53,55,56,57,58,59,60,61,62,64,65,66,
         67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,88,89,93
@@ -7049,59 +7235,99 @@ GuziczakModules.define('audio/instrument', ['math'], (math) => {
         return (Number(voice.strength) || 0) * Math.sqrt(power) / Math.max(.001, Number(voice.normalizer) || 1) * cancel;
     }
     function create(sound, { reduced = false } = {}) {
-        let disposed = false, generation = null, serial = 0;
-        const announced = new Set();
-        function reset() { announced.clear(); generation = null; }
+        let disposed = false, generation = null, scoreRevision = null, serial = 0, onsetRevision = 0;
+        let lastPosition = null, lastContext = null, lastRunning = null, blockExisting = false;
+        const announced = new Set(), seenOnsets = new Set(), history = new Map();
+        function remember(set, id) {
+            set.add(id); if (set.size > 4096) set.delete(set.values().next().value);
+        }
+        function reset() {
+            announced.clear(); history.clear(); onsetRevision++; blockExisting = true;
+            lastPosition = null; lastContext = null;
+            // Seen IDs survive a same-transport reset. A release cannot become a new attack.
+        }
         function sample() {
-            // A score alone cannot prove that a note was scheduled or heard. No
-            // synthetic fallback is used when the audio event ledger is unavailable.
             const source = !disposed && typeof sound.instrumentState === 'function' ? sound.instrumentState() : null;
             const position = Number.isFinite(source?.position) ? source.position : 0;
             const time = Number.isFinite(source?.contextTime) ? source.contextTime : 0;
             const available = !disposed && !!source?.available;
             const volume = Number.isFinite(source?.volume) ? clamp(source.volume, 0, 1) : 0;
             const running = available && !!source?.running && !source.muted && !source.paused && volume > 0;
+            const nextGeneration = source?.generation ?? null, nextRevision = source?.revision ?? 0;
+            const transportChanged = generation !== nextGeneration || scoreRevision !== nextRevision;
+            const shifted = lastPosition !== null && lastContext !== null &&
+                (position < lastPosition - .0001 || time < lastContext - .0001 ||
+                 Math.abs((position - lastPosition) - (time - lastContext)) > .08);
+            if (transportChanged) {
+                generation = nextGeneration; scoreRevision = nextRevision;
+                announced.clear(); seenOnsets.clear(); history.clear(); onsetRevision++; blockExisting = false;
+            } else if (shifted) {
+                history.clear(); onsetRevision++; blockExisting = true;
+            }
+            const ledger = Array.isArray(source?.voices) ? source.voices : [];
+            // At a same-generation resume, even starts missed during a silent frame
+            // gap are ineligible. Their current sustain may return, never their attack.
+            const suppressExisting = !running || blockExisting || (!transportChanged && lastRunning === false);
+            if (suppressExisting) {
+                for (const voice of ledger)
+                    if (voice && voice.generation === generation && Number.isFinite(voice.startTime) && voice.startTime <= time)
+                        remember(seenOnsets, voice.id);
+                if (history.size || lastRunning === true) { history.clear(); onsetRevision++; }
+                blockExisting = false;
+            }
             const levels = new Array(layout.high - layout.low + 1).fill(0), notes = [], voices = [];
-            const nextGeneration = source?.generation ?? null;
-            if (generation !== nextGeneration) { generation = nextGeneration; announced.clear(); }
             if (running) {
                 const power = new Array(levels.length).fill(0), attacks = new Array(levels.length).fill(0);
                 const representatives = new Array(levels.length);
                 const gain = Number.isFinite(source.gain) ? clamp(source.gain, 0, 1) : 0;
-                for (const voice of Array.isArray(source.voices) ? source.voices : []) {
+                for (const voice of ledger) {
                     if (!voice || voice.cancelled || voice.generation !== generation || !Number.isFinite(voice.startTime)
-                        || !Number.isFinite(voice.stopTime) || time < voice.startTime || time >= voice.stopTime) continue;
+                        || !Number.isFinite(voice.stopTime) || time < voice.startTime) continue;
                     const slot = voice.midi - layout.low;
                     if (!Number.isInteger(slot) || slot < 0 || slot >= levels.length) continue;
-                    const age = time - voice.startTime;
+                    const age = time - voice.startTime, onsetAt = position - age;
                     const level = clamp(voiceLevel(voice, time) * gain, 0, 1);
-                    // The attack accent is tied to the heard onset, while level keeps
-                    // the exact synthesized release. Neither depends on frame delta.
+                    const strength = clamp((Number(voice.strength) || 0) * gain, 0, 1);
+                    if (!seenOnsets.has(voice.id) && strength > 0) {
+                        remember(seenOnsets, voice.id);
+                        if (age < ONSET_HISTORY_SECONDS && voice.id !== undefined && voice.id !== null) {
+                            history.set(voice.id, Object.freeze({ id: voice.id, generation, midi: voice.midi,
+                                name: names[voice.midi], onsetAt, heardAt: position, strength, level,
+                                velocity: voice.velocity, startTime: voice.startTime }));
+                            if (history.size > MAX_ONSET_HISTORY) history.delete(history.keys().next().value);
+                        }
+                    }
+                    if (time >= voice.stopTime) continue;
                     const attack = clamp(Math.exp(-age / .115) * (Number(voice.strength) || 0) * gain, 0, 1);
-                    power[slot] += level * level;
-                    attacks[slot] = Math.max(attacks[slot], attack);
+                    power[slot] += level * level; attacks[slot] = Math.max(attacks[slot], attack);
                     if (!representatives[slot] || voice.startTime > representatives[slot].startTime)
                         representatives[slot] = voice;
-                    if (!announced.has(voice.id)) {
-                        announced.add(voice.id); serial++;
-                        if (announced.size > 4096) announced.delete(announced.values().next().value);
-                    }
-                    voices.push(Object.freeze({ id: voice.id, generation, midi: voice.midi, at: voice.at,
+                    if (!announced.has(voice.id)) { remember(announced, voice.id); serial++; }
+                    voices.push(Object.freeze({ id: voice.id, generation, midi: voice.midi, at: voice.at, onsetAt,
                         startTime: voice.startTime, stopTime: voice.stopTime, age, level, attack, velocity: voice.velocity }));
                 }
                 for (let slot = 0; slot < levels.length; slot++) {
                     const level = clamp(Math.sqrt(power[slot]), 0, 1), voice = representatives[slot];
                     levels[slot] = level;
                     if (!voice || level < .001 && attacks[slot] < .002) continue;
-                    const midi = slot + layout.low;
+                    const midi = slot + layout.low, age = time - voice.startTime;
                     notes.push(Object.freeze({ id: voice.id, generation, midi, name: names[midi],
-                        velocity: voice.velocity, level, at: voice.at, age: time - voice.startTime, attack: attacks[slot] }));
+                        velocity: voice.velocity, level, at: voice.at, onsetAt: position - age, age, attack: attacks[slot] }));
                 }
             }
+            const onsets = [];
+            for (const [id, onset] of history) {
+                const age = position - onset.onsetAt;
+                if (age < 0 || age >= ONSET_HISTORY_SECONDS || !running) history.delete(id);
+                else onsets.push(Object.freeze({ ...onset, age }));
+            }
+            onsets.sort((a, b) => a.onsetAt - b.onsetAt || a.midi - b.midi || String(a.id).localeCompare(String(b.id)));
+            lastPosition = position; lastContext = time; lastRunning = running;
             const energy = clamp(Math.sqrt(levels.reduce((sum, level) => sum + level * level, 0)) * .65, 0, 1);
-            return Object.freeze({ position, running, available, revision: source?.revision ?? 0,
+            return Object.freeze({ position, running, available, revision: nextRevision,
                 low: layout.low, high: layout.high, pitches: layout.pitches,
                 levels: Object.freeze(levels), notes: Object.freeze(notes), voices: Object.freeze(voices),
+                onsets: Object.freeze(onsets), onsetRevision, onsetHistorySeconds: ONSET_HISTORY_SECONDS,
                 energy, serial, generation, reduced: !!reduced, motionScale: reduced ? 0 : 1 });
         }
         return { sample, reset, destroy() { disposed = true; reset(); } };
@@ -7267,91 +7493,201 @@ GuziczakModules.define('geometry/instrument', ['geometry/keyboard', 'geometry/ai
 
 GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math,geometry) => {
  'use strict';
- const {M,C,clamp,ease}=math,zero=[0,0,0];
- function sample(ctx){
-  const {t,state,meshes,push}=ctx,source=state.instrument||{};
-  const emit=typeof ctx.emit==='function'?ctx.emit:()=>{};
-  if(t<=.02||state.stage<.001)return {};
-  const focus=state.phase==='reclaim'?ease(0,.12,state.phaseProgress)*(1-ease(.94,1,state.phaseProgress)):0;
-  const light=state.stage*ease(.02,.65,t)*(1-.35*focus);
-  push(meshes.instrumentBody,M.I(),0,zero,zero,false,light*.90);
-  const low=Number.isFinite(source.low)?source.low:28;
-  const audible=source.running===true&&source.available!==false&&!source.paused&&!source.muted;
-  const levels=audible?source.levels||[]:[],notes=audible?source.notes||[]:[];
-  const reduced=!!(ctx.reduced||source.reduced||source.motionScale===0);
-  const audioPosition=Number.isFinite(source.position)?source.position:0;
-  const motionClock=reduced?0:Math.max(0,audioPosition),heard=[];
-  for(const note of notes){
-   const slot=geometry.slotFor(note.midi);if(slot<0)continue;
-   const level=clamp(Number(levels[note.midi-low])||0,0,1),attack=clamp(Number(note.attack)||0,0,1);
-   const onset=Number.isFinite(note.at)?note.at:audioPosition-(Number.isFinite(note.age)?note.age:0);
-   const age=Number.isFinite(note.age)?note.age:audioPosition-onset;
-   if(age<0||onset>audioPosition+.0001||!Number.isFinite(age))continue;
-   if(level<.003&&!(age<.16&&attack>=.006))continue;
-   const onsetPulse=reduced?0:ease(0,.018,age)*(1-ease(.08,.52,age));
-   // Display gain keeps quiet heard notes legible without altering measured audio.
-   const visualDrive=clamp(Math.pow(level*6.5,.40),0,1);
-   heard.push({note,midi:note.midi,slot,position:geometry.mouth(slot),level,attack,onset,age,
-    onsetPulse,visualDrive,width:.86+.18*visualDrive+.08*onsetPulse,
-    rate:reduced?0:.86+(note.midi%12)*.018,
-    visualEnergy:clamp(.42+.58*visualDrive+.12*onsetPulse,0,1)});
-  }
-  const visibleFlows=new Set(heard.slice().sort((a,b)=>
-   (b.level+b.attack*.50+b.onsetPulse*.22)-(a.level+a.attack*.50+a.onsetPulse*.22)||a.midi-b.midi
-  ).slice(0,8).map(n=>n.midi));
-  const byMidi=new Map(heard.map(n=>[n.midi,n]));
-  const traceTargets=[],flows=[],bursts=[];
-  const flowLight=light*(1-.18*clamp((visibleFlows.size-2)/6,0,1));
-  const maximumHeight=(ctx.mobile?1.05:1.20)*(1-.20*focus);
-  let active=0,strongest=null;
-  // @live:organ
-  function heightFor(voice){
-   return maximumHeight*(.50+.40*voice.visualDrive+.10*voice.onsetPulse);
-  }
-  function poseFor(voice,height){
-   return C(M.T(...voice.position),M.Ry(geometry.outwardAngle(voice.slot)),M.S(voice.width,height,voice.width));
-  }
-  function drawFlow(pose,voice){
-   push(meshes.instrumentAir,pose,8,[voice.midi,motionClock,voice.onset],
-    [voice.rate,reduced?1:0,voice.onsetPulse],true,flowLight,0,1,voice.visualEnergy);
-  }
-  for(let slot=0;slot<geometry.slots;slot++){
-   const midi=geometry.pitches[slot],position=geometry.mouth(slot),objectId='instrument/note/'+midi;
-   const key=geometry.keys[slot];
-   // Selection belongs to the fixed pipe mouth, never to a moving packet above it.
-   traceTargets.push({key:'organ',objectId,world:position.slice(),radius:key.radius+.035,midi});
-   const voice=byMidi.get(midi);if(!voice)continue;
-   const {note,level,onset,age,onsetPulse,visualDrive}=voice;
-   const noteLight=clamp(.10+.40*visualDrive+.14*onsetPulse,0,.64);
-   const lightScale=geometry.lightScale(slot);
-   push(meshes.instrumentLight,C(M.T(...position),M.S(lightScale,1,lightScale)),0,zero,zero,false,light,0,1,noteLight);
-   if(visibleFlows.has(midi)){
-    const flowHeight = heightFor(voice);
-    const flowPose = poseFor(voice, flowHeight);
-    drawFlow(flowPose, voice);
-    // @live:end
-    flows.push({midi,height:flowHeight,width:voice.width,position:position.slice(),clock:motionClock,
-     age,level,visualDrive,onsetPulse,rate:voice.rate,rateUnit:'path/s',direction:'mouth to rising, dissipating air'});
-    if(!reduced&&age>0&&age<.52&&onsetPulse>.012){
-     const progress=clamp(age/.52,0,1),burstRadius=key.mouthRadius*(1.4+1.6*Math.sqrt(progress));
-     const burstRise=.012+.32*Math.pow(progress,.80),burstHeight=.27+.30*progress;
-     const burstPose=C(M.T(position[0],position[1]+burstRise,position[2]),
-      M.Ry(geometry.outwardAngle(slot)+Math.sin(midi)*.20),M.S(burstRadius,burstHeight,burstRadius));
-     push(meshes.instrumentBurst,burstPose,0,[midi,motionClock,onset],
-      [onsetPulse,visualDrive,progress],true,flowLight,0,1,voice.visualEnergy);
-     bursts.push({midi,age,pulse:onsetPulse,radius:burstRadius,rise:burstRise,height:burstHeight,
-      clock:motionClock,position:position.slice()});
-    }
-    emit('organ',{note:note.name||String(midi),flowHeight,flowClock:motionClock,flowRate:voice.rate,level,visualDrive,onsetPulse,midi},{
-     objectId,priority:34+level*8+onsetPulse*6,labelKey:'organ',
-     focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']});
-   }
-   active++;
-   if(!strongest||level>strongest.level)strongest={midi,slot,level,position:position.slice()};
-  }
-  return {instrument:{active,strongest,flows,columns:flows,bursts,slots:geometry.slots,pitches:geometry.pitches},traceTargets};
+ const {M,C,clamp,ease,TAU}=math,zero=[0,0,0];
+ const limits=Object.freeze({lobes:128,puffs:16,primary:8,lobesPerPuff:8,
+  maximumLife:1.38,preemptFade:.22,sustainLife:.62,sustainPeriod:.20});
+ function noise(seed,n=0){
+  let x=(seed+Math.imul(n+1,374761393))>>>0;
+  x=Math.imul(x^(x>>>13),1274126177);return ((x^(x>>>16))>>>0)/4294967295;
  }
- return {sample};
+ function seedFor(id){let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)%4096;}
+ const identity=event=>String(event.generation)+':'+String(event.id);
+ const drive=level=>clamp(Math.pow(Math.max(0,level)*6.5,.40),0,1);
+ function makePuff(event){
+  const slot=geometry.slotFor(event.midi),seed=seedFor(identity(event));
+  return {...event,key:identity(event),slot,seed,origin:geometry.mouth(slot),
+   yaw:geometry.outwardAngle(slot),drive:drive(event.strength),
+   scale:.90+.10*geometry.keys[slot].mouthRadius/.111,
+   life:1.12+.26*noise(seed,19),releaseAt:null};
+ }
+ // @live:organ
+ function lobeAt(puff,i,puffAge){
+  const tail=i>=5,delay=tail?.046*(i-4):.009*i;
+  const age=puffAge-delay;
+  const life=tail?.68+.13*noise(puff.seed,i):puff.life-delay;
+  if(age<=0||age>=life)return null;
+  const spread=1-Math.exp(-age/.22);
+  const roll=.48+1.85*(1-Math.exp(-age/.40));
+  const phase=TAU*noise(puff.seed,23)+i*2.399;
+  const radius=1.60*(.068+.128*spread)*(.95+.12*puff.drive)*puff.scale;
+  const ring=1.30*(.014+.155*spread)*(i===0?0:.80+.20*Math.sin(roll));
+  const lift=1.25*(.020+(2.50+.55*puff.drive)*.24*(1-Math.exp(-age/.24))+.28*age);
+  const drift=(.055+.065*noise(puff.seed,31))*age/(1+.60*age);
+  const curl=i===0?0:ring*.62*Math.cos(roll+.24*noise(puff.seed,i));
+  const x=Math.cos(phase+.24*age)*ring+Math.cos(puff.yaw)*drift;
+  const z=Math.sin(phase+.24*age)*ring-Math.sin(puff.yaw)*drift;
+  const y=tail?lift*(.50+.11*(i-5)):lift+curl;
+  const size=tail?radius*(.50+.10*noise(puff.seed,i+8)):radius;
+  const fade=ease(0,.022,age)*(1-ease(tail?.22:.24,1,age/life));
+  const density=fade*(tail?.36+.24*puff.drive:(i===0?1.05: .82)+.45*puff.drive);
+  return {center:[puff.origin[0]+x*(tail?.44:1),puff.origin[1]+y,puff.origin[2]+z*(tail?.44:1)],
+   radii:[size*(.88+.12*noise(puff.seed,i+3)),size*(tail?1.30:1.08),size],
+   density,seed:(puff.seed+i*97)%4096,age,life,midi:puff.midi,onsetId:puff.key,
+   kind:tail?'tail':i===0?'head':'curl'};
+ }
+ function emitPuff(puff,clock,fade,out){
+  const puffAge = clock-puff.onsetAt;
+  for(let i=0;i<limits.lobesPerPuff;i++){
+   const lobe = lobeAt(puff,i,puffAge);
+   if(lobe){lobe.density*=fade;if(lobe.density>.006)out.push(lobe);}
+  }
+  return puffAge;
+ }
+ function tailFor(feed,clock){
+  const tail = sustainLobes(feed,clock);
+  return tail;
+ }
+ // @live:end
+ function releaseFade(puff,clock){
+  return puff.releaseAt===null?1:1-ease(puff.releaseAt,puff.releaseAt+limits.preemptFade,clock);
+ }
+ function sustainLobes(feed,clock){
+  const out=[],end=Math.min(clock,feed.endAt??clock),last=Math.floor((end-feed.from)/limits.sustainPeriod);
+  for(let n=Math.max(0,last-3);n<=last;n++){
+   const born=feed.from+n*limits.sustainPeriod,age=clock-born;if(age<=0||age>=limits.sustainLife)continue;
+   const r=(.034+.068*(1-Math.exp(-age/.16)))*feed.scale;
+   const phase=feed.seed*.021+n*2.399,y=.014+.35*(1-Math.exp(-age/.20))+.13*age;
+   const sway=.022*Math.sin(age*4+phase),width=.010+.035*age;
+   const density=(.14+.22*drive(feed.level))*ease(0,.022,age)*(1-ease(.16,limits.sustainLife,age));
+   if(density>.006)out.push({center:[feed.origin[0]+Math.cos(phase)*width+sway,feed.origin[1]+y,
+    feed.origin[2]+Math.sin(phase)*width],radii:[r*.85,r*1.18,r],density,
+    seed:(feed.seed+n*59)%4096,age,life:limits.sustainLife,midi:feed.midi,onsetId:feed.key,kind:'sustain'});
+  }
+  return out;
+ }
+ function create(){
+  let puffs=[],generation=null,lastClock=null,lastReduced=null,lastAudible=null,admitted=0,dropped=0,feedBoundary=-Infinity;
+  const seen=new Set(),feeds=new Map();
+  function mark(id){seen.add(id);if(seen.size>4096)seen.delete(seen.values().next().value);}
+  function clear(){puffs=[];feeds.clear();seen.clear();}
+  function sample(ctx){
+   const {t,state,meshes,push}=ctx,source=state.instrument||{},emit=typeof ctx.emit==='function'?ctx.emit:()=>{};
+   const clock=Number.isFinite(source.position)?source.position:0;
+   const audible=source.running===true&&source.available!==false&&!source.paused&&!source.muted;
+   const reduced=!!(ctx.reduced||source.reduced||source.motionScale===0);
+   const epoch=[source.generation,source.revision,source.onsetRevision].join(':');
+   const motionChanged=lastReduced!==null&&lastReduced!==reduced;
+   if(generation!==epoch||lastClock!==null&&clock<lastClock-.0001||motionChanged){
+    clear();if(generation!==null)feedBoundary=clock;generation=epoch;
+   }
+   const events=Array.isArray(source.onsets)?source.onsets:[];
+   if(!audible||reduced||motionChanged){
+    puffs=[];feeds.clear();feedBoundary=clock;for(const event of events)mark(identity(event));
+   }
+   if(lastAudible===false&&audible)feedBoundary=clock;
+   lastClock=clock;lastReduced=reduced;lastAudible=audible;
+   if(t<=.02||state.stage<.001)return {steamLobes:[],steamLight:0};
+   const focus=state.phase==='reclaim'?ease(0,.12,state.phaseProgress)*(1-ease(.94,1,state.phaseProgress)):0;
+   const light=state.stage*ease(.02,.65,t)*(1-.35*focus),traceTargets=[],steamLobes=[],tracedMouths=new Set();
+   push(meshes.instrumentBody,M.I(),0,zero,zero,false,light*.90);
+   let active=0,strongest=null;
+   const levels=audible?source.levels||[]:[],low=Number.isFinite(source.low)?source.low:28;
+   const heardNotes=new Set((audible&&Array.isArray(source.notes)?source.notes:[]).filter(note=>{
+    const onsetAt=Number.isFinite(note.onsetAt)?note.onsetAt:clock-note.age;
+    return geometry.slotFor(note.midi)>=0&&Number.isFinite(onsetAt)&&onsetAt<=clock&&!(note.age<0);
+   }).map(note=>note.midi));
+   for(let slot=0;slot<geometry.slots;slot++){
+    const midi=geometry.pitches[slot],position=geometry.mouth(slot),key=geometry.keys[slot];
+    traceTargets.push({key:'organ',objectId:'instrument/note/'+midi,world:position.slice(),radius:key.radius+.035,midi});
+    const level=clamp(Number(levels[midi-low])||0,0,1);if(level<.001||!heardNotes.has(midi))continue;
+    const pulse=reduced?0:Math.max(0,...events.filter(e=>e.midi===midi&&e.generation===source.generation
+     &&Number.isFinite(e.onsetAt)&&e.onsetAt<=clock).map(e=>1-ease(.04,.22,clock-e.onsetAt)));
+    const noteLight=clamp(.08+.38*drive(level)+.10*pulse,0,.60),scale=geometry.lightScale(slot);
+    push(meshes.instrumentLight,C(M.T(...position),M.S(scale,1,scale)),0,zero,zero,false,light,0,1,noteLight);
+    active++;if(!strongest||level>strongest.level)strongest={midi,slot,level,position:position.slice()};
+   }
+   puffs=puffs.filter(p=>clock-p.onsetAt<p.life&&releaseFade(p,clock)>.001);
+   if(audible&&!reduced){
+    const fresh=events.filter(e=>e&&e.id!==undefined&&e.id!==null&&e.generation===source.generation
+     &&geometry.slotFor(e.midi)>=0&&Number.isFinite(e.onsetAt)&&e.onsetAt<=clock
+     &&clock-e.onsetAt<1.60&&e.strength>0&&!seen.has(identity(e)))
+     .sort((a,b)=>a.onsetAt-b.onsetAt||b.strength-a.strength||a.midi-b.midi||String(a.id).localeCompare(String(b.id)));
+    for(let at=0;at<fresh.length;){
+     let end=at+1;while(end<fresh.length&&fresh[end].onsetAt-fresh[at].onsetAt<.028)end++;
+     const chord=fresh.slice(at,end).sort((a,b)=>b.strength-a.strength||a.midi-b.midi||String(a.id).localeCompare(String(b.id)));
+     chord.forEach(event=>mark(identity(event)));
+     for(const event of chord.slice(0,limits.primary)){
+      const puff=makePuff(event);if(clock-puff.onsetAt>=puff.life)continue;
+      const primary=puffs.filter(p=>p.releaseAt===null).sort((a,b)=>a.onsetAt-b.onsetAt||a.strength-b.strength);
+      if(primary.length>=limits.primary)primary[0].releaseAt=event.onsetAt;
+      if(puffs.length>=limits.puffs){
+       const residual=puffs.slice().sort((a,b)=>releaseFade(a,clock)*(1-clamp((clock-a.onsetAt)/a.life,0,1))
+        -releaseFade(b,clock)*(1-clamp((clock-b.onsetAt)/b.life,0,1)))[0];
+       puffs.splice(puffs.indexOf(residual),1);dropped++;
+      }
+      puffs.push(puff);admitted++;
+     }
+     at=end;
+    }
+    const liveVoices=new Map();
+    for(const voice of Array.isArray(source.voices)?source.voices:[]){
+     const onsetAt=Number.isFinite(voice.onsetAt)?voice.onsetAt:clock-voice.age;
+     if(voice.generation!==source.generation||!Number.isFinite(onsetAt)||onsetAt>clock
+      ||geometry.slotFor(voice.midi)<0||!(voice.level>.004))continue;
+     const previous=liveVoices.get(voice.midi);
+     if(!previous||onsetAt>previous.onsetAt)liveVoices.set(voice.midi,{...voice,onsetAt});
+    }
+    const held=[...liveVoices.values()].sort((a,b)=>b.level-a.level||b.onsetAt-a.onsetAt).slice(0,8),heldIds=new Set();
+    for(const voice of held){
+     const key=identity(voice);heldIds.add(key);
+     let feed=feeds.get(key);
+     if(!feed){const slot=geometry.slotFor(voice.midi);feed={key,midi:voice.midi,seed:seedFor(key),
+      name:(source.notes||[]).find(note=>note.midi===voice.midi)?.name||String(voice.midi),
+      origin:geometry.mouth(slot),scale:.9+.1*geometry.keys[slot].mouthRadius/.111,
+      from:Math.max(voice.onsetAt+.22,feedBoundary),level:voice.level,endAt:null};feeds.set(key,feed);}
+     feed.level=voice.level;feed.endAt=null;
+    }
+    for(const [key,feed] of feeds){
+     if(!heldIds.has(key)&&feed.endAt===null)feed.endAt=clock;
+     if(feed.endAt!==null&&clock-feed.endAt>limits.sustainLife)feeds.delete(key);
+    }
+    const crowd=1-.14*clamp((puffs.filter(p=>p.releaseAt===null).length-2)/6,0,1);
+    for(const puff of puffs){
+     const first=steamLobes.length,puffAge=emitPuff(puff,clock,releaseFade(puff,clock)*crowd,steamLobes);
+     if(steamLobes.length>first){
+      const radius=Math.max(...steamLobes.slice(first).map(l=>Math.max(...l.radii)));
+      emit('organ',{note:puff.name||String(puff.midi),puffAge,puffRadius:radius,midi:puff.midi,
+       lobeCount:steamLobes.length-first,onsetId:puff.key,level:puff.level,steamClock:clock},{
+       objectId:'instrument/note/'+puff.midi,priority:34+puff.strength*8+(1-ease(.04,.22,puffAge))*6,
+       labelKey:'organ',focus:['const puffAge =','const lobe ='],valueKeys:['note','puffAge']});
+      tracedMouths.add(puff.midi);
+     }
+    }
+    const tailCandidates=[...feeds.values()].flatMap(feed=>tailFor(feed,clock)).sort((a,b)=>b.density-a.density);
+    const acceptedTails=tailCandidates.slice(0,Math.max(0,limits.lobes-steamLobes.length));
+    steamLobes.push(...acceptedTails);
+    const drawnFeeds=new Map();
+    for(const lobe of acceptedTails){
+     if(!drawnFeeds.has(lobe.onsetId))drawnFeeds.set(lobe.onsetId,[]);
+     drawnFeeds.get(lobe.onsetId).push(lobe);
+    }
+    for(const [key,lobes] of drawnFeeds){
+     const feed=feeds.get(key);if(!feed||tracedMouths.has(feed.midi))continue;
+     emit('organ',{note:feed.name,tailAge:Math.min(...lobes.map(lobe=>lobe.age)),midi:feed.midi,
+      lobeCount:lobes.length,onsetId:key,level:feed.level,steamClock:clock},{
+      objectId:'instrument/note/'+feed.midi,priority:32+feed.level*4,labelKey:'organ',
+      focus:['const tail ='],valueKeys:['note','tailAge']});
+    }
+   }
+   const visiblePuffs=puffs.filter(p=>clock-p.onsetAt<p.life&&releaseFade(p,clock)>.001);
+   return {steamLobes,steamLight:light,instrument:{active,strongest,slots:geometry.slots,pitches:geometry.pitches,
+    puffs:visiblePuffs.map(p=>({id:p.id,onsetId:p.key,midi:p.midi,onsetAt:p.onsetAt,age:clock-p.onsetAt,
+     life:p.life,releaseAt:p.releaseAt,fade:releaseFade(p,clock),seed:p.seed,origin:p.origin.slice()})),
+    primary:visiblePuffs.filter(p=>p.releaseAt===null).length,lobes:steamLobes.length,admitted,dropped,clock,reduced},traceTargets};
+  }
+  return {sample};
+ }
+ return {create,sample:ctx=>create().sample(ctx),limits,lobeAt};
 });
 
 
@@ -7364,9 +7700,9 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', waiting: 'WARTET', expand: 'Quelltext anzeigen', collapse: 'Quelltext ausblenden', more: 'Code', less: 'Zu', source: 'Tatsächlicher Quelltext', values: 'Werte dieses Frames', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', loading: 'Warte auf Audio', release: 'Nachklang', between: 'Pause zwischen Noten', pin: 'Dieses Objekt anheften', unpin: 'Zur automatischen Auswahl', pinned: 'Angeheftetes Objekt', last: 'Letzter Stand · wartet auf diese Operation', pending: 'Wartet auf die Ausführung dieser Operation', cpu: 'Für diesen Frame ausgeführter Code', gpu: 'In diesem Frame verwendeter Shader', frame: 'Frame', object: 'Objekt', history: 'Letzte Operationen' }
     };
     const LABELS = {
-        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Przepływ powietrza', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
-        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Airflow', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
-        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Luftstrom', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
+        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Wyrzut pary', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
+        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Steam burst', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
+        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Dampfausstoß', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
     };
     // These selectors choose real lines in a marked source block, never replacement code.
     const PROFILES = {
@@ -7379,7 +7715,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         quench: { focus: ['const power', 'const take'], values: ['enthalpy', 'power'] },
         exhibit: { focus: ['const rotation', 'const model'], values: ['yaw', 'groundY'] },
         shader: { focus: ['vec4 w', 'gl_Position'], values: ['time', 'objects'] },
-        organ: { focus: ['const flowHeight =', 'const flowPose ='], values: ['note', 'flowHeight'] },
+        organ: { focus: ['const puffAge =', 'const lobe ='], values: ['note', 'puffAge'] },
         tokens: { focus: ['letterInstances.push'], values: ['count', 'inside'] },
         gold: { focus: ['float level =', 'level=mix'], values: ['time', 'flow'] }
     };
