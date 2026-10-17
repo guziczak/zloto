@@ -19,7 +19,7 @@ const scripts = Array.from(html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/
 const findings = [];
 const failures = [];
 function check(name, fn) {
-  const requiresCatalog = /geometry|audio-ledger|full-scene|renderer|mobile|projection/.test(only);
+  const requiresCatalog = /geometry|audio-ledger|airflow|full-scene|renderer|mobile|projection/.test(only);
   if (only && !name.includes(only) && !(requiresCatalog && name === 'cpu-geometry-catalog')) return;
   try { const detail = fn(); findings.push({ name, status: 'pass', ...detail }); }
   catch (error) { failures.push({ name, message: error.message, stack: error.stack?.split('\n').slice(0, 6) }); }
@@ -237,13 +237,12 @@ function legacyAudioSnapshot() {
     notes: [{ midi: 60, name: 'C4', velocity: 110, level: .82, at: .9, age: .1, attack: .6 }, { midi: 67, name: 'G4', velocity: 90, level: .5, at: .85, age: .15, attack: .3 }], energy: .8, serial: 2 };
 }
 
-if (!baseline) check('audio-ledger-to-water-instrument', () => {
+if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
   const audio = registry.get('audio/instrument'), geometry = registry.get('geometry/instrument');
   assert.equal(audio.layout.pitches.length, 46, 'One fixed slot for every supported pitch');
   assert.equal(geometry.slots, 46, 'Geometry follows fixed score union');
-  for (const name of ['instrumentRestWater', 'instrumentColumn', 'instrumentDrop', 'instrumentRipple'])
-    assert(gpu.summary(catalog.meshes[name].buffer).materials.every(id => id === 29), name + ': uses dedicated water material');
-  assert(gpu.summary(catalog.meshes.instrumentRestWater.buffer).minNormalY >= 0, 'Resting water normals face upward');
+  assert(catalog.meshes.instrumentAir, 'The real scene catalog contains the airflow mesh');
+  assert(gpu.summary(catalog.meshes.instrumentAir.buffer).materials.every(id => id === 29), 'Airflow has its dedicated transparent material');
   assert.equal(new Set(geometry.pitches).size, 46, 'Distinct pitches retain distinct sockets');
   for (const [i, midi] of Array.from(audio.layout.pitches).entries()) assert.equal(geometry.slotFor(midi), i, 'Pitch-to-slot mapping stable');
   const noLedger = audio.create({ visualState: () => ({ running: true, available: true, position: 1, volume: 1 }), score: () => ({ notes: [[0, 1000, 60, 127]] }) });
@@ -257,31 +256,50 @@ if (!baseline) check('audio-ledger-to-water-instrument', () => {
   ledger.contextTime = 1.1; const onset = instrument.sample(); assert(onset.energy > 0, 'Heard voice lights instrument');
   ledger.contextTime = 1.8; const afterGap = instrument.sample(); assert(afterGap.energy > 0, '700ms rendering gap preserves still-audible note');
   ledger.generation = 2; assert.equal(instrument.sample().energy, 0, 'Old generation is not displayed after transport replacement');
-  ledger.generation = 1; ledger.muted = true; assert.equal(instrument.sample().energy, 0, 'Muted transport has no column energy');
-  ledger.muted = false; ledger.paused = true; assert.equal(instrument.sample().energy, 0, 'Paused transport has no column energy');
+  ledger.generation = 1; ledger.muted = true; assert.equal(instrument.sample().energy, 0, 'Muted transport has no airflow energy');
+  ledger.muted = false; ledger.paused = true; assert.equal(instrument.sample().energy, 0, 'Paused transport has no airflow energy');
+  ledger.paused = false; ledger.available = false; assert.equal(instrument.sample().energy, 0, 'Unavailable audio has no airflow energy');
   instrument.destroy();
-  function sceneSample(source, mobile = false, reduced = false) {
-    const frame = { time: 2, stage: 1, phase: 'assembly', phaseProgress: .5, instrument: source };
+  function sceneSample(source, mobile = false, reduced = false, time = 2) {
+    const frame = { time, stage: 1, phase: 'assembly', phaseProgress: .5, instrument: source };
     const list = registry.get('scene/commands').createDrawList(catalog, frame); list.family('instrument');
-    const emissions = []; const result = registry.get('scene/instrument').sample({ t: 2, state: frame, mobile, reduced,
+    const emissions = []; const result = registry.get('scene/instrument').sample({ t: time, state: frame, mobile, reduced,
       meshes: catalog.meshes, push: list.push, emit: (...args) => emissions.push(args) });
     return { result, commands: list.commands, emissions };
   }
+  const flowCommands = sample => sample.commands.filter(command => command.mesh === catalog.meshes.instrumentAir);
   const quiet = sceneSample({ ...onset, running: false, notes: [], levels: onset.levels.map(() => 0), energy: 0 });
-  assert(!quiet.commands.some(command => command.mode === 8), 'No water columns for silent input');
+  assert.equal(flowCommands(quiet).length, 0, 'Silent input has no airflow');
+  const stopped = sceneSample({ ...onset, running: false });
+  assert.equal(flowCommands(stopped).length, 0, 'Stopped transport cannot reuse stale positive note levels');
+  assert.equal(stopped.emissions.filter(([key]) => key === 'organ').length, 0, 'Silent pipes cannot claim a live airflow operation');
+  assert.equal(stopped.result.traceTargets.length, 46, 'Silent mouths remain available for stable object selection');
   const active = sceneSample(onset);
-  assert(active.commands.some(command => command.mode === 8 && command.glass && command.noteEnergy > 0), 'Audible voice creates water-material draw command');
+  assert(flowCommands(active).some(command => command.mode === 8 && command.glass && command.noteEnergy > 0), 'Audible voice creates a transparent airflow draw command');
   assert(active.result.traceTargets.some(target => target.objectId === 'instrument/note/60' && target.world.every(Number.isFinite)), 'Heard note has stable projected selection target');
+  assert(active.emissions.some(([key, values, options]) => key === 'organ' && values.midi === 60 && options.objectId === 'instrument/note/60'), 'Airflow trace belongs to the actual sounding pitch');
+  const flowState = sample => flowCommands(sample).map(command => ({ matrix: Array.from(command.m), from: Array.from(command.from), to: Array.from(command.to) }));
+  const laterScene = sceneSample(onset, false, false, 4);
+  assert.deepEqual(flowState(laterScene), flowState(active), 'Advancing scene time alone cannot advance audio airflow');
+  const laterAudio = sceneSample({ ...onset, position: onset.position + .5 });
+  assert(flowCommands(laterAudio).every(command => command.from[1] === onset.position + .5), 'Airflow receives the heard audio position');
+  assert.notDeepEqual(flowState(laterAudio), flowState(active), 'Advancing the audible clock advances airflow phase');
   const pitches = Array.from(audio.layout.pitches), levels = Array.from({ length: 66 }, (_, i) => pitches.includes(i + 28) ? .9 : 0);
   const dense = { ...onset, levels, notes: pitches.map(midi => ({ midi, name: String(midi), level: .9, age: .1, attack: .5, at: .9 })) };
   const denseScene = sceneSample(dense);
   assert.equal(denseScene.commands.filter(command => command.mesh === catalog.meshes.instrumentLight).length, 46, 'All sounding pitches illuminate their mouths');
-  assert.equal(denseScene.commands.filter(command => command.mode === 8).length, 8, 'Dense chord water columns stay bounded');
+  assert.equal(flowCommands(denseScene).length, 8, 'A dense chord uses at most eight airflow draws');
+  assert(denseScene.commands.every(command => Array.from(command.m).concat(command.from, command.to, command.light, command.noteEnergy).every(Number.isFinite)), 'Dense airflow uniforms and transforms remain finite');
+  const reverseDense = sceneSample({ ...dense, notes: dense.notes.slice().reverse() });
+  assert.deepEqual(flowCommands(reverseDense).map(command => command.from[0]), flowCommands(denseScene).map(command => command.from[0]), 'Dense-note selection remains deterministic when ledger order changes');
   const mobileScene = sceneSample(onset, true), reducedScene = sceneSample(onset, false, true);
-  assert(mobileScene.result.instrument.columns.every(column => column.height <= .540001), 'Mobile columns stay within designed height');
-  assert(!reducedScene.commands.some(command => command.mesh === catalog.meshes.instrumentDrop), 'Reduced-motion path omits onset drops');
+  assert(mobileScene.result.instrument.flows.every(flow => flow.height > 0 && flow.height <= .650001), 'Mobile airflow stays within its presentation budget');
+  assert.equal(flowCommands(reducedScene).length, flowCommands(active).length, 'Reduced motion retains the sounding note cue');
+  assert(flowCommands(reducedScene).every(command => command.from[1] === 0 && command.to[1] === 1), 'Reduced motion requests frozen airflow without a moving packet clock');
+  assert.deepEqual(flowState(sceneSample({ ...onset, position: onset.position + .5 }, false, true)), flowState(reducedScene), 'Reduced-motion airflow remains fixed as audio time advances');
   return { pitches: 46, noScoreOnlyFallback: true, futureVoiceDark: true, longFrameGap: true, generationAndPause: true,
-    liveColumns: active.result.instrument.columns.length, denseColumns: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
+    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true,
+    liveFlows: active.result.instrument.flows.length, denseFlows: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
 });
 
 if (!baseline) check('mobile-content-projection', () => {
@@ -308,7 +326,7 @@ if (!baseline) check('mobile-content-projection', () => {
     return { project, top, bottom, contentHeight };
   }
   for (const [width, height] of [[375, 720], [390, 660]]) {
-    const viewport = { width, height, dpr: 1, traceTop: Math.min(width <= 700 ? 56 : 62, height * .13), traceInset: Math.min(180, height * .30) };
+    const viewport = { width, height, dpr: 1, traceTop: Math.min(width <= 700 ? 56 : 62, height * .13), traceInset: Math.min(116, height * .30) };
     for (const authored of [3.6, 6.3, 9.5, 10.2, 11.5, 12, 13.5, 15.7]) {
       const frame = registry.get('scene/state').sampleState(timeline.sample(timeline.toElapsed(authored)));
       frame.frozen = true; frame.seek = true; frame.instrument = legacyAudioSnapshot();
@@ -319,18 +337,18 @@ if (!baseline) check('mobile-content-projection', () => {
       const camera = registry.get('scene/camera').sampleCamera(frame, viewport, packet.assembly);
       const { project, top, bottom, contentHeight } = projector(camera, frame, viewport);
       assert(camera.fov >= 43.9, 'Full-table mobile focus uses its designed field of view');
-      const ring = [], underside = [], jetBound = [];
+      const ring = [], underside = [], airflowBound = [];
       for (let i = 0; i <= 96; i++) {
         const angle = i * Math.PI / 48;
         ring.push(project([docking.hull[0] * Math.cos(angle), docking.deckY, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
         underside.push(project([docking.hull[0] * Math.cos(angle), docking.deckY - .32, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
-        jetBound.push(project([docking.hull[0] * Math.cos(angle), docking.deckY + .9, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
+        airflowBound.push(project([docking.hull[0] * Math.cos(angle), docking.deckY + 1.08, docking.hull[2] + docking.hull[1] * Math.sin(angle)]));
       }
-      const bound = ring.concat(underside, jetBound); assert(bound.every(point => point.every(Number.isFinite) && point[2] > 0), 'Full rim is in front of camera');
+      const bound = ring.concat(underside, airflowBound); assert(bound.every(point => point.every(Number.isFinite) && point[2] > 0), 'Full rim is in front of camera');
       const minX = Math.min(...bound.map(point => point[0])), maxX = Math.max(...bound.map(point => point[0]));
       const minY = Math.min(...bound.map(point => point[1])), maxY = Math.max(...bound.map(point => point[1]));
       assert(minX >= -.5 && maxX <= width + .5, 'Full ring fits portrait width at ' + width + 'x' + height + ' t=' + authored);
-      assert(minY >= top - .5 && maxY <= height - bottom + .5, 'Full ring and jet bound fit above code dock at ' + width + 'x' + height + ' t=' + authored);
+      assert(minY >= top - .5 && maxY <= height - bottom + .5, 'Full ring and airflow bound fit with ambient source at ' + width + 'x' + height + ' t=' + authored);
       const cup = [], coil = [];
       for (let i = 0; i <= 64; i++) {
         const angle = i * Math.PI / 32;
@@ -349,7 +367,7 @@ if (!baseline) check('mobile-content-projection', () => {
       }
       results.push({ width, height, authored, fov: camera.fov, distance: camera.distance,
         leftClearance: minX, rightClearance: width - maxX, topClearance: minY - top, bottomClearance: height - bottom - maxY });
-      if (authored === 9.5) plots.push({ width, height, authored, top, bottom, contentHeight, ring, underside, jetBound, cup, coil, mouths, mouldBounds });
+      if (authored === 9.5) plots.push({ width, height, authored, top, bottom, contentHeight, ring, underside, airflowBound, cup, coil, mouths, mouldBounds });
     }
   }
   if (dumpProjections) fs.writeFileSync(dumpProjections, JSON.stringify({ htmlPath, limitation: 'Exact CPU camera projection of bounds; not a rendered WebGL screenshot.', plots, results }, null, 2));
@@ -493,7 +511,7 @@ check('renderer-javascript-projection-and-uniforms', () => {
     for (const [width, height] of [[1440, 900], [375, 720], [390, 660]]) {
       const authored = 16.70, viewport = { width, height, dpr: 1,
         traceTop: Math.min(width <= 700 ? 56 : 62, height * .13),
-        traceInset: Math.min(width <= 700 ? 180 : 176, height * .30) };
+        traceInset: Math.min(width <= 700 ? 116 : 124, height * .30) };
       const frame = registry.get('scene/state').sampleState(timeline.sample(timeline.toElapsed(authored)));
       assert(Math.abs(frame.time - authored) < 1e-9, 'Handoff test samples the exact first exhibit frame');
       frame.frozen = false; frame.seek = true; frame.motion = { tilt: [0, 0], acceleration: [0, 0], speed: 0 };
@@ -520,14 +538,13 @@ check('renderer-javascript-projection-and-uniforms', () => {
       assert(rectErrorPx < .002, 'Cinema signature front plane aligns with the exhibit handoff rectangle');
       const content = registry.get('scene/camera').contentViewport(frame, viewport);
       assert.equal(content.top, 0, 'Camera header reservation ends at the first exhibit frame');
-      assert.equal(content.bottom, 0, 'Camera source-dock reservation ends at the first exhibit frame');
+      assert.equal(content.bottom, 0, 'Camera ambient-source reservation ends at the first exhibit frame');
       handoffProjection.push({ width, height, authored, maxErrorPx, rectErrorPx });
     }
   }
   assert(uniformSamples.some(sample => sample.name === 'uNoteEnergy' && sample.values[0] > 0), 'Audible note intensity reaches mesh shader uniform');
   if (!baseline) {
-    assert(uniformSamples.some(sample => sample.name === 'uAudioTime' && sample.values[0] === 1), 'Water deformation receives audio position, independently of scene time');
-    assert(uniformSamples.some(sample => sample.name === 'uMode' && sample.values[0] === 8), 'Water columns reach renderer mode 8 without colliding with existing deformation');
+    assert(uniformSamples.some(sample => sample.name === 'uMode' && sample.values[0] === 8), 'Airflow reaches its renderer mode without colliding with existing deformation');
   }
   for (const pair of programSources) {
     assert.equal(pair.length, 2, 'Every renderer program has vertex and fragment source');
@@ -628,6 +645,94 @@ check('trace-source-lifecycle-and-selection', () => {
   trace.destroy(); assert.equal(trace.diagnostics().destroyed, true); assert.equal(trace.diagnostics().scopeSize, 0, 'Event listeners disposed');
   assert.equal(isolated.doc.getElementById('live-trace'), null, 'Trace node removed');
   return { sources: 12, boundedHistory: true, selection: !baseline, routeLifecycle: true, localization: true, cleanup: true };
+});
+
+if (!baseline) check('trace-ambient-execution-provenance', () => {
+  // Compare displayed text against the real script text independently of the
+  // runtime trace's source cache. Line numbers alone cannot prove provenance.
+  const actualSources = new Map();
+  for (const script of scripts) {
+    let key = null, lines = new Map();
+    for (const [index, line] of script.textContent.split('\n').entries()) {
+      const marker = line.match(/^\s*\/\/\s*@live:([a-z][a-z0-9-]*)\s*$/);
+      if (marker) {
+        if (marker[1] === 'end') { if (key && !actualSources.has(key)) actualSources.set(key, lines); key = null; }
+        else { key = marker[1]; lines = new Map(); }
+      } else if (key) lines.set(index + 1, line.trim());
+    }
+  }
+  const isolated = makeDom(), trace = registry.get('runtime/trace').create(isolated.win, isolated.doc);
+  const root = isolated.doc.getElementById('live-trace'), executed = new Map();
+  let frameId = 0;
+  const frame = (key, options = {}) => {
+    const id = ++frameId;
+    trace.beginFrame(options.mode || 'intro', { frameId: id, time: id * .1 + 2, phase: 'assembly' }, 1000 + id * 400);
+    trace.emit(key, { energy: id / 10, position: [1, 2, 3] }, { objectId: key + '/actual', priority: 80,
+      focus: options.focus || [] });
+    trace.emit('fabricated-operation', { source: 'invented.transform()' }, { priority: 1000 });
+    executed.set(id, key);
+    trace.endFrame({ audio: legacyAudioSnapshot(), paused: !!options.paused });
+    return id;
+  };
+  const visibleNode = node => { let current = node; while (current) { if (current.hidden || current.hasAttribute('hidden')) return false; current = current.parentNode; } return true; };
+  function inspect() {
+    const diagnostics = trace.diagnostics();
+    const rows = root.querySelectorAll('.live-trace-excerpt-line');
+    assert(rows.length > 0 && rows.length <= (diagnostics.mode === 'page' ? 1 : 2), 'Ambient code has a small, legible source excerpt');
+    assert.equal(rows.filter(row => row.classList.contains('is-active')).length, 1, 'One real source line is visually emphasized');
+    for (const row of rows) {
+      const number = Number(row.dataset.line), actual = actualSources.get(diagnostics.activeKey)?.get(number);
+      assert.equal(typeof actual, 'string', 'Displayed line exists in the marked application source');
+      assert.equal(row.querySelector('code')?.textContent, actual, 'Displayed source is copied exactly, never replacement code');
+    }
+    assert(Array.isArray(diagnostics.ambientEchoes), 'Ambient echo diagnostics expose execution provenance');
+    assert(diagnostics.ambientEchoes.length <= 1, 'At most one previous operation remains as an ambient echo');
+    const echo = root.querySelector('.live-trace-echo');
+    assert.equal(echo?.getAttribute('aria-hidden'), 'true', 'The visual echo does not duplicate code for assistive readers');
+    const echoes = root.querySelectorAll('.live-trace-echo-line').filter(visibleNode);
+    assert.equal(echoes.length, diagnostics.ambientEchoes.length, 'Visible echoes match recorded actual executions');
+    for (const [index, prior] of diagnostics.ambientEchoes.entries()) {
+      assert.equal(executed.get(prior.frameId), prior.key, 'Every echo points to an operation actually emitted in its recorded frame');
+      assert.notEqual(prior.key, diagnostics.activeKey, 'An echo refers to an earlier operation, not a duplicate of the active block');
+      const actual = actualSources.get(prior.key)?.get(prior.line);
+      assert.equal(typeof actual, 'string', 'Echo line exists in the real source block');
+      assert.equal(echoes[index].querySelector('code')?.textContent, actual, 'Echo text retains exact executed-source provenance');
+      assert.equal(Number(echoes[index].dataset.line), prior.line);
+      assert.equal(echoes[index].dataset.key, prior.key);
+    }
+    return JSON.parse(JSON.stringify(diagnostics.ambientEchoes));
+  }
+  const assemblyFrame = frame('assembly', { focus: ['const seated', 'const cartridge'] });
+  assert.equal(inspect().length, 0, 'A first execution has no invented historical echo');
+  frame('water', { focus: ['v[k]+=', 's[k]+='] });
+  const firstEcho = inspect();
+  assert.equal(firstEcho.length, 1, 'A real operation change leaves one source echo');
+  assert.equal(firstEcho[0].frameId, assemblyFrame, 'Echo retains its original execution frame');
+  frame('water', { paused: true });
+  assert.deepEqual(inspect(), firstEcho, 'Pausing the same operation does not advance ambient history');
+  const pausedFrame = trace.selection().frameId;
+  isolated.win.advanceTime(20000); trace.endFrame({ paused: true });
+  assert.deepEqual(inspect(), firstEcho, 'Wall-clock time alone cannot scroll or generate an echo');
+  assert.equal(trace.selection().frameId, pausedFrame, 'Paused display never claims another executed frame');
+  trace.pin('pour', 'pour/not-yet-executed');
+  assert.equal(trace.selection().waiting, true, 'Pinning an unexecuted source is explicitly pending');
+  assert.equal(trace.diagnostics().ambientEchoes.length, 0, 'Pending selection has no misleading executed echo');
+  assert.equal(root.querySelectorAll('.live-trace-echo-line').filter(visibleNode).length, 0, 'Pending selection hides the historical visual echo');
+  trace.unpin();
+  const toggle = root.querySelector('.live-trace-toggle'); toggle.dispatchEvent(new Event('click'));
+  const history = root.querySelector('.live-trace-history');
+  let scrollWrites = 0, scrollPosition = 83;
+  Object.defineProperty(history, 'scrollTop', { configurable: true, get: () => scrollPosition, set: value => { scrollWrites++; scrollPosition = value; } });
+  frame('lift'); inspect(); frame('pour'); inspect(); frame('mould'); inspect();
+  assert.equal(scrollWrites, 0, 'New source captures never force the user-controlled expanded history to scroll');
+  assert.equal(history.querySelector('.live-trace-code')?.dataset.key, 'mould', 'Expanded source starts with the latest actual operation');
+  frame('exhibit', { mode: 'page' }); inspect();
+  trace.reset();
+  assert.equal(trace.diagnostics().ambientEchoes.length, 0, 'Replay reset clears ambient execution history');
+  assert.equal(root.querySelectorAll('.live-trace-echo-line').filter(visibleNode).length, 0, 'Replay reset clears visible ambient echoes');
+  trace.destroy();
+  return { exactSourceText: true, introLines: 2, pageLines: 1, maximumEchoes: 1,
+    echoExecutionFrames: true, pausedClockStable: true, pendingHasNoEcho: true, manualHistoryScroll: true, resetClears: true };
 });
 
 console.log(JSON.stringify({ htmlPath, baseline, only: only || undefined, findings, failures,

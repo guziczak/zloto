@@ -13,8 +13,16 @@ release tails, mute, pause, seeking, track changes and volume automation.
 
 The runtime checks load the actual modules from `index.html`. They exercise mesh
 construction, scene transforms, the 46-pitch instrument, camera bounds, source
-selection, pause/pin behavior and renderer calls. DOM and WebGL uploads are
-substituted; these checks do not validate browser CSS layout or hardware audio.
+selection, pause/pin behavior and renderer calls. Airflow tests check that the
+heard audio clock controls the flow, scene time cannot move it independently,
+stopped snapshots cannot retain live flow, dense chords respect the draw budget,
+and reduced motion keeps a static note cue. Ambient-code checks compare the
+displayed text with the real marked source and verify that its single historical
+echo comes from an earlier actual execution. They also cover pause, pending pins,
+replay reset and user-controlled history scrolling.
+
+DOM and WebGL uploads are substituted; these checks do not validate browser CSS
+layout, visual airflow direction, shader animation or hardware audio.
 
 For native shader compilation on Linux with EGL and GLES libraries installed:
 
@@ -26,7 +34,12 @@ python3 tests/compile-shaders-egl.py /tmp/zloto-shaders.json
 This compiles and links the exact cinema and exhibit shader pairs using an
 offscreen GLES context. It does not install a browser or require a running server.
 
-For a manual visual check, enable sound, replay the scene, tap a pipe to pin its
-operation, expand and collapse the code, and pause during the casting stage.
-Check both portrait and landscape layouts. A pinned inactive pipe should show
-`CZEKA` / `WAITING` until its next sounding note.
+For a manual visual check, enable sound, replay the scene, and check that a fine
+air stream bends into each sounding mouth and rises above it, with its bright
+packets moving in the flow direction. The source should sit directly in the
+background with one emphasized current line and at most one faint historical
+echo. Tap a pipe to pin its operation, expand and collapse the code, and pause
+during the casting stage. Check both portrait and landscape layouts, and repeat
+with the system's reduced-motion preference enabled. A pinned inactive pipe
+should show `CZEKA` / `WAITING` until its next sounding note; changing source must
+not scroll the expanded history automatically.

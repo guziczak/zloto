@@ -728,92 +728,96 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
    touch cancellation, synthetic click or double-tap debounce. */
 #finale-replay{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style><style id="live-trace-style">
-/* Actual source, two live results and an optional deeper view. The camera reserves
-   space for this dock; its source is never an overlay on the instrument's front. */
+/* Real source lives in the scene's negative space. Only the explicit controls and
+   the optional source text receive pointer events; there is no panel surface. */
 .live-trace[hidden],.live-trace [hidden],.live-trace-tether[hidden]{display:none!important}
-.live-trace{--trace-gold:#edc578;--trace-soft:#ceb784;--trace-dim:#94a19d;--trace-border:#e6bc6c80;box-sizing:border-box;color:#e6e9e1;background:linear-gradient(120deg,#111b1de8,#080f11f2);border:1px solid var(--trace-border);border-radius:12px;box-shadow:0 15px 50px #0005,inset 0 1px 0 #fff0bc0d;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:Arial,Helvetica,sans-serif;z-index:31;overflow:hidden;isolation:isolate;text-align:left;letter-spacing:0;padding:8px 14px 7px}
+.live-trace{--trace-gold:#dcc08a;--trace-soft:#a2987e;--trace-dim:#78847e;box-sizing:border-box;color:#9ea59a;background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;z-index:31;overflow:visible;text-align:left;letter-spacing:0;padding:0;pointer-events:none}
 .live-trace *{box-sizing:border-box}
-.live-trace[data-mode=intro]{position:fixed;left:50%;bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(660px,calc(100vw - 48px));transform:translateX(-50%);max-height:calc(100svh - 104px)}
-.live-trace[data-mode=page]{position:absolute;right:0;bottom:var(--trace-page-bottom,0px);width:min(370px,100%);z-index:5;border-color:#d5b16b60;border-radius:9px;padding:5px 10px}
-.live-trace-header{display:flex;align-items:center;gap:9px;min-height:35px;margin-bottom:5px}
-.live-trace-object-button{appearance:none;border:0;border-radius:3px;background:transparent;color:var(--trace-gold);font:inherit;display:flex;align-items:center;gap:12px;flex:1;min-width:0;min-height:35px;padding:0;text-align:left;cursor:pointer;letter-spacing:0}
-.live-trace-object-button:hover .live-trace-name{color:#ffe0a2}
-.live-trace-object-button:focus-visible,.live-trace-toggle:focus-visible,.live-trace-history:focus-visible{outline:2px solid var(--trace-gold);outline-offset:3px}
-.live-trace-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#ffdb95;box-shadow:0 0 9px #ffd183a3,0 0 20px #ffd18333}
-.live-trace-name{font-size:15px;line-height:1.3;font-weight:400;letter-spacing:.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.live-trace-pin{font-size:16px;line-height:1;color:#ffda94;flex:0 0 auto}
-.live-trace-status{color:var(--trace-gold);font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.11em;white-space:nowrap;border:1px solid #d6bd7e36;border-radius:5px;background:#070b0d33;padding:4px 7px;flex:0 0 auto}
-.live-trace-status:before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:#ffda95;box-shadow:0 0 6px #ffce7470;vertical-align:1px}
-.live-trace-excerpt{border:1px solid #c5cebd26;border-radius:7px;background:linear-gradient(100deg,#ced8cf06,#e5f0de03);padding:10px 13px;max-height:92px;overflow:hidden;font:15px/1.55 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;color:#e7ece5}
-.live-trace-excerpt-line{margin:0;min-width:0}
-.live-trace-excerpt code{display:block;font:inherit;color:inherit;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;tab-size:2}
-.live-trace-token-number{color:#9fc5e9}.live-trace-token-function{color:#efc271}.live-trace-token-keyword{color:#c5cabd}.live-trace-token-string{color:#b5d1a1}.live-trace-token-comment{color:#7f9291}
-.live-trace-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin-top:9px;min-height:40px}
-.live-trace-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;padding:0;margin:0}
-.live-trace-value{min-width:0}
-.live-trace-values .live-trace-value+.live-trace-value{padding-left:15px;border-left:1px solid #d2ae6640}
-.live-trace-value dt{margin:0 0 3px;color:var(--trace-dim);font:10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.live-trace-value dd{margin:0;color:#efd392;font:18px/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.live-trace-toggle{appearance:none;display:flex;align-items:center;justify-content:flex-end;gap:9px;min-height:38px;max-width:148px;padding:0 0 0 15px;border:0;border-left:1px solid #d2ae6640;border-radius:0;background:transparent;color:var(--trace-gold);font:11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;cursor:pointer;text-align:right}
-.live-trace-toggle:hover{color:#ffe4ac}
-.live-trace-chevron{font:17px/1 monospace;transform:translateY(-2px);transition:transform .18s}
-.live-trace[data-expanded=true] .live-trace-chevron{transform:translateY(2px) rotate(180deg)}
-.live-trace-snapshot{margin:7px 2px 0;color:#97a7a2;font:10px/1.45 Arial,Helvetica,sans-serif;letter-spacing:0}
-.live-trace[data-paused=true] .live-trace-status,.live-trace[data-waiting=true] .live-trace-status{color:#aab8b1;border-color:#aab8b138}
-.live-trace[data-paused=true] .live-trace-status:before,.live-trace[data-waiting=true] .live-trace-status:before{background:#9baba4;box-shadow:none}
-.live-trace[data-waiting=true] .live-trace-dot{background:#a9b4a8;box-shadow:none}
+.live-trace[data-mode=intro]{position:fixed;left:clamp(24px,3.1vw,54px);bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(670px,calc(100vw - 64px));max-height:calc(100svh - 104px)}
+.live-trace[data-mode=page]{position:absolute;left:0;right:0;bottom:var(--trace-page-bottom,0px);width:100%;z-index:5}
+.live-trace-header{display:flex;align-items:center;gap:14px;min-height:28px;margin:0}
+.live-trace-object-button{appearance:none;border:0;border-radius:0;background:none;color:var(--trace-soft);font:inherit;display:flex;align-items:center;gap:9px;flex:1;min-width:0;min-height:28px;padding:0;text-align:left;cursor:pointer;letter-spacing:0;pointer-events:auto;touch-action:manipulation}
+.live-trace-object-button:hover .live-trace-name{color:#ebd4a4}
+.live-trace-object-button:focus-visible,.live-trace-toggle:focus-visible,.live-trace-history:focus-visible{outline:2px solid var(--trace-gold);outline-offset:4px}
+.live-trace-dot{width:4px;height:4px;flex:0 0 4px;border-radius:50%;background:#e0c38c;box-shadow:0 0 9px #ffd18340}
+.live-trace-name{font-size:10.5px;line-height:1.35;font-weight:400;letter-spacing:.045em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-pin{font-size:13px;line-height:1;color:var(--trace-gold);flex:0 0 auto}
+.live-trace-status{color:#a99e82;font-size:8px;line-height:1.3;letter-spacing:.13em;white-space:nowrap;border:0;background:none;padding:0;flex:0 0 auto}
+.live-trace-echo{height:14px;margin:0 0 0 24px;overflow:hidden;color:#9caa9f;opacity:.23;user-select:none}
+.live-trace-echo-line{margin:0;font-size:10px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-echo code{font:inherit;color:inherit}
+.live-trace-excerpt{border:0;background:none;padding:0;overflow:hidden;font-size:12px;line-height:19px;color:#96a096}
+.live-trace-excerpt-line{margin:0;min-width:0;opacity:.6}
+.live-trace-excerpt-line.is-active{color:#e0c38e;opacity:1;text-shadow:0 0 22px #f5bd5619}
+.live-trace-excerpt code{display:block;font:inherit;color:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;tab-size:2}
+.live-trace-token-number{color:#93aaa1}.live-trace-token-function{color:#c1ae88}.live-trace-token-keyword{color:#92a093}.live-trace-token-string{color:#9eaf8e}.live-trace-token-comment{color:#667a70}
+.live-trace-excerpt .is-active span{color:inherit}
+.live-trace-bottom{display:flex;align-items:center;margin-top:2px;min-height:20px}
+.live-trace-values{display:flex;align-items:baseline;gap:22px;padding:0;margin:0;min-width:0}
+.live-trace-value{display:flex;align-items:baseline;gap:6px;min-width:0}
+.live-trace-value dt{margin:0;color:var(--trace-dim);font-size:9px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-value dd{margin:0;color:#b9aa86;font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.live-trace-toggle{appearance:none;display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:28px;min-width:44px;max-width:110px;padding:0;border:0;border-radius:0;background:none;color:#928970;font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;cursor:pointer;text-align:right;pointer-events:auto;touch-action:manipulation}
+.live-trace-toggle:hover{color:#e6c98f}
+.live-trace-chevron{font:12px/1 monospace;transform:translateY(-1px);transition:transform .18s}
+.live-trace[data-expanded=true] .live-trace-chevron{transform:translateY(-1px) rotate(180deg)}
+.live-trace-snapshot{margin:2px 0 0;color:#86948a;font-size:9px;line-height:12px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace[data-paused=true] .live-trace-status,.live-trace[data-waiting=true] .live-trace-status{color:#a7b0a4}
+.live-trace[data-waiting=true] .live-trace-dot{background:#9aa697;box-shadow:none}
 .live-trace[data-waiting=true] .live-trace-excerpt,.live-trace[data-waiting=true] .live-trace-values{opacity:.7}
-.live-trace-body{border-top:1px solid #cbb38225;margin-top:9px;padding-top:10px;max-height:min(340px,45svh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#7b704c #0b1212}
-.live-trace-provenance{display:flex;gap:8px;align-items:center;justify-content:space-between;color:#a9b6ad;font:9px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;padding:0 1px}
-.live-trace-origin{min-width:0}.live-trace-frame{color:#9c9e82;white-space:nowrap}
-.live-trace-object{font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;color:#788e87;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:4px 1px 8px}
-.live-trace-history{position:relative;max-height:210px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#817345 #081011;background:#040b0d50;border-radius:5px;scroll-behavior:smooth}
-.live-trace-code{min-width:100%;width:max-content;padding:6px 12px 8px 0;color:#86928c;opacity:.5;border-left:2px solid transparent}
-.live-trace-code.is-current{color:#cad5c9;opacity:1;border-left-color:#e9c78080}
-.live-trace-code-label{padding:4px 0 7px 36px;font:9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a6b89e;letter-spacing:.02em}
-.live-trace-line{display:flex;align-items:baseline;min-height:20px;font:11px/20px ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;white-space:pre}
-.live-trace-line.is-relevant{background:linear-gradient(90deg,#dab87216,#dab87203);color:#e8e6d7}
-.live-trace-line-number{flex:0 0 35px;width:35px;padding-right:9px;text-align:right;color:#7183787a;font-size:8px;user-select:none}
+.live-trace[data-mode=intro][data-waiting=true] .live-trace-excerpt-line:not(.is-active){display:none}
+/* Additional source opens upward as typography. It never scrolls itself. */
+.live-trace-body{position:absolute;left:0;right:0;bottom:calc(100% + 14px);height:min(226px,36svh);display:flex;flex-direction:column;gap:4px;margin:0;padding:0;border:0;background:none;overflow:hidden;pointer-events:none}
+.live-trace-provenance{display:flex;gap:10px;align-items:center;justify-content:space-between;flex:0 0 auto;color:#89978c;font-size:8px;line-height:1.5;padding:0}
+.live-trace-origin{min-width:0}.live-trace-frame{color:#7c806f;white-space:nowrap}
+.live-trace-object{flex:0 0 auto;font-size:8px;line-height:1.4;color:#64796c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0}
+.live-trace-history{position:relative;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#75684860 transparent;background:none;border:0;border-radius:0;scroll-behavior:auto;pointer-events:auto;user-select:text;-webkit-user-select:text;touch-action:pan-x pan-y}
+.live-trace-code{min-width:100%;width:max-content;padding:0 14px 12px 0;color:#78907e;opacity:.4;border:0}
+.live-trace-code.is-current{color:#bac4b4;opacity:.95}
+.live-trace-code-label{padding:2px 0 5px 29px;font-size:8px;line-height:1.3;color:#8e9f85;letter-spacing:.02em}
+.live-trace-line{display:flex;align-items:baseline;min-height:18px;font-size:10px;line-height:18px;white-space:pre}
+.live-trace-line.is-relevant{background:none;color:#dfc491}
+.live-trace-line.is-relevant code span{color:inherit}
+.live-trace-line-number{flex:0 0 29px;width:29px;padding-right:9px;text-align:right;color:#697f685f;font-size:7px;user-select:none}
 .live-trace-line code{display:block;font:inherit;color:inherit;white-space:pre;tab-size:2}
-.live-trace-details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 1px 0;padding:0}
-.live-trace-details:empty{display:none}.live-trace-details .live-trace-value dt{font-size:8px}.live-trace-details .live-trace-value dd{font-size:11px}
-.live-trace-audio{display:flex;align-items:center;gap:8px;margin-top:9px;padding:9px 1px 3px;min-height:22px;border-top:1px solid #cbb38217;font-size:9px}
-.live-trace-audio-label{color:#91a69c;font-size:8px;text-transform:uppercase;letter-spacing:.07em}
-.live-trace-audio-value{color:#acc1b7;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;font:9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace}
-.live-trace-bands{display:flex;align-items:flex-end;height:12px;gap:3px;flex:0 0 auto}
-.live-trace-bands i{display:block;width:2px;height:12px;background:#b9caa4;opacity:calc(.25 + var(--level,0)*.75);transform-origin:bottom;transform:scaleY(calc(.15 + var(--level,0)*.85));transition:transform .12s linear,opacity .12s linear}
+.live-trace-details{display:flex;flex:0 0 auto;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0}
+.live-trace-details:empty{display:none}.live-trace-details .live-trace-value dt{font-size:8px}.live-trace-details .live-trace-value dd{font-size:9px}
+.live-trace-audio{display:flex;flex:0 0 auto;align-items:center;gap:8px;margin:0;padding:2px 0 0;min-height:16px;border:0;font-size:8px}
+.live-trace-audio-label{color:#7d9584;font-size:7px;letter-spacing:.06em}
+.live-trace-audio-value{color:#9faf9b;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;font-size:8px;line-height:1.3}
+.live-trace-bands{display:flex;align-items:flex-end;height:9px;gap:3px;flex:0 0 auto}
+.live-trace-bands i{display:block;width:1px;height:9px;background:#a8b495;opacity:calc(.25 + var(--level,0)*.75);transform-origin:bottom;transform:scaleY(calc(.15 + var(--level,0)*.85))}
 .live-trace-audio[data-running=false] .live-trace-bands{opacity:.3}
-.live-trace-tether{position:fixed;inset:0;width:100%;height:100%;overflow:visible;z-index:30;pointer-events:none;color:#f1cc83;filter:drop-shadow(0 0 3px #edc16b45)}
-.live-trace-thread{fill:none;stroke:currentColor;stroke-width:1.15;stroke-opacity:.82}
-.live-trace-target-halo{fill:#e8bf6620;stroke:currentColor;stroke-width:1;stroke-opacity:.8}
-.live-trace-target{fill:#ffe4ad;stroke:#fff0c8;stroke-width:.7}
-.live-trace[data-mode=page] .live-trace-header{min-height:26px;margin-bottom:3px}
-.live-trace[data-mode=page] .live-trace-object-button{min-height:26px;gap:9px}
-.live-trace[data-mode=page] .live-trace-name{font-size:12px}
-.live-trace[data-mode=page] .live-trace-status{font-size:8px;padding:3px 5px}
-.live-trace[data-mode=page] .live-trace-excerpt{padding:6px 8px;font-size:11px;line-height:1.5;max-height:48px}
-.live-trace[data-mode=page] .live-trace-bottom{margin-top:5px;min-height:30px;gap:9px}
-.live-trace[data-mode=page] .live-trace-value dt{font-size:8px;margin-bottom:2px}
-.live-trace[data-mode=page] .live-trace-value dd{font-size:14px}
-.live-trace[data-mode=page] .live-trace-toggle{min-height:30px;font-size:9px;padding-left:10px;gap:5px}
-@media(min-width:1100px){.live-trace[data-mode=intro]{width:min(640px,calc(100vw - 80px));padding:10px 17px 9px}.live-trace[data-mode=intro] .live-trace-header{min-height:36px}.live-trace[data-mode=intro] .live-trace-name{font-size:16px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:16px;padding:10px 15px}.live-trace[data-mode=intro] .live-trace-value dd{font-size:20px}}
-@media(max-width:700px){.live-trace[data-mode=intro]{left:14px;right:14px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:520px;margin:0 auto;transform:none;border-radius:10px;padding:6px 10px 6px}.live-trace-header{min-height:31px;margin-bottom:4px;gap:7px}.live-trace-object-button{min-height:31px;gap:9px}.live-trace-name{font-size:13px;letter-spacing:.012em}.live-trace-status{font-size:8px;padding:3px 6px}.live-trace-status:before{width:4px;height:4px;margin-right:4px}.live-trace-excerpt{font-size:12.5px;line-height:1.55;padding:8px 10px;border-radius:6px;max-height:76px}.live-trace-bottom{gap:9px;margin-top:7px;min-height:34px}.live-trace-values{gap:11px}.live-trace-values .live-trace-value+.live-trace-value{padding-left:11px}.live-trace-value dt{font-size:9px;margin-bottom:2px}.live-trace-value dd{font-size:16px}.live-trace-toggle{font-size:10px;gap:6px;padding-left:11px;min-height:34px;max-width:116px}.live-trace-chevron{font-size:15px}.live-trace-body{max-height:36svh;margin-top:8px;padding-top:8px}.live-trace-provenance{font-size:8px}.live-trace-frame{font-size:7px}.live-trace-history{max-height:170px}.live-trace-line{font-size:10px;line-height:19px;min-height:19px}.live-trace[data-mode=page]{width:100%;max-width:none}.live-trace-visible-intro #quench-controls{bottom:calc(var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom))) + 158px);max-height:calc(100svh - 330px);overflow:auto}.live-trace-open-intro #quench-controls{visibility:hidden}.live-trace-details{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
-@media(max-width:360px){.live-trace[data-mode=intro]{left:10px;right:10px;padding-right:8px;padding-left:8px}.live-trace-name{font-size:12px}.live-trace-excerpt{font-size:11.5px;padding:7px 8px}.live-trace-values{gap:8px}.live-trace-values .live-trace-value+.live-trace-value{padding-left:8px}.live-trace-toggle{font-size:9px;padding-left:8px;gap:4px}.live-trace-value dd{font-size:15px}}
-@media(max-height:540px){.live-trace[data-mode=intro]{left:16px;right:auto;width:min(420px,calc(100vw - 32px));max-height:calc(100svh - 86px);margin:0;transform:none;bottom:var(--trace-dock-bottom,12px)}.live-trace-header{min-height:27px;margin-bottom:3px}.live-trace-object-button{min-height:27px}.live-trace-name{font-size:12px}.live-trace-excerpt{font-size:11px;padding:6px 9px;max-height:49px}.live-trace-bottom{margin-top:5px;min-height:30px}.live-trace-value dd{font-size:15px}.live-trace-toggle{min-height:30px}.live-trace-body{max-height:28svh}.live-trace-history{max-height:100px}}
-@media(prefers-reduced-motion:reduce){.live-trace{backdrop-filter:none;-webkit-backdrop-filter:none}.live-trace-history{scroll-behavior:auto}.live-trace-chevron,.live-trace-bands i{transition:none}.live-trace-tether{filter:none}}
+.live-trace-tether{position:fixed;inset:0;width:100%;height:100%;overflow:visible;z-index:30;pointer-events:none;color:#d2b67d}
+.live-trace-thread{fill:none;stroke:currentColor;stroke-width:.8;stroke-opacity:.44}
+.live-trace-target-halo{fill:none;stroke:currentColor;stroke-width:.7;stroke-opacity:.45}
+.live-trace-target{fill:#e8cd95;stroke:none}
+.live-trace[data-mode=page] .live-trace-header,.live-trace[data-mode=page] .live-trace-object-button,.live-trace[data-mode=page] .live-trace-toggle{min-height:24px}
+.live-trace[data-mode=page] .live-trace-name{font-size:10px}
+.live-trace[data-mode=page] .live-trace-echo{display:none}
+.live-trace[data-mode=page] .live-trace-excerpt{font-size:11px;line-height:16px}
+.live-trace[data-mode=page] .live-trace-bottom{min-height:18px}
+.live-trace[data-mode=page] .live-trace-value dt{font-size:8px}
+.live-trace[data-mode=page] .live-trace-value dd{font-size:10px}
+.live-trace[data-mode=page] .live-trace-toggle{font-size:9px}
+.live-trace[data-mode=page] .live-trace-body{bottom:calc(100% + 12px);height:min(202px,32svh)}
+@media(min-width:1100px){.live-trace[data-mode=intro]{width:min(650px,calc(55vw - 45px))}.live-trace[data-mode=intro] .live-trace-echo{margin-left:38px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:12.5px}}
+@media(max-width:700px){.live-trace[data-mode=intro]{left:18px;right:18px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:520px;margin:0}.live-trace-header{gap:10px}.live-trace-object-button{gap:8px}.live-trace-name{font-size:10px;letter-spacing:.02em}.live-trace-status{font-size:7px}.live-trace-echo{display:none}.live-trace-excerpt{font-size:11.25px;line-height:17px}.live-trace-values{gap:19px}.live-trace-value dt{font-size:8px}.live-trace-value dd{font-size:10px}.live-trace-toggle{font-size:9px;gap:4px}.live-trace-body{bottom:calc(100% + 10px);height:min(194px,30svh)}.live-trace-provenance{font-size:7px}.live-trace-frame{font-size:7px}.live-trace-line{font-size:9.5px;line-height:17px;min-height:17px}.live-trace-details{gap:5px 14px}.live-trace-visible-intro #quench-controls{bottom:calc(var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom))) + 106px);max-height:calc(100svh - 240px);overflow:auto}.live-trace-open-intro #quench-controls{visibility:hidden}}
+@media(max-width:360px){.live-trace[data-mode=intro]{left:14px;right:14px}.live-trace-header{gap:8px}.live-trace-name{font-size:9.5px}.live-trace-excerpt{font-size:11px}.live-trace-values{gap:15px}.live-trace-toggle{font-size:8px}}
+@media(max-height:540px){.live-trace[data-mode=intro]{left:16px;right:auto;width:min(440px,calc(100vw - 32px));margin:0;bottom:var(--trace-dock-bottom,12px)}.live-trace-echo{display:none}.live-trace-header,.live-trace-object-button,.live-trace-toggle{min-height:26px}.live-trace-excerpt{font-size:11px;line-height:16px}.live-trace-name{font-size:9px}.live-trace-body{height:min(150px,29svh);bottom:calc(100% + 8px)}.live-trace-details,.live-trace-audio{display:none}}
+@media(prefers-reduced-motion:reduce){.live-trace-chevron{transition:none}.live-trace-excerpt-line.is-active{text-shadow:none}}
 @media print{.live-trace,.live-trace-tether{display:none!important}}
 
-/* The compact dock has its own space in both the cinema and the page. */
+/* The page reserves only a few lines of typography beneath the artifact. */
 body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
-#artifact-slot{bottom:150px}
-.artifact-caption{bottom:111px}
+#artifact-slot{bottom:105px}
+.artifact-caption{bottom:77px}
 .artifact-help{display:none}
 @media(min-width:1051px){.hero{grid-template-rows:minmax(475px,1fr) 150px 82px}}
 @media(min-width:1051px) and (max-height:780px){.hero{grid-template-rows:minmax(425px,1fr) 123px 61px}}
 @media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(465px,1fr) 112px 60px}}
-@media(max-width:700px){.hero{grid-template-rows:max-content minmax(324px,1fr) 94px auto}#artifact-stage{min-height:324px}#artifact-slot{bottom:150px}.artifact-caption{bottom:111px}}
+@media(max-width:700px){.hero{grid-template-rows:max-content minmax(324px,1fr) 94px auto}#artifact-stage{min-height:324px}#artifact-slot{bottom:105px}.artifact-caption{bottom:77px}}
 @media(max-width:360px){.hero{grid-template-rows:max-content minmax(299px,1fr) 88px auto}#artifact-stage{min-height:299px}}
-
 </style></head>
 <body><div id="reading-progress" aria-hidden="true"><i></i></div><script>document.body.classList.add('intro','booting');</script><a class="skip-content" data-l10n="n12" href="#hero-heading">Przejdź do treści</a>
 <canvas aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak." data-l10n="n13" id="scene" role="img"></canvas>
@@ -1919,7 +1923,7 @@ GuziczakModules.define('app/engine',[
   let screenPickTargets=[],tracePointer=null,traceFrameNumber=0,tracePickCount=0;
   const stage=exhibitUI.create(window,document,()=>{dirty=true;schedule();});
   const viewport=()=>{const v={width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},mobile=v.width<701;
-   return {...v,brand:ui.measureBrand(v),traceTop:mode==='intro'?Math.min(mobile?56:62,v.height*.13):0,traceInset:mode==='intro'?Math.min(mobile?180:176,v.height*.30):0};};
+   return {...v,brand:ui.measureBrand(v),traceTop:mode==='intro'?Math.min(mobile?56:62,v.height*.13):0,traceInset:mode==='intro'?Math.min(mobile?116:124,v.height*.30):0};};
   const drive=waterDrive.create();let lastWaterMs=null,waterPaused=reduced;
   const quench=quenchLib.create(timeline),quenchPanel=quenchUI.create(document,()=>surge(),()=>motion.enable());
   function surge(options={}){
@@ -2019,7 +2023,7 @@ GuziczakModules.define('app/engine',[
   function resume(){if(mode==='page'){stage.setPaused(false);setWaterPaused(false);return;}if(mode!=='intro'||disposed||failed)return;clock.resume();lastWaterMs=null;sound.timelinePause(false);dirty=true;schedule();}
   function diagnostics(){const f=lastFrame||states.sampleState(clock.snapshot());return {version:config.version,mode,routeSuspended,waterState:drive.diagnostics(),waterPaused,ready,phase:mode==='page'?'page':f.phase,time:clock.elapsed,authoredTime:f.time,total:timeline.total,playback:clock.state,playbackRate:clock.rate,savedCoolingSeconds:clock.saved,quench:quench.diagnostics(),finished:mode==='page',frozen:clock.state==='paused',frame:frameNumber,error:lastError,disposed,
    ...(renderer&&!device?.disposed?renderer.stats():{}),resources:device?device.counts():{},surface:device?device.surface():null,exhibit:exhibit&&!device?.disposed?exhibit.stats():{},exhibitControl:stage.diagnostics(),
-   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),tracePicking:{targets:screenPickTargets.length,picks:tracePickCount,frame:traceFrameNumber},instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial,slots:lastPacket?.instrument?.slots??instruments.layout?.pitches?.length??0,pitches:lastPacket?.instrument?.pitches??instruments.layout?.pitches??[],active:mode==='intro'?(lastPacket?.instrument?.active||0):0,columns:mode==='intro'?(lastPacket?.instrument?.columns||[]):[],strongest:mode==='intro'?(lastPacket?.instrument?.strongest||null):null}:null};}
+   triangles:catalog?.triangleCount||0,objects:lastPacket?.commands.length||0,counts:lastPacket?.counts||{},vesselTransform:lastPacket?Array.from(lastPacket.vesselTransform):null,cupInteraction:lastPacket?.cupInteraction,assembly:lastPacket?.assembly,fluid:lastPacket?.fluid,docking:lastPacket?.docking,foundry:lastPacket?.foundry,reclaim:lastPacket?.reclaim,motion:motion.diagnostics(),markRect:ui.markRect,brandLayout:ui.layout,audio:sound.diagnostics(),score:scoreLayer.diagnostics(),liveTrace:trace.diagnostics(),tracePicking:{targets:screenPickTargets.length,picks:tracePickCount,frame:traceFrameNumber},instrument:lastInstrument?{running:lastInstrument.running,available:lastInstrument.available,position:lastInstrument.position,notes:lastInstrument.notes,energy:lastInstrument.energy,serial:lastInstrument.serial,slots:lastPacket?.instrument?.slots??instruments.layout?.pitches?.length??0,pitches:lastPacket?.instrument?.pitches??instruments.layout?.pitches??[],active:mode==='intro'?(lastPacket?.instrument?.active||0):0,flows:mode==='intro'?(lastPacket?.instrument?.flows||[]):[],columns:mode==='intro'?(lastPacket?.instrument?.columns||[]):[],strongest:mode==='intro'?(lastPacket?.instrument?.strongest||null):null}:null};}
   function destroy(){if(disposed)return;disposed=true;mode='disposed';clearTracePicking();clock.pause();cancel();stage.destroy();quench.destroy();quenchPanel.destroy();scope.dispose();motion.destroy();scoreLayer.destroy();instrument.destroy();trace.destroy();if(globalThis.GUZICZAK_TRACE===trace)delete globalThis.GUZICZAK_TRACE;sound.destroy();if(device)device.dispose();ui.finish();canvas.style.display='none';dispatch('guziczak:brand-dispose');resolve();}
   scope.on(ui.$('skip'),'click',()=>{complete();ui.$('replay').focus({preventScroll:true});});scope.on(ui.$('replay'),'click',play);scope.on(ui.$('close-fallback'),'click',ui.closeFallback);
   scope.on(ui.$('scene-pause'),'click',()=>clock.state==='playing'?pause():resume());
@@ -2959,7 +2963,7 @@ GuziczakModules.define('config/materials', [], () => {
         LIQUID_GOLD: 5, TEXT_LIGHT: 6, FLOOR: 7, ACCENT: 8, GLASS: 9, GOLD_LIGHT: 10,
         RECEIVER: 11, SIGNATURE_A: 12, SIGNATURE_B: 13, RIFT: 14, TIMBER: 15,
         SAND: 16, CAVITY: 17, RIFT_EDGE: 18, CAST_METAL: 20, OVERFLOW_METAL: 21,
-        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_WATER:29 });
+        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29 });
     const ids = new Set(Object.values(Material));
     function validate(id) { if (!Number.isInteger(id) || !ids.has(id))
         throw Error('Unknown material ID: ' + id); }
@@ -4066,8 +4070,8 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             const aim = shot.target, yaw = shot.yaw, pitch = shot.pitch;
             cam = [aim[0] + Math.sin(yaw) * Math.cos(pitch) * distance, aim[1] + Math.sin(pitch) * distance, aim[2] + Math.cos(yaw) * Math.cos(pitch) * distance];
             view = M.look(cam, aim);
-            // Reserve a real viewport rectangle above the source dock. Keeping the
-            // content aspect here and in the camera avoids cropping the front pipes.
+            // Leave a narrow band of negative space for the ambient source text.
+            // Matching the camera's content aspect keeps the front pipes visible.
             // The existing exhibit takeover begins at 16.70 with a full viewport.
             const reservation = 1 - ease(16.35,16.70,time);
             const topInset = Math.min(viewport.height*.13, Math.max(0, viewport.traceTop || 0))*reservation;
@@ -4102,9 +4106,9 @@ GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/voc
             for (const o of objs)
                 if (!o.glass)
                     draw(o, meshProg, refl);
-            // Reflect the few active water jets as well as their lit gold mouths.
+            // Active air tracers leave a faint echo beside their lit gold mouths.
             gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
-            for(const o of objs)if(o.mesh===meshes.instrumentColumn||o.mesh===meshes.instrumentDrop)draw(o,meshProg,refl);
+            for(const o of objs)if(o.mesh===meshes.instrumentAir)draw(o,meshProg,refl);
             gl.depthMask(true);gl.disable(gl.BLEND);
             drawWords(refl);
             filter(mirrorRT, mirrorBlur, .68 / mirrorRT.w, .28 / mirrorRT.h);
@@ -4291,14 +4295,13 @@ vec3 curve(float s){
  return p;
 }
 void deform(inout vec3 p,inout vec3 n,vec2 uv){
- // Mode 7 belongs to the existing recovery mechanism. Water has its own ABI slot.
+ // Mode 7 belongs to the existing recovery mechanism. Air has its own ABI slot.
  if(uMode>7.5&&uMode<8.5){
-  float y=max(0.,p.y),phase=uAudioTime*8.+uFrom.x*.43;
-  float a=y*17.-phase,r=1.+.055*sin(a),dr=.935*cos(a);
-  vec2 bend=vec2(.11*sin(phase*.73),.08*cos(phase*.61))*y*y;
-  vec2 slope=vec2(.22*sin(phase*.73),.16*cos(phase*.61))*y+dr*p.xz;
-  n=normalize(vec3(n.x/r,n.y-dot(n.xz/r,slope),n.z/r));
-  p.xz=p.xz*r+bend;return;
+  float path=clamp(uv.x-2.*floor(uv.x*.5),0.,1.);
+  float rise=smoothstep(.36,1.,path),clock=uTo.y>.5?0.:uFrom.y;
+  float phase=clock*1.8+uFrom.x*.31;
+  vec2 breath=vec2(sin(phase+path*5.2),cos(phase*.83-path*4.8));
+  p.xz+=breath*rise*rise*.018;return;
  }
  if(uMode>6.5&&uMode<7.5){
   float a=uTo.x,c=cos(a),s=sin(a),w=smoothstep(0.,1.,uv.x);
@@ -4379,7 +4382,7 @@ void main(){
     const meshFS = `#version 300 es
 precision highp float;
 in vec3 vWorld,vLocal,vNormal;in vec4 vShadow;in vec2 vUV;flat in float vMat;
-uniform vec3 uCam,uRiftWorld;uniform float uBadgeHeat,uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uAudioTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat,uNoteEnergy;
+uniform vec3 uCam,uRiftWorld,uFrom,uTo;uniform float uBadgeHeat,uRiftLight,uFluidLevel,uFluidFlow,uDrainProgress,uLakeTime;uniform float uTime,uAudioTime,uFlow,uEnergy,uReflection,uMode,uAlpha,uPulse,uWave,uReflectY,uObjectLight,uReveal,uHeat,uNoteEnergy;
 uniform sampler2D uShadow,uMirror,uLiquidMirror;uniform vec2 uResolution;out vec4 outColor;
 const float PI=3.14159265359;
 ${quenchShader.fieldGLSL}
@@ -4405,18 +4408,23 @@ void main(){
  vec3 q=vLocal,p=vWorld,n=normalize(vNormal),cam=uCam;if(uReflection>.5){p.y=2.*uReflectY-p.y;n.y=-n.y;cam.y=2.*uReflectY-cam.y;if(p.y<uReflectY-.003)discard;}
  vec3 v=normalize(cam-p);float nv=max(dot(n,v),.001),id=vMat;float rough=.25,metal=.9,occ=1.,alpha=uAlpha;vec3 base=vec3(.13),emission=vec3(0.);
  if(id>28.5&&id<29.5){
-  if(!gl_FrontFacing)n=-n;
-  float grain=noise3(q*vec3(17.,32.,17.)+vec3(0.,-uAudioTime*.55,0.));
-  n=normalize(n+vec3(.014*(grain-.5),0.,.011*(grain-.5)));
-  nv=max(dot(n,v),.001);
-  float fresnel=.025+.86*pow(1.-nv,5.);
-  vec3 reflection=env(reflect(-v,n),.035);
-  vec3 c=vec3(.018,.039,.046)+reflection*(.18+.65*fresnel);
-  float highlight=pow(max(dot(reflect(-normalize(vec3(-3.4,6.,4.)-p),n),v),0.),64.);
-  c+=vec3(.48,.68,.78)*highlight*(.5+uNoteEnergy);
-  c+=vec3(.52,.25,.047)*exp(-max(q.y,0.)*5.)*uNoteEnergy;
-  float opacity=clamp((.24+.48*fresnel+.12*uNoteEnergy)*uAlpha,0.,.88);
-  outColor=vec4(c*uObjectLight,opacity);return;
+  // Soft crossed ribbons trace air; the bright packet always travels intake -> lip -> curl.
+  float lane=floor(vUV.x*.5),path=clamp(vUV.x-lane*2.,0.,1.);
+  float phase=uTo.y>.5?.31+lane*.23:(uFrom.y-uFrom.z)*uTo.x+lane*.23;
+  float distance=abs(fract(path-phase+.5)-.5);
+  float packet=exp(-pow(distance/.065,2.));
+  float behind=fract(phase-path+1.);
+  float trail=exp(-behind*13.)*(1.-smoothstep(.17,.30,behind));
+  float edge=1.-smoothstep(.10,.96,abs(vUV.y));
+  float core=exp(-vUV.y*vUV.y*12.);
+  float ends=smoothstep(0.,.065,path)*(1.-smoothstep(.74,1.,path));
+  float strength=.26+.74*sqrt(clamp(uNoteEnergy,0.,1.));
+  float opacity=edge*ends*(.10+.66*packet+.18*trail)*strength*clamp(uObjectLight,0.,1.)*uAlpha;
+  if(uReflection>.5)opacity*=.34;
+  if(opacity<.002)discard;
+  vec3 tint=mix(vec3(1.,.61,.23),vec3(1.,.96,.85),smoothstep(.16,.67,path));
+  vec3 c=tint*(.66+core*.50+packet*1.70+trail*.34)*uObjectLight;
+  outColor=vec4(c,clamp(opacity,0.,.86));return;
  }
  if(id>6.5&&id<7.5){
   float r=length(p.xz),f=.04+.40*pow(1.-nv,5.);float grain=noise3(vec3(p.xz*22.,0));
@@ -4795,7 +4803,7 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const width = Math.max(1, Number(viewport.width) || 1), height = Math.max(1, Number(viewport.height) || 1);
         const mobile = width <= 700, reservation = 1 - ease(16.35, 16.70, frame.time);
         const top = clamp(Number.isFinite(viewport.traceTop) ? viewport.traceTop : mobile ? 56 : 62, 0, height * .13) * reservation;
-        const bottom = clamp(Number.isFinite(viewport.traceInset) ? viewport.traceInset : mobile ? 180 : 176, 0, height * .30) * reservation;
+        const bottom = clamp(Number.isFinite(viewport.traceInset) ? viewport.traceInset : mobile ? 116 : 124, 0, height * .30) * reservation;
         const contentHeight = Math.max(1, height - top - bottom);
         return { width, height, top, bottom, contentHeight, aspect: width / contentHeight, reservation };
     }
@@ -4854,12 +4862,12 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         return { ...fitLoading({ ...shot, distance }, frame, viewport, assembly), quenchFocus: 0 };
     }
     // Bound the whole visible hull, not just the center points of its pipe mouths.
-    // The upper ring includes the tallest permitted water column and its hardware.
+    // The upper ring includes the full air ribbon above each pipe mouth.
     const ringBounds = [];
     for (let i = 0; i < 96; i++) {
         const a = i * Math.PI / 48, x = docking.hull[0] * 1.045 * Math.cos(a);
         const z = docking.hull[2] + docking.hull[1] * 1.045 * Math.sin(a);
-        for (const y of [docking.deckY - .32, docking.deckY + .90]) ringBounds.push([x, y, z]);
+        for (const y of [docking.deckY - .32, docking.deckY + 1.08]) ringBounds.push([x, y, z]);
     }
     function worldBounds(frame, assembly) {
         const points = ringBounds.slice(), cup = assembly?.cupPose || M.I(), coil = assembly?.coilPose || cup;
@@ -7008,9 +7016,9 @@ GuziczakModules.define('audio/instrument', ['math'], (math) => {
 
 GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/instrument'], (math, docking, audio) => {
  'use strict';
- const { M, TAU } = math;
+ const { M, TAU, norm, cross, dot, vadd, vsub, vmul } = math;
  const pitches = audio.layout.pitches, slots = pitches.length, rimScale = .932;
- const mouthY = .302, radius = .151;
+ const mouthY = .302, radius = .151, airSegments = 64;
  function position(slot) {
   // A small break marks the beginning of the scale; pitches never move between tracks.
   const angle = -.5 * Math.PI + .075 + slot / Math.max(1, slots - 1) * (TAU - .15);
@@ -7019,6 +7027,49 @@ GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/
  }
  function mouth(slot) { const p = position(slot); p[1] += mouthY; return p; }
  function slotFor(midi) { return pitches.indexOf(midi); }
+ function outwardAngle(slot) {
+  const p = position(slot);
+  return -Math.atan2((p[2] - docking.hull[2]) / (docking.hull[1] ** 2),
+   p[0] / (docking.hull[0] ** 2));
+ }
+ function airPath(s, lane = 0) {
+  // The path enters from above the deck, converges at the lip, then curls and opens.
+  // It is a visible tracer of each heard note, not a pressure or acoustic simulation.
+  if (s <= .36) {
+   const u = s / .36, v = 1 - u;
+   const a = [-.61, .12, lane * .12], b = [-.29, .16, lane * .066];
+   const c = [-.020, -.065, lane * .012], d = [.012, .025, lane * .012];
+   return a.map((p, k) => p*v*v*v + 3*b[k]*v*v*u + 3*c[k]*v*u*u + d[k]*u*u*u);
+  }
+  const u = (s - .36) / .64, turn = u * 4.2 + lane * .65;
+  return [.012 + .07*u + .14*u*u*Math.cos(turn), .025 + .975*u,
+   lane*.012 + lane*.025*u + .17*u*u*Math.sin(turn)];
+ }
+ function airRibbon(b, laneIndex) {
+  const lane = laneIndex - 1, points = [], frames = [];
+  for (let k = 0; k <= airSegments; k++) points.push(airPath(k / airSegments, lane));
+  let previousAxis = null;
+  for (let k = 0; k <= airSegments; k++) {
+   const tangent = norm(vsub(points[Math.min(airSegments, k+1)], points[Math.max(0, k-1)]));
+   let axis = previousAxis ? norm(vsub(previousAxis, vmul(tangent, dot(previousAxis, tangent))))
+    : norm(cross(tangent, [0,0,1]));
+   if (Math.hypot(...axis) < .1) axis = norm(cross(tangent, [0,1,0]));
+   const across = cross(tangent, axis), s = k / airSegments;
+   const width = (lane === 0 ? .026 : .022) * (.76 + .24*Math.sin(Math.PI*s));
+   frames.push({ tangent, axes:[axis, across], width }); previousAxis = axis;
+  }
+  // Crossed ribbons keep a soft, readable stroke from both the table and overhead views.
+  // UV.x contains longitudinal progress plus a disjoint lane ID; UV.y crosses its glow.
+  for (let k = 0; k < airSegments; k++) for (let plane = 0; plane < 2; plane++) {
+   const f = frames[k], g = frames[k+1], a = f.axes[plane], c = g.axes[plane];
+   const p = vadd(points[k], vmul(a, -f.width)), q = vadd(points[k+1], vmul(c, -g.width));
+   const r = vadd(points[k+1], vmul(c, g.width)), z = vadd(points[k], vmul(a, f.width));
+   const n = norm(cross(f.tangent, a)), m = norm(cross(g.tangent, c));
+   const u = laneIndex*2 + k/airSegments, v = laneIndex*2 + (k+1)/airSegments;
+   b.tri(p,q,r,29,n,m,m,[[u,-1],[v,-1],[v,1]]);
+   b.tri(p,r,z,29,n,m,n,[[u,-1],[v,1],[u,1]]);
+  }
+ }
  function create({ build, ringY }) {
   // The whole stationary instrument is one opaque mesh, including its hollow bores.
   const instrumentBody = build(b => {
@@ -7045,23 +7096,13 @@ GuziczakModules.define('geometry/instrument', ['math', 'config/docking', 'audio/
     });
    }
   });
-  const instrumentRestWater = build(b => {
-   for (let slot = 0; slot < slots; slot++) b.at(M.T(...mouth(slot)), () =>
-    b.lathe([[.109,-.023],[.106,-.029],[.085,-.037],[0,-.037]], 29, 16));
-  });
   const instrumentLight = build(b => ringY(b, .108, -.004, .012, .008, 28, 20));
-  // A shared unit-height water profile; every sounding voice only changes its matrix.
-  const instrumentColumn = build(b => b.lathe([
-   [0,0],[.96,0],[1,.035],[.84,.11],[.79,.20],[.85,.30],
-   [.69,.42],[.72,.55],[.57,.66],[.64,.76],[.49,.88],
-   [.48,.96],[.30,1.015],[0,1.04]
-  ], 29, 16));
-  const instrumentDrop = build(b => b.sphere(1, 29, 6, 10));
-  const instrumentRipple = build(b => ringY(b, 1, 0, .035, .01, 29, 24));
-  return { instrumentBody, instrumentRestWater, instrumentLight, instrumentColumn, instrumentDrop, instrumentRipple };
+  const instrumentAir = build(b => { for (let lane = 0; lane < 3; lane++) airRibbon(b, lane); });
+  return { instrumentBody, instrumentLight, instrumentAir };
  }
- return { create, position, mouth, slots, slotFor, pitches, mouthY, radius };
+ return { create, position, mouth, outwardAngle, airPath, airSegments, slots, slotFor, pitches, mouthY, radius };
 });
+
 
 GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (math, geometry) => {
  'use strict';
@@ -7074,55 +7115,52 @@ GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (mat
    ? ease(0,.12,state.phaseProgress) * (1-ease(.94,1,state.phaseProgress)) : 0;
   const light = state.stage * ease(.02,.65,t) * (1-.62*focus);
   push(meshes.instrumentBody, M.I(), 0, zero, zero, false, light);
-  push(meshes.instrumentRestWater, M.I(), 0, zero, zero, true, light * .72);
   const low = Number.isFinite(source.low) ? source.low : 28;
-  const levels = source.levels || [], notes = source.notes || [];
+  const audible = source.running === true && source.available !== false && !source.paused && !source.muted;
+  const levels = audible ? source.levels || [] : [], notes = audible ? source.notes || [] : [];
+  const reduced = !!(ctx.reduced || source.reduced || source.motionScale === 0);
+  const motionClock = reduced ? 0 : Math.max(0, Number.isFinite(source.position) ? source.position : 0);
   const sounding = notes.filter(n => n.level >= .008 && geometry.slotFor(n.midi) >= 0);
   // New attacks remain legible in dense chords; all voices still illuminate their own mouth.
-  const visibleColumns = new Set(sounding.slice().sort((a,b) =>
+  const visibleFlows = new Set(sounding.slice().sort((a,b) =>
    (b.level + (b.attack || 0)*.12) - (a.level + (a.attack || 0)*.12) || a.midi-b.midi
   ).slice(0,8).map(n => n.midi));
   const byMidi = new Map(notes.map(n => [n.midi,n]));
-  const traceTargets = [], columns = [];
+  const traceTargets = [], flows = [];
   let active = 0, strongest = null;
-  const maximumHeight = (ctx.mobile ? .54 : .64) * (1-.35*focus);
+  const maximumHeight = (ctx.mobile ? .65 : .74) * (1-.35*focus);
   for (let slot = 0; slot < geometry.slots; slot++) {
    const midi = geometry.pitches[slot], position = geometry.mouth(slot);
    const level = clamp(Number(levels[midi-low]) || 0,0,1), note = byMidi.get(midi);
    const objectId = 'instrument/note/' + midi;
    traceTargets.push({ key:'organ', objectId, world:position.slice(), radius:.20, midi });
    if (level < .008) continue;
-   const attack = clamp(note?.attack || 0,0,1), age = Math.max(0,note?.age ?? ((source.position || 0)-(note?.at || 0)));
-   const noteLight = clamp(level*.86 + attack*.35,0,1);
+   const attack = clamp(note?.attack || 0,0,1), noteLight = clamp(level*.86 + attack*.35,0,1);
    push(meshes.instrumentLight, M.T(...position), 0, zero, zero, false, light, 0, 1, noteLight);
-   // @live:organ
-   const height = maximumHeight * Math.sqrt(level);
-   const width = .079 + .018 * Math.sqrt(level);
-   const columnPose = C(M.T(...position), M.S(width, height, width));
-   if (visibleColumns.has(midi))
-    push(meshes.instrumentColumn, columnPose, 8, [midi,0,0], zero, true, light, 0, 1, noteLight);
-   // @live:end
-   if (visibleColumns.has(midi)) {
-    columns.push({ midi, height, width, position:position.slice() });
-    traceTargets[traceTargets.length-1].world[1] += height*.52;
-    // A single small droplet belongs to the actual onset, not an unrelated particle clock.
-    if (age > .035 && age < .48 && !ctx.reduced) {
-     const flight = (age-.035)/.445, rise = .18*4*flight*(1-flight), r = .016*(1-flight*.5);
-     push(meshes.instrumentDrop, C(M.T(position[0]+.019*Math.sin(midi),position[1]+height+rise,position[2]),M.S(r,r*1.5,r)),
-      0,zero,zero,true,light*.8,0,1,noteLight);
-    }
-    const ringAge = clamp(age/.7,0,1), ring = .111+.055*ringAge;
-    if (ringAge<1) push(meshes.instrumentRipple,C(M.T(position[0],position[1]-.020,position[2]),M.S(ring,1,ring)),
-     0,zero,zero,true,light*(1-ringAge)*.55,0,1,noteLight);
+   if (visibleFlows.has(midi)) {
+    // Fixed rate per note avoids backwards packet jumps as its envelope decays.
+    // The rate is a visual path traversal per second, not a physical air velocity.
+    const flowRate = reduced ? 0 : .68 + (midi % 12)*.014;
+    const onset = Number.isFinite(note?.at) ? note.at : 0;
+    // @live:organ
+    const flowHeight = maximumHeight * Math.sqrt(level);
+    const flowWidth = .72 + .24 * Math.sqrt(level);
+    const flowPose = C(M.T(...position), M.Ry(geometry.outwardAngle(slot)), M.S(flowWidth, flowHeight, flowWidth));
+    push(meshes.instrumentAir, flowPose, 8, [midi,motionClock,onset], [flowRate,reduced?1:0,0], true, light, 0, 1, noteLight);
+    // @live:end
+    flows.push({ midi, height:flowHeight, width:flowWidth, position:position.slice(),
+     clock:motionClock, rate:flowRate, rateUnit:'path/s', direction:'toward mouth, then upward' });
+    traceTargets[traceTargets.length-1].world = M.point(flowPose, geometry.airPath(.69));
+    emit('organ',{ note:note?.name || String(midi), flowHeight, flowClock:motionClock, flowRate, level, midi },{
+     objectId,priority:34+level*8,labelKey:'organ',
+     focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']
+    });
    }
    active++;
    if (!strongest || level > strongest.level) strongest = { midi,slot,level,position:position.slice() };
-   emit('organ',{ note:note?.name || String(midi),height,level,midi },{
-    objectId,priority:34+level*8,labelKey:'organ',
-    focus:['const height =','const columnPose ='],valueKeys:['note','height']
-   });
   }
-  return { instrument:{ active,strongest,columns,slots:geometry.slots,pitches:geometry.pitches },traceTargets };
+  // Keep the old diagnostic key readable for saved inspection scripts.
+  return { instrument:{ active,strongest,flows,columns:flows,slots:geometry.slots,pitches:geometry.pitches },traceTargets };
  }
  return { sample };
 });
@@ -7130,16 +7168,16 @@ GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (mat
 
 GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
     'use strict';
-    const MAX_RECORDS = 64, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, PAINT_INTERVAL = 125;
+    const MAX_RECORDS = 64, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, MAX_ECHOES = 1, PAINT_INTERVAL = 125;
     const TEXT = {
-        pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', waiting: 'CZEKA', expand: 'Rozwiń kod', collapse: 'Zwiń kod', source: 'Rzeczywisty fragment źródła', values: 'Wartości tej klatki', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', loading: 'Oczekiwanie na dźwięk', release: 'Wybrzmiewanie', between: 'Cisza między nutami', pin: 'Przypnij ten obiekt', unpin: 'Wróć do automatycznego wyboru', pinned: 'Przypięty obiekt', last: 'Ostatni zapis · oczekiwanie na tę operację', pending: 'Oczekiwanie na wykonanie tej operacji', cpu: 'Fragment wykonany w tej klatce', gpu: 'Źródło shadera użytego w tej klatce', frame: 'klatka', object: 'obiekt', history: 'Ostatnie operacje' },
-        en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', waiting: 'WAITING', expand: 'Expand code', collapse: 'Collapse code', source: 'Actual source excerpt', values: 'Values from this frame', notes: 'Notes', bands: 'Bands', silent: 'Sound off', loading: 'Waiting for audio', release: 'Resonance', between: 'Between notes', pin: 'Pin this object', unpin: 'Return to automatic selection', pinned: 'Pinned object', last: 'Last capture · waiting for this operation', pending: 'Waiting for this operation to execute', cpu: 'Source executed for this frame', gpu: 'Shader source used for this frame', frame: 'frame', object: 'object', history: 'Recent operations' },
-        de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', waiting: 'WARTET', expand: 'Code öffnen', collapse: 'Code schließen', source: 'Tatsächlicher Quelltext', values: 'Werte dieses Frames', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', loading: 'Warte auf Audio', release: 'Nachklang', between: 'Pause zwischen Noten', pin: 'Dieses Objekt anheften', unpin: 'Zur automatischen Auswahl', pinned: 'Angeheftetes Objekt', last: 'Letzter Stand · wartet auf diese Operation', pending: 'Wartet auf die Ausführung dieser Operation', cpu: 'Für diesen Frame ausgeführter Code', gpu: 'In diesem Frame verwendeter Shader', frame: 'Frame', object: 'Objekt', history: 'Letzte Operationen' }
+        pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', waiting: 'CZEKA', expand: 'Pokaż pełne źródło', collapse: 'Ukryj pełne źródło', more: 'Źródło', less: 'Ukryj', source: 'Rzeczywisty fragment źródła', values: 'Wartości tej klatki', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', loading: 'Oczekiwanie na dźwięk', release: 'Wybrzmiewanie', between: 'Cisza między nutami', pin: 'Przypnij ten obiekt', unpin: 'Wróć do automatycznego wyboru', pinned: 'Przypięty obiekt', last: 'Ostatni zapis · oczekiwanie na tę operację', pending: 'Oczekiwanie na wykonanie tej operacji', cpu: 'Fragment wykonany w tej klatce', gpu: 'Źródło shadera użytego w tej klatce', frame: 'klatka', object: 'obiekt', history: 'Ostatnie operacje' },
+        en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', waiting: 'WAITING', expand: 'Show full source', collapse: 'Hide full source', more: 'Source', less: 'Hide', source: 'Actual source excerpt', values: 'Values from this frame', notes: 'Notes', bands: 'Bands', silent: 'Sound off', loading: 'Waiting for audio', release: 'Resonance', between: 'Between notes', pin: 'Pin this object', unpin: 'Return to automatic selection', pinned: 'Pinned object', last: 'Last capture · waiting for this operation', pending: 'Waiting for this operation to execute', cpu: 'Source executed for this frame', gpu: 'Shader source used for this frame', frame: 'frame', object: 'object', history: 'Recent operations' },
+        de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', waiting: 'WARTET', expand: 'Quelltext anzeigen', collapse: 'Quelltext ausblenden', more: 'Code', less: 'Zu', source: 'Tatsächlicher Quelltext', values: 'Werte dieses Frames', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', loading: 'Warte auf Audio', release: 'Nachklang', between: 'Pause zwischen Noten', pin: 'Dieses Objekt anheften', unpin: 'Zur automatischen Auswahl', pinned: 'Angeheftetes Objekt', last: 'Letzter Stand · wartet auf diese Operation', pending: 'Wartet auf die Ausführung dieser Operation', cpu: 'Für diesen Frame ausgeführter Code', gpu: 'In diesem Frame verwendeter Shader', frame: 'Frame', object: 'Objekt', history: 'Letzte Operationen' }
     };
     const LABELS = {
-        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Grające piszczałki', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
-        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Playing organ pipes', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
-        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Spielende Orgelpfeifen', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
+        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Przepływ powietrza', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
+        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Airflow', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
+        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Luftstrom', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
     };
     // These selectors choose real lines in a marked source block, never replacement code.
     const PROFILES = {
@@ -7152,7 +7190,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         quench: { focus: ['const power', 'const take'], values: ['enthalpy', 'power'] },
         exhibit: { focus: ['const rotation', 'const model'], values: ['yaw', 'groundY'] },
         shader: { focus: ['vec4 w', 'gl_Position'], values: ['time', 'objects'] },
-        organ: { focus: ['const height =', 'const columnPose =', 'position[1]'], values: ['note', 'height'] },
+        organ: { focus: ['const flowHeight =', 'const flowPose ='], values: ['note', 'flowHeight'] },
         tokens: { focus: ['letterInstances.push'], values: ['count', 'inside'] },
         gold: { focus: ['float level =', 'level=mix'], values: ['time', 'flow'] }
     };
@@ -7195,13 +7233,14 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         const operation = node('span', 'live-trace-name', objectButton);
         const pinMark = node('span', 'live-trace-pin', objectButton); pinMark.textContent = '⌖'; pinMark.setAttribute('aria-hidden', 'true');
         const status = node('span', 'live-trace-status', header);
+        const echo = node('div', 'live-trace-echo', root); echo.setAttribute('aria-hidden', 'true'); echo.hidden = true;
         const excerpt = node('div', 'live-trace-excerpt', root);
         const snapshotNote = node('p', 'live-trace-snapshot', root); snapshotNote.hidden = true;
         const bottom = node('div', 'live-trace-bottom', root);
         const values = node('dl', 'live-trace-values', bottom);
-        const button = node('button', 'live-trace-toggle', bottom); button.type = 'button'; button.setAttribute('aria-controls', 'live-trace-body');
+        const button = node('button', 'live-trace-toggle', header); button.type = 'button'; button.setAttribute('aria-controls', 'live-trace-body');
         const toggleLabel = node('span', '', button);
-        const chevron = node('span', 'live-trace-chevron', button); chevron.textContent = '⌄'; chevron.setAttribute('aria-hidden', 'true');
+        const chevron = node('span', 'live-trace-chevron', button); chevron.textContent = '↗'; chevron.setAttribute('aria-hidden', 'true');
         const content = node('div', 'live-trace-body', root); content.id = 'live-trace-body'; content.hidden = true;
         const provenance = node('div', 'live-trace-provenance', content);
         const origin = node('span', 'live-trace-origin', provenance);
@@ -7217,14 +7256,15 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         const svg = name => doc.createElementNS('http://www.w3.org/2000/svg', name);
         const tether = svg('svg'); tether.setAttribute('class', 'live-trace-tether'); tether.setAttribute('aria-hidden', 'true'); tether.setAttribute('focusable', 'false'); tether.setAttribute('hidden', '');
         const thread = svg('path'); thread.setAttribute('class', 'live-trace-thread'); tether.appendChild(thread);
-        const halo = svg('circle'); halo.setAttribute('class', 'live-trace-target-halo'); halo.setAttribute('r', '10'); tether.appendChild(halo);
-        const point = svg('circle'); point.setAttribute('class', 'live-trace-target'); point.setAttribute('r', '3'); tether.appendChild(point);
+        const halo = svg('circle'); halo.setAttribute('class', 'live-trace-target-halo'); halo.setAttribute('r', '7'); tether.appendChild(halo);
+        const point = svg('circle'); point.setAttribute('class', 'live-trace-target'); point.setAttribute('r', '2'); tether.appendChild(point);
         doc.body.appendChild(tether);
         const expanded = { intro: false, page: false };
         let mode = 'intro', lang = '', dictionary = TEXT.pl, frame = {}, frameMs = 0, frameOpen = false;
         let destroyed = false, suspended = false, routeBlocked = false, visible = true, ready = false, paused = false, stale = false;
         let current = null, pinned = null, lastPaint = -Infinity, lastSwitch = -Infinity, lastAudio = null;
         let sourceSignature = '', historyVersion = 0, paintedHistoryVersion = -1, dockAnchor = null, dockRect = null, geometryDirty = true;
+        let echoSignature = '', echoEntries = [];
         let snapshots = [], excerptLines = [], frameCount = 0, emissionCount = 0, droppedCount = 0, paintCount = 0, selectionCount = 0, tetherVisible = false;
         const now = () => win.performance && typeof win.performance.now === 'function' ? win.performance.now() : Date.now();
         const idFor = (key, objectId) => key + '\u0000' + objectId;
@@ -7260,7 +7300,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             content.hidden = !open; root.dataset.expanded = String(open); root.dataset.paused = String(stopped);
             root.dataset.pinned = String(!!pinned); root.dataset.waiting = String(stale);
             text(status, stopped ? dictionary.paused : stale ? dictionary.waiting : dictionary.live);
-            text(toggleLabel, open ? dictionary.collapse : dictionary.expand);
+            text(toggleLabel, open ? dictionary.less : dictionary.more);
             button.setAttribute('aria-expanded', String(open)); button.setAttribute('aria-label', open ? dictionary.collapse : dictionary.expand);
             objectButton.setAttribute('aria-pressed', String(!!pinned));
             objectButton.setAttribute('aria-label', label(current) + ' · ' + (pinned ? dictionary.unpin : dictionary.pin));
@@ -7308,7 +7348,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
                 if (first) picked.push(first);
             }
             picked.sort((a, b) => a.number - b.number);
-            return mode === 'page' ? picked.slice(-1) : picked;
+            return mode === 'page' ? picked.slice(-1) : picked.slice(-2);
         }
         function syntax(parent, source) {
             // Tokens are emitted as text nodes. Source is never treated as HTML or evaluated.
@@ -7326,9 +7366,27 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             const next = mode + '/' + record.key + '/' + record.focus.join('|');
             if (sourceSignature === next) return;
             sourceSignature = next; excerptLines = sourceFocus(record); clear(excerpt);
-            for (const line of excerptLines) {
-                const row = node('div', 'live-trace-excerpt-line', excerpt); row.dataset.line = String(line.number);
+            for (let index = 0; index < excerptLines.length; index++) {
+                const line = excerptLines[index];
+                const row = node('div', 'live-trace-excerpt-line' + (index === excerptLines.length - 1 ? ' is-active' : ''), excerpt); row.dataset.line = String(line.number);
                 syntax(node('code', '', row), line.text.trim());
+            }
+            geometryDirty = true;
+        }
+        function paintEcho(record) {
+            // One earlier, actually captured operation recedes into the scene. It
+            // changes only with a new source capture, never with a wall clock.
+            const prior = mode === 'intro' && !stale && !record.pending
+                ? snapshots.slice().reverse().find(item => !item.pending && historyId(item) !== historyId(record)) : null;
+            const line = prior && sourceFocus(prior).slice(-1)[0];
+            const signature = line ? prior.key + '/' + line.number + '/' + prior.frame.id : '';
+            if (signature === echoSignature) return;
+            echoSignature = signature; echoEntries = []; clear(echo); echo.hidden = !line;
+            if (line) {
+                const row = node('div', 'live-trace-echo-line', echo);
+                row.dataset.key = prior.key; row.dataset.line = String(line.number); row.dataset.frame = String(prior.frame.id);
+                node('code', '', row).textContent = line.text.trim();
+                echoEntries.push({ key: prior.key, line: line.number, frameId: prior.frame.id });
             }
             geometryDirty = true;
         }
@@ -7341,8 +7399,8 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         function paintHistory() {
             if (paintedHistoryVersion === historyVersion) return;
             paintedHistoryVersion = historyVersion; clear(history);
-            let lastBlock = null;
-            for (let index = 0; index < snapshots.length; index++) {
+            // Latest capture is first; preserve the reader's own scroll position.
+            for (let index = snapshots.length - 1; index >= 0; index--) {
                 const record = snapshots[index], source = sources.get(record.key); if (!source) continue;
                 const isCurrent = index === snapshots.length - 1;
                 const block = node('div', 'live-trace-code' + (isCurrent ? ' is-current' : ''), history); block.dataset.key = record.key;
@@ -7354,9 +7412,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
                     const number = node('span', 'live-trace-line-number', row); number.textContent = String(line.number); number.setAttribute('aria-hidden', 'true');
                     syntax(node('code', '', row), line.text || ' ');
                 }
-                lastBlock = block;
             }
-            if (lastBlock) history.scrollTop = Math.max(0, lastBlock.offsetTop - history.offsetTop);
         }
         function paintValues(container, list) {
             const signature = list.map(item => item.name + ':' + item.value).join('|');
@@ -7421,7 +7477,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             lastPaint = frameMs; paintCount++;
             if (String(doc.documentElement.lang || 'pl').slice(0, 2).toLowerCase() !== lang) localize();
             root.dataset.key = current.key; root.dataset.frame = String(current.frame.id || 0);
-            paintExcerpt(current); paintValues(values, current.values.slice(0, 2));
+            paintExcerpt(current); paintEcho(current); paintValues(values, current.values.slice(0, 2));
             if (expanded[mode]) {
                 text(origin, current.pending ? dictionary.pending : gpu(current) ? dictionary.gpu : dictionary.cpu);
                 text(frameLabel, current.frame.id ? dictionary.frame + ' ' + current.frame.id : '');
@@ -7521,12 +7577,12 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         function reset() {
             if (destroyed) return;
             records.clear(); recent.clear(); targets.clear(); frameOpen = false; current = pinned = null; ready = false; stale = false;
-            sourceSignature = ''; snapshots = []; excerptLines = []; historyVersion++; paintedHistoryVersion = -1; clear(excerpt); clear(history);
+            sourceSignature = ''; echoSignature = ''; echoEntries = []; echo.hidden = true; snapshots = []; excerptLines = []; historyVersion++; paintedHistoryVersion = -1; clear(excerpt); clear(echo); clear(history);
             lastPaint = lastSwitch = -Infinity; lastAudio = null; geometryDirty = true; paintControls(); updateVisibility();
         }
         function destroy() {
             if (destroyed) return;
-            destroyed = true; scope.dispose(); records.clear(); recent.clear(); targets.clear(); sources.clear(); snapshots = []; lastAudio = current = pinned = null;
+            destroyed = true; scope.dispose(); records.clear(); recent.clear(); targets.clear(); sources.clear(); snapshots = []; echoEntries = []; lastAudio = current = pinned = null;
             root.remove(); tether.remove(); doc.body.classList.remove('live-trace-open-intro', 'live-trace-visible-intro', 'live-trace-visible-page');
         }
         scope.on(button, 'click', () => { expanded[mode] = !expanded[mode]; geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); announceLayout(); });
@@ -7541,7 +7597,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         localize(); mount('intro');
         return {
             beginFrame, emit, endFrame, setSuspended, reset, destroy, projectObject, setTargets, pin, unpin, setFocus, selection, executed,
-            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, waiting: stale, activeKey: current && current.key, activeObjectId: current && current.objectId, pinned: pinned && { ...pinned }, expanded: expanded[mode], compactLines: excerptLines.map(line => line.number), records: records.size, history: snapshots.length, targets: targets.size, tether: tetherVisible, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: MAX_HISTORY, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
+            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, waiting: stale, activeKey: current && current.key, activeObjectId: current && current.objectId, pinned: pinned && { ...pinned }, expanded: expanded[mode], compactLines: excerptLines.map(line => line.number), ambientEchoes: echoEntries.map(item => ({ ...item })), maxEchoes: MAX_ECHOES, records: records.size, history: snapshots.length, targets: targets.size, tether: tetherVisible, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: MAX_HISTORY, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
         };
     }
     return { create };
