@@ -254,7 +254,7 @@ if (!baseline) check('keyboard-layout-and-picking', () => {
     assert.equal(key.row, black ? 'inner' : 'outer', 'Piano colors occupy distinct radial rows');
     const radius = Math.hypot(positions[slot][0] / docking.hull[0], (positions[slot][2] - docking.hull[2]) / docking.hull[1]);
     assert(Number.isFinite(radius) && key.mouthRadius > 0 && key.radius > key.mouthRadius, 'Each mouth has an open bore and a solid rim');
-    (black ? accidental : natural).push({ midi, slot, angle: angles[slot], radius });
+    (black ? accidental : natural).push({ midi, slot, angle: angles[slot], radius, mouthY: geometry.mouth(slot)[1] });
   }
   assert.equal(natural.length, 39); assert.equal(accidental.length, 27);
   const step = natural[1].angle - natural[0].angle;
@@ -270,6 +270,8 @@ if (!baseline) check('keyboard-layout-and-picking', () => {
     assert.deepEqual(blacks, [1, 3, 6, 8, 10], 'Each complete octave has groups of two and three black keys, with E–F and B–C gaps');
   }
   assert(Math.min(...natural.map(key => key.radius)) - Math.max(...accidental.map(key => key.radius)) > .10, 'Both rows have clear radial separation');
+  const raisedBlackMouths = Math.min(...accidental.map(key => key.mouthY)) - Math.max(...natural.map(key => key.mouthY));
+  assert(raisedBlackMouths > .08, 'The inner black mouths rise above the outer row instead of reading as flat holes');
   let minimumSolidClearance = Infinity;
   for (let i = 0; i < positions.length; i++) for (let j = i + 1; j < positions.length; j++) {
     const gap = Math.hypot(positions[i][0] - positions[j][0], positions[i][2] - positions[j][2]) - geometry.keys[i].radius - geometry.keys[j].radius;
@@ -280,6 +282,11 @@ if (!baseline) check('keyboard-layout-and-picking', () => {
   const frame = { time: 2, stage: 1, phase: 'assembly', phaseProgress: .5, instrument: { running: false } };
   const list = registry.get('scene/commands').createDrawList(catalog, frame); list.family('instrument');
   const quiet = registry.get('scene/instrument').sample({ t: 2, state: frame, meshes: catalog.meshes, push: list.push });
+  for (const target of quiet.traceTargets) {
+    const slot = geometry.slotFor(target.midi);
+    assert(slot >= 0, 'Every selectable mouth carries its actual pitch');
+    assert.deepEqual(Array.from(target.world), Array.from(geometry.mouth(slot)), 'The selection anchor is exactly the fixed pipe mouth');
+  }
   const projected = engine.projectTraceTargets({ commands: [], traceTargets: quiet.traceTargets },
     point => [187 + point[0] * 30, 360 + point[2] * 30, 10 + point[1]], { width: 375, height: 720 }, frame, []);
   assert.equal(projected.targets.length, 66, 'The projection budget retains all idle chromatic mouths');
@@ -298,7 +305,7 @@ if (!baseline) check('keyboard-layout-and-picking', () => {
   assert.equal(trace.diagnostics().tether, true, 'The highest original pitch retains its projected tether');
   trace.destroy();
   return { physicalPitches: 66, naturals: 39, accidentals: 27, completeOctaves: 4, minimumSolidClearance,
-    naturalSpacing: true, accidentalMidpoints: true, idlePickTargets: 66, originalScorePitchesPreserved: 46 };
+    naturalSpacing: true, accidentalMidpoints: true, raisedBlackMouths, idlePickTargets: 66, originalScorePitchesPreserved: 46 };
 });
 
 if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
@@ -359,6 +366,9 @@ if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
   assert(flowCommands(laterAudio).every(command => command.from[1] === onset.position + .5), 'Airflow receives the heard audio position');
   assert.notDeepEqual(flowState(laterAudio), flowState(active), 'Advancing the audible clock advances airflow phase');
   assert.equal(burstCommands(laterAudio).length, 0, 'The short onset puff expires while the note continues sounding');
+  const anchorState = sample => Array.from(sample.result.traceTargets, target => ({ objectId: target.objectId, world: Array.from(target.world) }));
+  assert.deepEqual(anchorState(active), anchorState(stopped), 'Playing a note cannot move its selectable mouth into the plume');
+  assert.deepEqual(anchorState(laterAudio), anchorState(active), 'Aging airflow keeps the object marker at the same mouth');
   const future = sceneSample({ ...onset, notes: onset.notes.map(note => ({ ...note, at: onset.position + .12, age: -.12 })) });
   assert.equal(flowCommands(future).length + burstCommands(future).length, 0, 'A future scheduled note cannot show flow or an early puff');
   const oneTone = (level, age) => ({ ...onset, position: 1 + age,
@@ -373,6 +383,7 @@ if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
   const releasingPuff = sceneSample(oneTone(.1, .4)).result.instrument.bursts[0];
   assert(firstPuff && releasingPuff && firstPuff.pulse > releasingPuff.pulse, 'The heard onset envelope releases after its initial puff');
   assert(releasingPuff.radius > firstPuff.radius && releasingPuff.rise > firstPuff.rise, 'A puff expands and rises as its actual note ages');
+  assert(firstPuff.height > 0 && releasingPuff.height > firstPuff.height, 'The onset mist stretches upward as it disperses');
   const pitches = Array.from(audio.layout.pitches), levels = Array.from({ length: 66 }, (_, i) => pitches.includes(i + 28) ? .9 : 0);
   const dense = { ...onset, levels, notes: pitches.map(midi => ({ midi, name: String(midi), level: .9, age: .1, attack: .5, at: onset.position - .1 })) };
   const denseScene = sceneSample(dense);
@@ -389,7 +400,7 @@ if (!baseline) check('audio-ledger-to-airflow-instrument', () => {
   assert.equal(burstCommands(reducedScene).length, 0, 'Reduced motion omits the expanding onset puff');
   assert.deepEqual(flowState(sceneSample(laterSnapshot(onset, .5), false, true)), flowState(reducedScene), 'Reduced-motion airflow remains fixed as audio time advances');
   return { pitches: 46, noScoreOnlyFallback: true, futureVoiceDark: true, longFrameGap: true, generationAndPause: true,
-    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true, onsetPuffEnvelope: true, softNoteMobileHeight: soft.result.instrument.flows[0].height,
+    stoppedSnapshotRejected: true, audibleClockControlsFlow: true, reducedMotion: true, onsetMistEnvelope: true, fixedMouthAnchors: true, softNoteMobileHeight: soft.result.instrument.flows[0].height,
     liveFlows: active.result.instrument.flows.length, denseFlows: 8, densePuffs: 8, denseLitMouths: 46, stableTraceTargets: denseScene.result.traceTargets.length };
 });
 
@@ -397,6 +408,7 @@ if (!baseline) check('mobile-content-projection', () => {
   assert(catalog, 'Geometry catalog required');
   const math = registry.get('math'), { M } = math;
   const docking = registry.get('config/docking'), geometry = registry.get('geometry/instrument');
+  const engine = registry.get('app/engine'), trace = registry.get('runtime/trace');
   const timeline = registry.get('core/timeline').createTimeline(), scene = registry.get('scene/composer').createScene(catalog);
   const plots = [], results = [];
   function projector(camera, frame, viewport) {
@@ -416,8 +428,8 @@ if (!baseline) check('mobile-content-projection', () => {
     };
     return { project, top, bottom, contentHeight };
   }
-  for (const [width, height] of [[375, 720], [390, 660]]) {
-    const viewport = { width, height, dpr: 1, traceTop: Math.min(width <= 700 ? 56 : 62, height * .13), traceInset: Math.min(116, height * .30) };
+  for (const [width, height] of [[320, 568], [375, 720], [390, 660]]) {
+    const viewport = { width, height, dpr: 1, traceTop: Math.min(width <= 700 ? 56 : 62, height * .13), traceInset: Math.min(width <= 360 ? 136 : 128, height * .30) };
     for (const authored of [3.6, 6.3, 9.5, 10.2, 11.5, 12, 13.5, 15.7]) {
       const frame = registry.get('scene/state').sampleState(timeline.sample(timeline.toElapsed(authored)));
       frame.frozen = true; frame.seek = true; frame.instrument = legacyAudioSnapshot();
@@ -448,6 +460,14 @@ if (!baseline) check('mobile-content-projection', () => {
       }
       const mouths = Array.from({ length: geometry.slots }, (_, i) => project(geometry.mouth(i)));
       for (const point of cup.concat(coil)) assert(point[0] >= -.5 && point[0] <= width + .5 && point[1] >= top - .5 && point[1] <= height - bottom + .5, 'Actual cup and coil fit reserved content viewport');
+      const projected = engine.projectTraceTargets(packet, project, viewport, frame, []);
+      assert.equal(projected.targets.filter(target => target.key === 'organ').length, 66, 'The actual camera keeps every chromatic mouth in the trace store');
+      assert(projected.sceneBounds && Object.values(projected.sceneBounds).every(Number.isFinite), 'The real table and assembly provide finite annotation bounds');
+      const annotation = trace.resolveTraceLayout({ viewport, bounds: projected.sceneBounds,
+        safe: { left: 18, right: 18, top: 70, bottom: 16 }, size: { width: width - 36, height: 101 } });
+      assert(annotation.fits && annotation.left >= 18 && annotation.right <= width - 18 && annotation.bottom <= height - 16, 'Compact source fits the actual portrait scene viewport');
+      assert.equal(annotation.placement, 'below', 'The reserved viewport leaves room immediately below the real scene');
+      assert(annotation.top - projected.sceneBounds.bottom <= 18, 'The source follows the scene without an empty vertical gap');
       const mouldBounds = [];
       for (const command of packet.commands.filter(command => /mould|mold|sand|flask/i.test(command.id))) {
         const bounds = command.mesh.bounds || gpu.summary(command.mesh.buffer)?.bounds;
@@ -457,12 +477,13 @@ if (!baseline) check('mobile-content-projection', () => {
         mouldBounds.push({ objectId: command.id, corners });
       }
       results.push({ width, height, authored, fov: camera.fov, distance: camera.distance,
-        leftClearance: minX, rightClearance: width - maxX, topClearance: minY - top, bottomClearance: height - bottom - maxY });
+        leftClearance: minX, rightClearance: width - maxX, topClearance: minY - top, bottomClearance: height - bottom - maxY,
+        annotationGap: annotation.top - projected.sceneBounds.bottom, annotationBottom: annotation.bottom });
       if (authored === 9.5) plots.push({ width, height, authored, top, bottom, contentHeight, ring, underside, airflowBound, cup, coil, mouths, mouldBounds });
     }
   }
   if (dumpProjections) fs.writeFileSync(dumpProjections, JSON.stringify({ htmlPath, limitation: 'Exact CPU camera projection of bounds; not a rendered WebGL screenshot.', plots, results }, null, 2));
-  return { portraits: 2, samples: results.length, minSideClearance: Math.min(...results.flatMap(result => [result.leftClearance, result.rightClearance])),
+  return { portraits: 3, samples: results.length, annotationHeight: 101, minSideClearance: Math.min(...results.flatMap(result => [result.leftClearance, result.rightClearance])),
     minTopClearance: Math.min(...results.map(result => result.topClearance)), minBottomClearance: Math.min(...results.map(result => result.bottomClearance)), sampled: results };
 });
 
@@ -602,7 +623,7 @@ check('renderer-javascript-projection-and-uniforms', () => {
     for (const [width, height] of [[1440, 900], [375, 720], [390, 660]]) {
       const authored = 16.70, viewport = { width, height, dpr: 1,
         traceTop: Math.min(width <= 700 ? 56 : 62, height * .13),
-        traceInset: Math.min(width <= 700 ? 116 : 124, height * .30) };
+        traceInset: Math.min(width <= 360 ? 136 : width <= 700 ? 128 : 124, height * .30) };
       const frame = registry.get('scene/state').sampleState(timeline.sample(timeline.toElapsed(authored)));
       assert(Math.abs(frame.time - authored) < 1e-9, 'Handoff test samples the exact first exhibit frame');
       frame.frozen = false; frame.seek = true; frame.motion = { tilt: [0, 0], acceleration: [0, 0], speed: 0 };
@@ -738,6 +759,81 @@ check('trace-source-lifecycle-and-selection', () => {
   return { sources: 12, boundedHistory: true, selection: !baseline, routeLifecycle: true, localization: true, cleanup: true };
 });
 
+if (!baseline) check('trace-layout-and-stable-connectors', () => {
+  const runtime = registry.get('runtime/trace');
+  const fixtures = [[320, 568], [390, 660], [812, 375], [1440, 900]];
+  for (const [width, height] of fixtures) {
+    const viewport = { left: 7, top: 11, width, height };
+    const safe = { left: 18, right: 18, top: 70, bottom: 16 };
+    const bounds = { left: viewport.left + width * .12, right: viewport.left + width * .88,
+      top: viewport.top + height * .20, bottom: viewport.top + height * .60 };
+    const size = { width: 530, height: height < 400 ? 72 : 84 };
+    const layout = runtime.resolveTraceLayout({ viewport, bounds, safe, size });
+    assert(layout.fits, 'A compact source annotation fits portrait, landscape and desktop viewports');
+    assert(layout.left >= viewport.left + safe.left && layout.right <= viewport.left + width - safe.right, 'Source stays inside both horizontal safe margins');
+    assert(layout.top >= viewport.top + safe.top && layout.bottom <= viewport.top + height - safe.bottom, 'Source stays clear of top controls and the viewport bottom');
+    assert(layout.top >= bounds.bottom && layout.top - bounds.bottom <= 18, 'Available space places source directly below its scene');
+    const crowded = runtime.resolveTraceLayout({ viewport, bounds: { ...bounds, bottom: viewport.top + height - 3 }, safe, size });
+    assert.equal(crowded.placement, 'clamped', 'A low scene cannot push the annotation offscreen');
+    assert(crowded.bottom <= viewport.top + height - safe.bottom && crowded.top >= viewport.top + safe.top);
+  }
+  const viewport = { left: 0, top: 0, width: 390, height: 660 };
+  const rect = { left: 18, top: 500, right: 372, bottom: 584 };
+  const closeTargets = [{ x: 90, y: 470 }, { x: 200, y: 620 }, { x: 5, y: 540 }, { x: 385, y: 540 }];
+  for (const target of closeTargets) {
+    const connector = runtime.resolveTraceConnector({ rect, target, viewport, maxLength: 112 });
+    assert.equal(connector.kind, 'linked', 'A nearby object is connected to the annotation');
+    assert.equal(connector.end.x, target.x); assert.equal(connector.end.y, target.y);
+    assert(connector.start.x === rect.left || connector.start.x === rect.right || connector.start.y === rect.top || connector.start.y === rect.bottom, 'A direct leader starts on the source boundary');
+    assert(connector.length <= 112, 'The direct leader stays within its readable length budget');
+  }
+  for (const target of [{ x: 1, y: 1 }, { x: 389, y: 1 }, { x: 200, y: 120 }]) {
+    const connector = runtime.resolveTraceConnector({ rect, target, viewport, maxLength: 112, labelWidth: 40 });
+    assert.equal(connector.kind, 'local', 'A distant object gets a short local leader instead of a long diagonal');
+    assert.equal(connector.end.x, target.x); assert.equal(connector.end.y, target.y);
+    assert(connector.length <= 30 && connector.label, 'A short local pointer includes a note label');
+    for (const point of [connector.start, connector.label]) assert(point.x >= 0 && point.x <= 390 && point.y >= 0 && point.y <= 660, 'Edge targets retain an onscreen pointer and label anchor');
+  }
+  for (const target of [{ x: 200, y: 540 }, { x: -1, y: 100 }, { x: 100, y: 100, visible: false }])
+    assert.equal(runtime.resolveTraceConnector({ rect, target, viewport }), null, 'Covered or unavailable targets do not get misleading leaders');
+  const isolated = makeDom(), trace = runtime.create(isolated.win, isolated.doc);
+  isolated.win.innerWidth = 390; isolated.win.innerHeight = 660;
+  trace.setSceneLayout({ viewport, bounds: { left: 24, right: 366, top: 150, bottom: 420 }, safe: { left: 18, right: 18, top: 70, bottom: 16 } });
+  function frame(ms, entries) {
+    trace.beginFrame('intro', { time: 2 + (ms - 1000) / 1000 }, ms);
+    for (const entry of entries) {
+      trace.projectObject('instrument/note/' + entry.midi, { x: entry.x, y: entry.y });
+      trace.emit('organ', { note: entry.note, midi: entry.midi, flowHeight: .7 }, { objectId: 'instrument/note/' + entry.midi, priority: entry.priority });
+    }
+    trace.endFrame({ audio: legacyAudioSnapshot() });
+  }
+  const c4 = { midi: 60, note: 'C4', priority: 80, x: 90, y: 400 }, c5 = { midi: 72, note: 'C5', priority: 84, x: 340, y: 150 };
+  frame(1000, [c4]);
+  assert.equal(trace.diagnostics().layout.placement, 'below', 'The live trace consumes the scene layout API');
+  frame(1100, [c4, c5]);
+  assert.equal(trace.selection().objectId, 'instrument/note/60', 'A still sounding selected pipe does not flicker to a new chord leader every frame');
+  frame(1116, [c5]);
+  assert.equal(trace.selection().objectId, 'instrument/note/72', 'Selection immediately leaves a voice that no longer executes');
+  const connector = trace.diagnostics().connector;
+  assert.equal(connector.kind, 'local'); assert.equal(connector.caption, 'C5', 'The local pointer names the actual selected note');
+  const marker = isolated.doc.querySelector('.live-trace-target');
+  assert.equal(Number(marker.getAttribute('cx')), c5.x); assert.equal(Number(marker.getAttribute('cy')), c5.y);
+  assert.equal(isolated.doc.querySelector('.live-trace-target-label').textContent, 'C5');
+  trace.pin('organ', 'instrument/note/60');
+  assert.equal(trace.selection().waiting, true); assert.equal(trace.diagnostics().connector, null, 'Pinning an inactive mouth cannot preserve an active leader');
+  trace.setSceneLayout(null); assert.equal(trace.diagnostics().layout, null, 'Clearing the scene layout removes the intro placement');
+  trace.unpin();
+  trace.setSceneLayout({ viewport, bounds: { left: 24, right: 366, top: 150, bottom: 420 } });
+  frame(1700, [c5]); assert(trace.diagnostics().layout, 'A later intro frame can restore the scene placement');
+  trace.beginFrame('page', { time: 23 }, 2100); trace.emit('exhibit', { yaw: .3 }, { objectId: 'exhibit/signature', priority: 70 }); trace.endFrame({});
+  const traceRoot = isolated.doc.getElementById('live-trace');
+  assert.equal(trace.diagnostics().layout, null, 'Entering the exhibit clears floating intro placement');
+  assert.equal(traceRoot.parentNode.id, 'artifact-stage', 'Page source is attached to its own artifact stage');
+  assert(!traceRoot.style.left && !traceRoot.style.top, 'Intro screen coordinates cannot leak into page layout');
+  trace.destroy();
+  return { responsiveFixtures: fixtures.length, boundedLeaders: true, exactMouthMarker: true, noteLabels: true, stableSelection: true, absentVoiceNeverLive: true, pagePlacementCleanup: true };
+});
+
 if (!baseline) check('trace-ambient-execution-provenance', () => {
   // Compare displayed text against the real script text independently of the
   // runtime trace's source cache. Line numbers alone cannot prove provenance.
@@ -747,10 +843,33 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
     for (const [index, line] of script.textContent.split('\n').entries()) {
       const marker = line.match(/^\s*\/\/\s*@live:([a-z][a-z0-9-]*)\s*$/);
       if (marker) {
-        if (marker[1] === 'end') { if (key && !actualSources.has(key)) actualSources.set(key, lines); key = null; }
+        if (marker[1] === 'end') {
+          if (key && !actualSources.has(key)) {
+            const nonempty = Array.from(lines.values()).filter(line => line.trim());
+            const indent = nonempty.length ? Math.min(...nonempty.map(line => line.match(/^\s*/)[0].length)) : 0;
+            actualSources.set(key, { lines, indent });
+          }
+          key = null;
+        }
         else { key = marker[1]; lines = new Map(); }
-      } else if (key) lines.set(index + 1, line.trim());
+      } else if (key) lines.set(index + 1, line);
     }
+  }
+  function sourceSpan(key, range) {
+    const source = actualSources.get(key); assert(source, 'The instruction belongs to an actual marked source');
+    assert(Number.isInteger(range.line) && Number.isInteger(range.endLine) && range.endLine >= range.line, 'The instruction has a complete source line range');
+    assert(Number.isInteger(range.column) && Number.isInteger(range.endColumn) && range.column >= 0 && range.endColumn > 0, 'Statement columns preserve provenance when multiple statements share a line');
+    const parts = [];
+    for (let number = range.line; number <= range.endLine; number++) {
+      const raw = source.lines.get(number); assert.equal(typeof raw, 'string', 'Every instruction line exists inside the marked source');
+      const start = source.indent + (number === range.line ? range.column : 0);
+      const end = number === range.endLine ? source.indent + range.endColumn : raw.length;
+      assert(start <= end && end <= raw.length, 'The displayed instruction span stays inside real source text');
+      parts.push(raw.slice(start, end));
+    }
+    const text = parts.join('\n').trim();
+    assert(text.endsWith(';'), 'Compact source contains a complete instruction rather than a clipped expression');
+    return text;
   }
   const isolated = makeDom(), trace = registry.get('runtime/trace').create(isolated.win, isolated.doc);
   const root = isolated.doc.getElementById('live-trace'), executed = new Map();
@@ -770,11 +889,14 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
     const diagnostics = trace.diagnostics();
     const rows = root.querySelectorAll('.live-trace-excerpt-line');
     assert(rows.length > 0 && rows.length <= (diagnostics.mode === 'page' ? 1 : 2), 'Ambient code has a small, legible source excerpt');
-    assert.equal(rows.filter(row => row.classList.contains('is-active')).length, 1, 'One real source line is visually emphasized');
-    for (const row of rows) {
-      const number = Number(row.dataset.line), actual = actualSources.get(diagnostics.activeKey)?.get(number);
-      assert.equal(typeof actual, 'string', 'Displayed line exists in the marked application source');
+    assert.equal(rows.filter(row => row.classList.contains('is-active')).length, 1, 'One real instruction is visually emphasized');
+    assert.equal(diagnostics.compactInstructions.length, rows.length, 'Displayed instructions retain their source spans');
+    for (const [index, row] of rows.entries()) {
+      const range = diagnostics.compactInstructions[index], actual = sourceSpan(diagnostics.activeKey, range);
+      assert.equal(range.text.trim(), actual, 'Instruction diagnostics are copied from the actual source range');
       assert.equal(row.querySelector('code')?.textContent, actual, 'Displayed source is copied exactly, never replacement code');
+      for (const key of ['line', 'endLine', 'column', 'endColumn']) assert.equal(Number(row.dataset[key]), range[key], 'DOM instruction range matches its captured source');
+      if (!['shader', 'gold'].includes(diagnostics.activeKey)) new vm.Script('(function(){\n' + actual + '\n})', { filename: 'compact-' + diagnostics.activeKey + '.js' });
     }
     assert(Array.isArray(diagnostics.ambientEchoes), 'Ambient echo diagnostics expose execution provenance');
     assert(diagnostics.ambientEchoes.length <= 1, 'At most one previous operation remains as an ambient echo');
@@ -785,10 +907,9 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
     for (const [index, prior] of diagnostics.ambientEchoes.entries()) {
       assert.equal(executed.get(prior.frameId), prior.key, 'Every echo points to an operation actually emitted in its recorded frame');
       assert.notEqual(prior.key, diagnostics.activeKey, 'An echo refers to an earlier operation, not a duplicate of the active block');
-      const actual = actualSources.get(prior.key)?.get(prior.line);
-      assert.equal(typeof actual, 'string', 'Echo line exists in the real source block');
+      const actual = sourceSpan(prior.key, prior);
       assert.equal(echoes[index].querySelector('code')?.textContent, actual, 'Echo text retains exact executed-source provenance');
-      assert.equal(Number(echoes[index].dataset.line), prior.line);
+      for (const key of ['line', 'endLine', 'column', 'endColumn']) assert.equal(Number(echoes[index].dataset[key]), prior[key]);
       assert.equal(echoes[index].dataset.key, prior.key);
     }
     return JSON.parse(JSON.stringify(diagnostics.ambientEchoes));
@@ -817,12 +938,25 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
   frame('lift'); inspect(); frame('pour'); inspect(); frame('mould'); inspect();
   assert.equal(scrollWrites, 0, 'New source captures never force the user-controlled expanded history to scroll');
   assert.equal(history.querySelector('.live-trace-code')?.dataset.key, 'mould', 'Expanded source starts with the latest actual operation');
+  frame('organ', { focus: ['const flowHeight =', 'const flowPose ='] }); inspect();
+  const organ = trace.diagnostics().compactInstructions;
+  assert.equal(organ.length, 2, 'The airflow view retains both short real transform instructions');
+  assert(organ.every(unit => unit.text.length <= 48 && unit.line === unit.endLine), 'The sounding-pipe explanation fits as complete short calls');
+  frame('cast', { focus: ['M.T(0,y,z)', 'M.Ry(yaw)'] }); inspect();
+  const cast = trace.diagnostics().compactInstructions;
+  assert.equal(cast.length, 2); assert(cast.every(unit => unit.line === unit.endLine && unit.text.length <= 48), 'Casting exposes complete short transform instructions');
+  assert(cast.some(unit => unit.text.includes('M.T(0,y,z)')) && cast.some(unit => unit.text.includes('M.Ry(yaw)')), 'The live casting source keeps both actual translation and rotation');
+  const multiline = ['const pose=C(', ' M.T(0,y,z),', ' M.Ry(yaw),M.Rx(rotation),', ' localTilt,M.S(scale)', ');'];
+  const parsed = registry.get('runtime/trace').sourceInstructions(multiline.map((text, i) => ({ text, number: 101 + i })));
+  assert.equal(parsed.length, 1, 'A multi-line matrix composition remains one complete instruction');
+  assert.equal(parsed[0].text, multiline.join('\n'), 'Multi-line extraction retains the complete transform and closing punctuation');
+  assert.equal(parsed[0].number, 101); assert.equal(parsed[0].endNumber, 105);
   frame('exhibit', { mode: 'page' }); inspect();
   trace.reset();
   assert.equal(trace.diagnostics().ambientEchoes.length, 0, 'Replay reset clears ambient execution history');
   assert.equal(root.querySelectorAll('.live-trace-echo-line').filter(visibleNode).length, 0, 'Replay reset clears visible ambient echoes');
   trace.destroy();
-  return { exactSourceText: true, introLines: 2, pageLines: 1, maximumEchoes: 1,
+  return { exactSourceText: true, completeInstructionSpans: true, shortCastCalls: true, multilineExtraction: true, introInstructions: 2, pageInstructions: 1, maximumEchoes: 1,
     echoExecutionFrames: true, pausedClockStable: true, pendingHasNoEcho: true, manualHistoryScroll: true, resetClears: true };
 });
 

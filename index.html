@@ -727,13 +727,44 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
 /* Rapid-fire button: each native click is one request. No global zoom ban,
    touch cancellation, synthetic click or double-tap debounce. */
 #finale-replay{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-</style><style id="live-trace-style">
+</style><style id="cinema-controls-style">
+/* One calm playback group; all symbols share the same stroked vector language. */
+.playback-controls{display:flex;align-items:center;gap:10px}
+body:not(.intro) #intro-controls .playback-controls{gap:0}
+body:not(.intro) #intro-controls .playback-controls>button{min-width:40px;justify-content:center}
+#intro-controls svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#scene-pause .control-play{display:none}
+#scene-pause[aria-pressed=true] .control-pause{display:none}
+#scene-pause[aria-pressed=true] .control-play{display:block}
+#audio-panel #motion{margin:0 0 8px;padding:6px 0;font-size:11px;display:flex;min-height:36px}
+#audio-panel #motion-label{display:inline}
+.intro #intro-controls{top:calc(18px + env(safe-area-inset-top,0px));right:24px;gap:12px}
+.intro #intro-controls .playback-controls{gap:0}
+.intro #intro-controls>.playback-controls>button,.intro #water-surge,.intro #skip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0;color:#bfc7c2;line-height:1}
+.intro #intro-controls>.playback-controls>button:hover,.intro #water-surge:hover,.intro #skip:hover{color:#efd39e}
+.intro #sound[aria-pressed=true]{color:#d9c08c}
+.intro #intro-controls .sound-label{display:none}
+.intro #water-surge{color:#b6a682}
+.intro #skip{gap:8px;font-size:11px;margin-left:2px}
+.intro .intro-brand{top:calc(35px + env(safe-area-inset-top,0px));color:#b3bdb8;font-size:9px;letter-spacing:.12em}
+@media(max-width:700px){
+ .intro #intro-controls{right:14px;top:calc(14px + env(safe-area-inset-top,0px));gap:8px}
+ .intro .intro-brand{top:calc(31px + env(safe-area-inset-top,0px));left:18px;font-size:8.5px;letter-spacing:.10em}
+ .intro-brand-prefix{display:none}
+ .intro #skip{margin-left:0}
+ #scene-skip-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ #audio-panel #motion{display:none}
+}
+@media(max-width:360px){.intro #intro-controls{right:10px;gap:5px}.intro .intro-brand{left:14px}body:not(.intro) #intro-controls .playback-controls>button{min-width:36px}}
+@media(min-width:701px){#audio-panel #motion-mobile{display:none!important}}
+</style>
+<style id="live-trace-style">
 /* Real source lives in the scene's negative space. Only the explicit controls and
    the optional source text receive pointer events; there is no panel surface. */
-.live-trace[hidden],.live-trace [hidden],.live-trace-tether[hidden]{display:none!important}
+.live-trace[hidden],.live-trace [hidden],.live-trace-tether[hidden],.live-trace-tether [hidden]{display:none!important}
 .live-trace{--trace-gold:#dcc08a;--trace-soft:#a2987e;--trace-dim:#78847e;box-sizing:border-box;color:#9ea59a;background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;z-index:31;overflow:visible;text-align:left;letter-spacing:0;padding:0;pointer-events:none}
 .live-trace *{box-sizing:border-box}
-.live-trace[data-mode=intro]{position:fixed;left:clamp(24px,3.1vw,54px);bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(670px,calc(100vw - 64px));max-height:calc(100svh - 104px)}
+.live-trace[data-mode=intro]{position:fixed;left:50%;bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(530px,calc(100vw - 36px));transform:translateX(-50%)}
 .live-trace[data-mode=page]{position:absolute;left:0;right:0;bottom:var(--trace-page-bottom,0px);width:100%;z-index:5}
 .live-trace-header{display:flex;align-items:center;gap:14px;min-height:28px;margin:0}
 .live-trace-object-button{appearance:none;border:0;border-radius:0;background:none;color:var(--trace-soft);font:inherit;display:flex;align-items:center;gap:9px;flex:1;min-width:0;min-height:28px;padding:0;text-align:left;cursor:pointer;letter-spacing:0;pointer-events:auto;touch-action:manipulation}
@@ -743,13 +774,13 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
 .live-trace-name{font-size:10.5px;line-height:1.35;font-weight:400;letter-spacing:.045em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .live-trace-pin{font-size:13px;line-height:1;color:var(--trace-gold);flex:0 0 auto}
 .live-trace-status{color:#a99e82;font-size:8px;line-height:1.3;letter-spacing:.13em;white-space:nowrap;border:0;background:none;padding:0;flex:0 0 auto}
-.live-trace-echo{height:14px;margin:0 0 0 24px;overflow:hidden;color:#9caa9f;opacity:.23;user-select:none}
-.live-trace-echo-line{margin:0;font-size:10px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-trace-echo{position:absolute;left:26px;right:0;bottom:calc(100% + 3px);height:auto;margin:0;color:#91a295;opacity:.17;user-select:none;pointer-events:none}
+.live-trace-echo-line{margin:0;font-size:10px;line-height:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .live-trace-echo code{font:inherit;color:inherit}
-.live-trace-excerpt{border:0;background:none;padding:0;overflow:hidden;font-size:12px;line-height:19px;color:#96a096}
+.live-trace-excerpt{border:0;background:none;padding:0;overflow:visible;font-size:12px;line-height:19px;color:#96a096}
 .live-trace-excerpt-line{margin:0;min-width:0;opacity:.6}
 .live-trace-excerpt-line.is-active{color:#e0c38e;opacity:1;text-shadow:0 0 22px #f5bd5619}
-.live-trace-excerpt code{display:block;font:inherit;color:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;tab-size:2}
+.live-trace-excerpt code{display:block;font:inherit;color:inherit;white-space:pre-wrap;overflow:visible;overflow-wrap:anywhere;tab-size:2}
 .live-trace-token-number{color:#93aaa1}.live-trace-token-function{color:#c1ae88}.live-trace-token-keyword{color:#92a093}.live-trace-token-string{color:#9eaf8e}.live-trace-token-comment{color:#667a70}
 .live-trace-excerpt .is-active span{color:inherit}
 .live-trace-bottom{display:flex;align-items:center;margin-top:2px;min-height:20px}
@@ -757,10 +788,11 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
 .live-trace-value{display:flex;align-items:baseline;gap:6px;min-width:0}
 .live-trace-value dt{margin:0;color:var(--trace-dim);font-size:9px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .live-trace-value dd{margin:0;color:#b9aa86;font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.live-trace-toggle{appearance:none;display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:28px;min-width:44px;max-width:110px;padding:0;border:0;border-radius:0;background:none;color:#928970;font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;cursor:pointer;text-align:right;pointer-events:auto;touch-action:manipulation}
+.live-trace-toggle{appearance:none;display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:28px;min-width:44px;max-width:110px;padding:0;border:0;border-radius:0;background:none;color:#b2a07b;font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;cursor:pointer;text-align:right;pointer-events:auto;touch-action:manipulation}
 .live-trace-toggle:hover{color:#e6c98f}
 .live-trace-chevron{font:12px/1 monospace;transform:translateY(-1px);transition:transform .18s}
 .live-trace[data-expanded=true] .live-trace-chevron{transform:translateY(-1px) rotate(180deg)}
+.live-trace[data-expanded=true] .live-trace-echo{display:none}
 .live-trace-snapshot{margin:2px 0 0;color:#86948a;font-size:9px;line-height:12px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .live-trace[data-paused=true] .live-trace-status,.live-trace[data-waiting=true] .live-trace-status{color:#a7b0a4}
 .live-trace[data-waiting=true] .live-trace-dot{background:#9aa697;box-shadow:none}
@@ -789,9 +821,11 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
 .live-trace-bands i{display:block;width:1px;height:9px;background:#a8b495;opacity:calc(.25 + var(--level,0)*.75);transform-origin:bottom;transform:scaleY(calc(.15 + var(--level,0)*.85))}
 .live-trace-audio[data-running=false] .live-trace-bands{opacity:.3}
 .live-trace-tether{position:fixed;inset:0;width:100%;height:100%;overflow:visible;z-index:30;pointer-events:none;color:#d2b67d}
-.live-trace-thread{fill:none;stroke:currentColor;stroke-width:.8;stroke-opacity:.44}
-.live-trace-target-halo{fill:none;stroke:currentColor;stroke-width:.7;stroke-opacity:.45}
-.live-trace-target{fill:#e8cd95;stroke:none}
+.live-trace-thread{fill:none;stroke:currentColor;stroke-width:.8;stroke-opacity:.56;vector-effect:non-scaling-stroke}
+.live-trace-target-halo{fill:none;stroke:currentColor;stroke-width:1;stroke-opacity:.88;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.live-trace-target{fill:#ead7b0;stroke:none}
+.live-trace-target-label{font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;fill:#dcc595;paint-order:stroke;stroke:#081311;stroke-opacity:.8;stroke-width:2.2px;stroke-linejoin:round}
+.live-trace-visible-intro #quench-controls{bottom:var(--trace-quench-bottom,118px);max-height:calc(100svh - 140px);overflow:auto}
 .live-trace[data-mode=page] .live-trace-header,.live-trace[data-mode=page] .live-trace-object-button,.live-trace[data-mode=page] .live-trace-toggle{min-height:24px}
 .live-trace[data-mode=page] .live-trace-name{font-size:10px}
 .live-trace[data-mode=page] .live-trace-echo{display:none}
@@ -801,10 +835,10 @@ body:is(.route-cv,.route-score) #score-bridge{display:none!important}
 .live-trace[data-mode=page] .live-trace-value dd{font-size:10px}
 .live-trace[data-mode=page] .live-trace-toggle{font-size:9px}
 .live-trace[data-mode=page] .live-trace-body{bottom:calc(100% + 12px);height:min(202px,32svh)}
-@media(min-width:1100px){.live-trace[data-mode=intro]{width:min(650px,calc(55vw - 45px))}.live-trace[data-mode=intro] .live-trace-echo{margin-left:38px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:12.5px}}
-@media(max-width:700px){.live-trace[data-mode=intro]{left:18px;right:18px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:520px;margin:0}.live-trace-header{gap:10px}.live-trace-object-button{gap:8px}.live-trace-name{font-size:10px;letter-spacing:.02em}.live-trace-status{font-size:7px}.live-trace-echo{display:none}.live-trace-excerpt{font-size:11.25px;line-height:17px}.live-trace-values{gap:19px}.live-trace-value dt{font-size:8px}.live-trace-value dd{font-size:10px}.live-trace-toggle{font-size:9px;gap:4px}.live-trace-body{bottom:calc(100% + 10px);height:min(194px,30svh)}.live-trace-provenance{font-size:7px}.live-trace-frame{font-size:7px}.live-trace-line{font-size:9.5px;line-height:17px;min-height:17px}.live-trace-details{gap:5px 14px}.live-trace-visible-intro #quench-controls{bottom:calc(var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom))) + 106px);max-height:calc(100svh - 240px);overflow:auto}.live-trace-open-intro #quench-controls{visibility:hidden}}
+@media(min-width:1100px){.live-trace[data-mode=intro]{width:min(530px,calc(100vw - 48px))}.live-trace[data-mode=intro] .live-trace-echo{left:38px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:12.5px}}
+@media(max-width:700px){.live-trace[data-mode=intro]{left:18px;right:18px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:530px;margin:0;transform:none}.live-trace-header{gap:10px}.live-trace-object-button{gap:8px}.live-trace-name{font-size:10px;letter-spacing:.02em}.live-trace-status{font-size:7px}.live-trace-echo{display:none}.live-trace-excerpt{font-size:11.25px;line-height:17px}.live-trace-values{gap:19px}.live-trace-value dt{font-size:8px}.live-trace-value dd{font-size:10px}.live-trace-toggle{font-size:10px;gap:4px}.live-trace-body{bottom:calc(100% + 10px);height:min(194px,30svh)}.live-trace-provenance{font-size:7px}.live-trace-frame{font-size:7px}.live-trace-line{font-size:9.5px;line-height:17px;min-height:17px}.live-trace-details{gap:5px 14px}.live-trace-visible-intro #quench-controls{bottom:var(--trace-quench-bottom,120px);max-height:calc(100svh - 140px);overflow:auto}.live-trace-open-intro #quench-controls{visibility:hidden}}
 @media(max-width:360px){.live-trace[data-mode=intro]{left:14px;right:14px}.live-trace-header{gap:8px}.live-trace-name{font-size:9.5px}.live-trace-excerpt{font-size:11px}.live-trace-values{gap:15px}.live-trace-toggle{font-size:8px}}
-@media(max-height:540px){.live-trace[data-mode=intro]{left:16px;right:auto;width:min(440px,calc(100vw - 32px));margin:0;bottom:var(--trace-dock-bottom,12px)}.live-trace-echo{display:none}.live-trace-header,.live-trace-object-button,.live-trace-toggle{min-height:26px}.live-trace-excerpt{font-size:11px;line-height:16px}.live-trace-name{font-size:9px}.live-trace-body{height:min(150px,29svh);bottom:calc(100% + 8px)}.live-trace-details,.live-trace-audio{display:none}}
+@media(max-height:540px){.live-trace[data-mode=intro]{left:16px;right:auto;width:min(440px,calc(100vw - 32px));margin:0;transform:none;bottom:var(--trace-dock-bottom,12px)}.live-trace-echo{display:none}.live-trace-header,.live-trace-object-button,.live-trace-toggle{min-height:26px}.live-trace-excerpt{font-size:11px;line-height:16px}.live-trace-name{font-size:9px}.live-trace-body{height:min(150px,29svh);bottom:calc(100% + 8px)}.live-trace-details,.live-trace-audio{display:none}}
 @media(prefers-reduced-motion:reduce){.live-trace-chevron{transition:none}.live-trace-excerpt-line.is-active{text-shadow:none}}
 @media print{.live-trace,.live-trace-tether{display:none!important}}
 
@@ -822,9 +856,9 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 <body><div id="reading-progress" aria-hidden="true"><i></i></div><script>document.body.classList.add('intro','booting');</script><a class="skip-content" data-l10n="n12" href="#hero-heading">Przejdź do treści</a>
 <canvas aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak." data-l10n="n13" id="scene" role="img"></canvas>
 <div aria-hidden="true" id="cinema-shade"></div><div aria-hidden="true" id="vessel-shadow"></div><div aria-hidden="true" id="score-bridge"><canvas id="score-canvas"></canvas></div>
-<div aria-hidden="true" class="intro-brand">GUITS / GUZICZAK</div>
-<div id="intro-controls"><button aria-label="Wstrzymaj pokaz" aria-pressed="false" data-l10n="n14" id="scene-pause">Ⅱ</button><button aria-label="Włącz muzykę" aria-pressed="false" class="sound" data-l10n="n15" id="sound"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M9 4 5 7H2v6h3l4 3Z"></path><path d="m13 7 5 6m0-6-5 6" id="sound-path"></path></svg><span class="sound-label" data-l10n="n16" id="sound-label">Muzyka</span></button><button aria-controls="audio-panel" aria-expanded="false" aria-label="Ustawienia muzyki" data-l10n="n17" id="audio-menu-button">⋯</button><button aria-label="Włącz reakcję wody na przechylenie" aria-pressed="false" data-l10n="n18" id="motion"><svg viewbox="0 0 24 24"><path d="M3 7c3-4 6 4 9 0s6 4 9 0M3 12c3-4 6 4 9 0s6 4 9 0M3 17c3-4 6 4 9 0s6 4 9 0"></path></svg><span data-l10n="n19" id="motion-label">Ruch wody</span></button><button aria-label="Wzburz wodę — fala może zalać ołtarz" data-l10n="n20" id="water-surge" title="Wzburz wodę [W]">≋<span class="sound-label" data-l10n="n21"> Fala</span></button><button class="skip" data-l10n="n22" id="skip">Pomiń <span aria-hidden="true">↗</span></button>
-<section aria-label="Odtwarzacz muzyki" data-l10n="n23" hidden="" id="audio-panel"><h2 data-l10n="n24">Partytura światła</h2><p aria-live="polite" data-l10n="n25" id="audio-library-status" role="status">Wczytuję wcześniejsze partytury…</p><button aria-pressed="true" class="track" data-track="main">Lux in tenebris<small data-l10n="n26">Temat główny</small></button><button aria-pressed="false" class="track" data-l10n="n27" data-track="variation">Wariacja<small data-l10n="n28">Wariacja tematu</small></button><label data-l10n="n29" for="music-volume">Głośność</label><input aria-label="Głośność muzyki i efektów" data-l10n="n30" id="music-volume" max="100" min="0" type="range" value="80"/><button aria-pressed="false" data-l10n="n31" id="staff-pause">Wstrzymaj przewijanie nut</button><button data-l10n="n32" id="water-wave" title="Fala na jeziorze — zawsze dostępna [W]">Wzburz wodę [W]</button><button aria-pressed="false" data-l10n="n33" id="water-pause">Wstrzymaj wodę</button><button data-l10n="n34" id="quench-preview" style="display:block;font-size:12px;color:var(--gold)" type="button">Wypróbuj chłodzenie wodą</button><button data-l10n="n35" id="motion-mobile" style="font-size:11px;color:var(--muted);display:block">Czujnik ruchu / woda</button></section></div>
+<div aria-hidden="true" class="intro-brand"><span class="intro-brand-prefix">GUITS / </span>GUZICZAK</div>
+<div id="intro-controls"><div class="playback-controls" role="group"><button aria-label="Wstrzymaj pokaz" aria-pressed="false" data-l10n="n14" id="scene-pause"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="control-pause" d="M8 5v14M16 5v14"/><path class="control-play" d="m8 5 11 7-11 7Z"/></svg></button><button aria-label="Włącz muzykę" aria-pressed="false" class="sound" data-l10n="n15" id="sound"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M9 4 5 7H2v6h3l4 3Z"></path><path d="m13 7 5 6m0-6-5 6" id="sound-path"></path></svg><span class="sound-label" data-l10n="n16" id="sound-label">Muzyka</span></button><button aria-controls="audio-panel" aria-expanded="false" aria-label="Ustawienia muzyki" data-l10n="n17" id="audio-menu-button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button></div><button aria-label="Wzburz wodę — fala może zalać ołtarz" data-l10n="n20" id="water-surge" title="Wzburz wodę [W]"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 8c3-4 6 4 9 0s6 4 9 0M3 13c3-4 6 4 9 0s6 4 9 0M3 18c3-4 6 4 9 0s6 4 9 0"/></svg><span class="sound-label" data-l10n="n21"> Fala</span></button><button class="skip" aria-labelledby="scene-skip-label" id="skip"><span data-l10n="n22" id="scene-skip-label">Pomiń </span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h14m-6-6 6 6-6 6M20 5v14"/></svg></button>
+<section aria-label="Odtwarzacz muzyki" data-l10n="n23" hidden="" id="audio-panel"><h2 data-l10n="n24">Partytura światła</h2><p aria-live="polite" data-l10n="n25" id="audio-library-status" role="status">Wczytuję wcześniejsze partytury…</p><button aria-pressed="true" class="track" data-track="main">Lux in tenebris<small data-l10n="n26">Temat główny</small></button><button aria-pressed="false" class="track" data-l10n="n27" data-track="variation">Wariacja<small data-l10n="n28">Wariacja tematu</small></button><label data-l10n="n29" for="music-volume">Głośność</label><input aria-label="Głośność muzyki i efektów" data-l10n="n30" id="music-volume" max="100" min="0" type="range" value="80"/><button aria-pressed="false" data-l10n="n31" id="staff-pause">Wstrzymaj przewijanie nut</button><button data-l10n="n32" id="water-wave" title="Fala na jeziorze — zawsze dostępna [W]">Wzburz wodę [W]</button><button aria-pressed="false" data-l10n="n33" id="water-pause">Wstrzymaj wodę</button><button aria-label="Włącz reakcję wody na przechylenie" aria-pressed="false" data-l10n="n18" id="motion"><svg viewbox="0 0 24 24"><path d="M3 7c3-4 6 4 9 0s6 4 9 0M3 12c3-4 6 4 9 0s6 4 9 0M3 17c3-4 6 4 9 0s6 4 9 0"></path></svg><span data-l10n="n19" id="motion-label">Ruch wody</span></button><button data-l10n="n34" id="quench-preview" style="display:block;font-size:12px;color:var(--gold)" type="button">Wypróbuj chłodzenie wodą</button><button data-l10n="n35" id="motion-mobile" style="font-size:11px;color:var(--muted);display:block">Czujnik ruchu / woda</button></section></div>
 <div aria-hidden="true" id="flying-mark"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></div><div aria-hidden="true" id="flying-word">GUZICZAK</div><div aria-hidden="true" data-l10n="n36" id="signature-line">Przekuwam AI w wartość.</div><div aria-live="polite" id="motion-status" role="status"></div>
 <header id="header"><a aria-label="Guziczak — strona główna" class="identity" data-l10n="n37" href="#top"><span id="header-logo"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></span><span><strong id="header-word">GUZICZAK</strong><small>ŁUKASZ GUZICZAK / GUITS</small></span></a><div class="header-links"><nav aria-label="Nawigacja" class="site-nav" data-l10n="n38" id="site-navigation"><a data-l10n="n39" href="#realizacje">Realizacje</a><a data-l10n="n40" href="#wspolpraca">Współpraca</a><a data-l10n="n41" href="#o-mnie">O mnie</a><a data-cv-open="html" href="/cv" id="nav-cv">CV</a><a data-l10n="n42" href="#kontakt">Kontakt</a></nav><div aria-label="Language" class="language-switch"><a aria-current="page" aria-label="Polski" data-site-language="pl" href="#/home?lang=pl" hreflang="pl" lang="pl">PL</a><a aria-label="English" data-site-language="en" href="#/home?lang=en" hreflang="en" lang="en">EN</a><a aria-label="Deutsch" data-site-language="de" href="#/home?lang=de" hreflang="de" lang="de">DE</a></div><button aria-controls="site-navigation" aria-expanded="false" id="nav-toggle" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 8h18M3 16h18"></path></svg><span data-l10n="n43">Menu</span></button></div></header>
 <main class="site" id="site"><section aria-labelledby="hero-heading" class="hero" id="top"><div aria-hidden="true" id="exhibit-world"></div><div class="hero-copy"><div class="eyebrow" data-l10n="n44">Ludzkie rzemiosło. Inteligentne systemy.</div><h1 data-l10n="n45" id="hero-heading" tabindex="-1">Przekuwam AI<br/><em data-l10n="n46">w wartość.</em></h1><p data-l10n="n47">Od pierwszego tokenu do działającego systemu.<br/>Inżynieria, która nie kończy się na obietnicach.</p><div class="hero-actions"><a class="button-main" data-l10n="n48" href="#kontakt">Porozmawiajmy <span aria-hidden="true">↗</span></a><button class="replay" data-l10n="n49" id="replay"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M6 3 16 10 6 17Z"></path></svg>Obejrzyj przemianę</button></div></div>
@@ -1867,7 +1901,7 @@ GuziczakModules.define('app/engine',[
    if(!screen||seen.has(objectId)||targets.length>=96)return;
    seen.add(objectId);
    const visible=screen.visible&&!(key==='organ'&&covered(screen,objectId));
-   targets.push({objectId,x:screen.x,y:screen.y,visible});
+   targets.push({objectId,key,x:screen.x,y:screen.y,visible,radius:screen.radius||9,...extra});
    if(visible&&pickable)pickTargets.push({key,objectId,x:screen.x,y:screen.y,depth:screen.depth,radius:screen.radius||18,visible:true,...extra});
   }
   // Instrument mouths exist in the body mesh even between notes. Selecting one
@@ -1897,7 +1931,29 @@ GuziczakModules.define('app/engine',[
    const assembly=executed.find(record=>record.key==='assembly'&&byId.has(record.objectId))||executed.find(record=>record.key==='lift'&&byId.has(record.objectId));
    if(assembly)pickTargets.push({key:assembly.key,objectId:assembly.objectId,x:cup.x,y:cup.y,depth:cup.depth,radius:Math.min(72,Math.max(18,Math.min(cup.right-cup.left,cup.bottom-cup.top)*.42)),visible:true,proxy:'cup'});
   }
-  return {targets,pickTargets};
+  // A stable, projected silhouette places source beside the actual table. Avoid
+  // transient air endpoints and avoid the exaggerated corners of an ellipse's box.
+  let sceneBounds=null;
+  const include=p=>{
+   if(!p||!(p.depth>0)||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;
+   if(!sceneBounds)sceneBounds={left:p.x,right:p.x,top:p.y,bottom:p.y};
+   else{sceneBounds.left=Math.min(sceneBounds.left,p.x);sceneBounds.right=Math.max(sceneBounds.right,p.x);
+    sceneBounds.top=Math.min(sceneBounds.top,p.y);sceneBounds.bottom=Math.max(sceneBounds.bottom,p.y);}
+  };
+  const body=byId.get('instrument/instrumentBody/0');
+  if(body?.mesh?.bounds&&body.light>.001){
+   const box=body.mesh.bounds,cx=(box.min[0]+box.max[0])*.5,cz=(box.min[2]+box.max[2])*.5;
+   const rx=(box.max[0]-box.min[0])*.51,rz=(box.max[2]-box.min[2])*.51;
+   for(let i=0;i<64;i++)for(const y of [box.min[1]-.32,box.max[1]]){
+    const a=i*Math.PI/32;
+    include(screenPoint(math.M.point(body.m,[cx+rx*Math.cos(a),y,cz+rz*Math.sin(a)])));
+   }
+  }
+  for(const item of occluders){
+   const box=item.screen;
+   include({x:box.left,y:box.top,depth:box.depth});include({x:box.right,y:box.bottom,depth:box.depth});
+  }
+  return {targets,pickTargets,sceneBounds};
  }
  function pickTraceTarget(targets,x,y,options={}){
   if(!Number.isFinite(x)||!Number.isFinite(y))return null;
@@ -1923,7 +1979,7 @@ GuziczakModules.define('app/engine',[
   let screenPickTargets=[],tracePointer=null,traceFrameNumber=0,tracePickCount=0;
   const stage=exhibitUI.create(window,document,()=>{dirty=true;schedule();});
   const viewport=()=>{const v={width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},mobile=v.width<701;
-   return {...v,brand:ui.measureBrand(v),traceTop:mode==='intro'?Math.min(mobile?56:62,v.height*.13):0,traceInset:mode==='intro'?Math.min(mobile?116:124,v.height*.30):0};};
+   return {...v,brand:ui.measureBrand(v),traceTop:mode==='intro'?Math.min(mobile?56:62,v.height*.13):0,traceInset:mode==='intro'?Math.min(v.width<=360?136:mobile?128:124,v.height*.30):0};};
   const drive=waterDrive.create();let lastWaterMs=null,waterPaused=reduced;
   const quench=quenchLib.create(timeline),quenchPanel=quenchUI.create(document,()=>surge(),()=>motion.enable());
   function surge(options={}){
@@ -1942,7 +1998,7 @@ GuziczakModules.define('app/engine',[
   function resolve(){const q=waiters;waiters=[];for(const r of q)r(diagnostics());}
   function schedule(){if(!raf&&!routeSuspended&&!disposed&&!failed&&!document.hidden)raf=requestAnimationFrame(tick);}
   function cancel(){if(raf)cancelAnimationFrame(raf);raf=0;}
-  function clearTracePicking(){screenPickTargets=[];tracePointer=null;}
+  function clearTracePicking(){screenPickTargets=[];tracePointer=null;trace.setSceneLayout(null);}
   function projectExhibitTrace(rect,shown=true){
    const x=rect.x+rect.w*.5,y=rect.y+rect.h*.5,visible=!!shown&&rect.w>0&&rect.h>0&&x>=0&&x<=innerWidth&&y>=0&&y<=innerHeight;
    trace.projectObject('exhibit/signature',{x,y,visible});
@@ -1978,6 +2034,10 @@ GuziczakModules.define('app/engine',[
     renderer.render(frame,packet,cameras.sampleCamera(frame,vp,packet.assembly),vp);canvas.style.visibility='visible';canvas.dataset.renderMode='intro';ui.render(frame,packet,renderer.project,vp);
     const projected=projectTraceTargets(packet,renderer.project,vp,frame,trace.executed());
     trace.setTargets(projected.targets);screenPickTargets=projected.pickTargets;
+    trace.setSceneLayout(projected.sceneBounds?{
+     viewport:{left:0,top:0,width:vp.width,height:vp.height},bounds:projected.sceneBounds,
+     safe:{top:Math.max(70,vp.traceTop+12),right:18,bottom:16,left:18}
+    }:null);
     if(frame.time>=16.70){
       const r=ui.markRect||lastSceneRect||{x:vp.width*.5,y:vp.height*.4,w:200,h:204};lastSceneRect=r;
       const target=stage.rect(),a=math.ease(20.35,22.70,frame.time),from={x:r.x-r.w/2,y:r.y-r.h/2,w:r.w,h:r.h};
@@ -1996,7 +2056,7 @@ GuziczakModules.define('app/engine',[
     scoreLayer.setScene(frame.time);lastFrame=frame;lastPacket=packet;dirty=false;frameNumber++;window.__frameNumber=frameNumber;
     if(!ready){ready=true;ui.booted();window.__renderReady=true;sound.ready();clock.reanchor();}
     if(fx)fx.update(frame,{enabled:sound.enabled,active:!frame.frozen&&!frame.finished});
-    ui.$('scene-pause').setAttribute('aria-pressed',String(frame.frozen));ui.$('scene-pause').setAttribute('aria-label',frame.frozen?globalThis.GUZICZAK_I18N.t("engine.17"):globalThis.GUZICZAK_I18N.t("engine.18"));ui.$('scene-pause').textContent=frame.frozen?'▷':'Ⅱ';
+    ui.$('scene-pause').setAttribute('aria-pressed',String(frame.frozen));ui.$('scene-pause').setAttribute('aria-label',frame.frozen?globalThis.GUZICZAK_I18N.t("engine.17"):globalThis.GUZICZAK_I18N.t("engine.18"));
     trace.endFrame({audio:lastInstrument,paused:frame.frozen&&!lastInstrument.running});
     resolve();if(cursor.complete){complete();return;}if(clock.state==='playing'||lastInstrument.running)schedule();
    }catch(e){fail(e);}
@@ -2963,7 +3023,7 @@ GuziczakModules.define('config/materials', [], () => {
         LIQUID_GOLD: 5, TEXT_LIGHT: 6, FLOOR: 7, ACCENT: 8, GLASS: 9, GOLD_LIGHT: 10,
         RECEIVER: 11, SIGNATURE_A: 12, SIGNATURE_B: 13, RIFT: 14, TIMBER: 15,
         SAND: 16, CAVITY: 17, RIFT_EDGE: 18, CAST_METAL: 20, OVERFLOW_METAL: 21,
-        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29, ORGAN_BURST:32, ORGAN_IVORY:30, ORGAN_EBONY:31 });
+        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29, ORGAN_BURST:32, ORGAN_IVORY:30, ORGAN_EBONY:31, ORGAN_BRASS:33 });
     const ids = new Set(Object.values(Material));
     function validate(id) { if (!Number.isInteger(id) || !ids.has(id))
         throw Error('Unknown material ID: ' + id); }
@@ -4295,13 +4355,13 @@ vec3 curve(float s){
  return p;
 }
 void deform(inout vec3 p,inout vec3 n,vec2 uv){
- // Mode 7 belongs to the existing recovery mechanism. Air has its own ABI slot.
+ // Mode 7 belongs to recovery; mode 8 gently carries the note's open air veils.
  if(uMode>7.5&&uMode<8.5){
   float path=clamp(uv.x-2.*floor(uv.x*.5),0.,1.);
-  float rise=smoothstep(.36,1.,path),clock=uTo.y>.5?0.:uFrom.y;
-  float phase=clock*1.8+uFrom.x*.31;
-  vec2 breath=vec2(sin(phase+path*5.2),cos(phase*.83-path*4.8));
-  p.xz+=breath*rise*rise*(.018+.010*uTo.z);return;
+  float rise=smoothstep(.18,1.,path),clock=uTo.y>.5?0.:uFrom.y;
+  float phase=clock*1.3+uFrom.x*.31;
+  vec2 breath=vec2(sin(phase+path*3.6),cos(phase*.83-path*3.1));
+  p.xz+=breath*rise*rise*(.014+.006*uTo.z);return;
  }
  if(uMode>6.5&&uMode<7.5){
   float a=uTo.x,c=cos(a),s=sin(a),w=smoothstep(0.,1.,uv.x);
@@ -4408,40 +4468,46 @@ void main(){
  vec3 q=vLocal,p=vWorld,n=normalize(vNormal),cam=uCam;if(uReflection>.5){p.y=2.*uReflectY-p.y;n.y=-n.y;cam.y=2.*uReflectY-cam.y;if(p.y<uReflectY-.003)discard;}
  vec3 v=normalize(cam-p);float nv=max(dot(n,v),.001),id=vMat;float rough=.25,metal=.9,occ=1.,alpha=uAlpha;vec3 base=vec3(.13),emission=vec3(0.);
  if(id>28.5&&id<29.5){
-  // Wide soft air ribbons carry bright, narrow cores and audible-clock packets.
+  // Broken density and broad feathering reveal air without a solid luminous core.
   float lane=floor(vUV.x*.5),path=clamp(vUV.x-lane*2.,0.,1.);
-  float phase=uTo.y>.5?.31+lane*.23:(uFrom.y-uFrom.z)*uTo.x+lane*.23;
-  float distance=abs(fract(path-phase+.5)-.5);
-  float packet=exp(-pow(distance/.090,2.));
-  float behind=fract(phase-path+1.);
-  float trail=exp(-behind*10.)*(1.-smoothstep(.21,.36,behind));
-  float edge=1.-smoothstep(.15,.99,abs(vUV.y));
-  float core=exp(-vUV.y*vUV.y*15.);
-  float ends=smoothstep(0.,.040,path)*(1.-smoothstep(.82,1.,path));
+  float travel=uTo.y>.5?.21:(uFrom.y-uFrom.z)*uTo.x;
+  float phase=travel+lane*.23;
+  float broad=noise3(vec3(path*10.-travel*2.8,vUV.y*1.8+lane*.9,uFrom.x*.17));
+  float fine=noise3(vec3(path*24.-travel*6.2,vUV.y*4.1,uFrom.x*.11+lane*1.7));
+  float grain=.64*broad+.36*fine,rise=smoothstep(.18,.92,path);
+  float density=.16+.84*smoothstep(mix(.08,.34,rise),mix(.52,.72,rise),grain);
+  float packet=exp(-pow(abs(fract(path-phase+.5)-.5)/.135,2.))*(.62+.38*grain);
+  float edge=pow(max(0.,1.-vUV.y*vUV.y),2.5);
+  float ends=smoothstep(0.,.045,path)*(1.-smoothstep(.62,1.,path));
+  float intake=mix(.18,1.,smoothstep(.11,.27,path));
+  float outlet=exp(-pow((path-.23)*11.,2.))*(.30+.70*uTo.z);
+  float laneWeight=lane>.5&&lane<1.5?1.:.60;
   float strength=.78+.22*sqrt(clamp(uNoteEnergy,0.,1.));
-  float mouthFlash=exp(-pow((path-.37)*9.,2.))*uTo.z;
-  float opacity=edge*ends*(.29+.62*packet+.20*trail+.15*mouthFlash)*strength*clamp(uObjectLight,0.,1.)*uAlpha;
-  if(uReflection>.5)opacity*=.30;
-  if(opacity<.002)discard;
-  vec3 tint=mix(vec3(1.,.69,.32),vec3(1.,.97,.88),smoothstep(.12,.57,path));
-  // Object light is applied once through opacity, so staging cannot square the fade.
-  vec3 c=tint*(1.26+core*.90+packet*2.20+trail*.42+mouthFlash*.95);
-  outColor=vec4(c,clamp(opacity,0.,.95));return;
+  float opacity=edge*ends*intake*density*(.204+.374*packet+.204*outlet)
+   *laneWeight*strength*clamp(uObjectLight,0.,1.)*uAlpha;
+  if(uReflection>.5)opacity*=.24;
+  if(opacity<.0015)discard;
+  vec3 tint=mix(vec3(1.,.76,.44),vec3(.92,.95,.92),smoothstep(.16,.70,path));
+  vec3 c=tint*(.98+.32*packet+.20*outlet);
+  outColor=vec4(c,clamp(opacity,0.,.68));return;
  }
  if(id>31.5&&id<32.5){
-  // The short exhalation is emissive mist: no glass reflections or liquid highlights.
-  if(!gl_FrontFacing)n=-n;
-  float age=max(0.,uFrom.y-uFrom.z),around=atan(q.z,q.x);
-  float grain=noise3(q*vec3(6.2,8.5,6.2)+vec3(uFrom.x*.17,-age*4.3,age*2.1));
-  float curl=.5+.5*sin(around*5.-age*11.+uFrom.x*.37);
-  float facing=pow(clamp(abs(dot(n,v)),0.,1.),.52);
-  float density=(.58+.30*grain+.12*curl)*facing;
-  float opacity=density*uTo.x*(.74+.20*uNoteEnergy)*clamp(uObjectLight,0.,1.)*uAlpha;
-  if(uReflection>.5)opacity*=.20;
-  if(opacity<.003)discard;
-  vec3 tint=mix(vec3(1.,.71,.37),vec3(1.,.975,.90),.58+.35*grain);
-  vec3 c=tint*(2.1+.75*grain+.45*curl);
-  outColor=vec4(c,clamp(opacity,0.,.88));return;
+  // Open onset veils have no closed contour; their irregular density dissolves upward.
+  float lane=floor(vUV.x*.5),path=clamp(vUV.x-lane*2.,0.,1.);
+  float age=max(0.,uFrom.y-uFrom.z);
+  float coarse=noise3(vec3(path*6.2-age*2.1,vUV.y*1.7+lane*.93,uFrom.x*.19));
+  float fine=noise3(vec3(path*17.-age*5.7,vUV.y*4.8,uFrom.x*.13+lane*1.3));
+  float grain=.68*coarse+.32*fine;
+  float density=smoothstep(.20+.14*path,.68,grain);
+  float edge=pow(max(0.,1.-vUV.y*vUV.y),2.2);
+  float ends=smoothstep(0.,.07,path)*(1.-smoothstep(.48,1.,path));
+  float laneWeight=lane>.5&&lane<1.5?1.:.72;
+  float opacity=edge*ends*density*uTo.x*(.391+.153*uNoteEnergy)*laneWeight
+   *clamp(uObjectLight,0.,1.)*uAlpha;
+  if(uReflection>.5)opacity*=.16;
+  if(opacity<.0015)discard;
+  vec3 tint=mix(vec3(1.,.80,.53),vec3(.94,.96,.94),smoothstep(.05,.60,path));
+  outColor=vec4(tint*(1.+.50*grain),clamp(opacity,0.,.55));return;
  }
  if(id>6.5&&id<7.5){
   float r=length(p.xz),f=.04+.40*pow(1.-nv,5.);float grain=noise3(vec3(p.xz*22.,0));
@@ -4556,14 +4622,19 @@ void main(){
   float hot=quenchHot(p.xz,1.-smoothstep(11.64,12.50,uTime));base=vec3(.79,.525,.213);metal=.996;rough=mix(.34,.09,hot);emission=vec3(.65,.23,.026)*hot*.14;
  }
  else if(id>29.5&&id<30.5){
-  // Warm ivory is a lit dielectric, distinct from the surrounding gold rims.
-  base=mix(vec3(.72,.66,.54),vec3(.79,.73,.61),macro*.40);
-  metal=.045;rough=.29+micro*.025;
+  // Matte ivory lets the heard note own the highlight instead of every rim.
+  base=mix(vec3(.59,.55,.45),vec3(.66,.61,.50),macro*.40);
+  metal=.03;rough=.40+micro*.028;
  }
  else if(id>30.5&&id<31.5){
-  // Soft ebony reflections retain the inner row's silhouette against the table.
-  base=mix(vec3(.010,.014,.016),vec3(.023,.029,.031),macro*.52);
-  metal=.16;rough=.255+micro*.026;
+  // A cool, lit graphite edge reveals the raised black keys against the dark deck.
+  base=mix(vec3(.032,.046,.053),vec3(.052,.065,.071),macro*.52);
+  metal=.29;rough=.27+micro*.024;
+ }
+ else if(id>32.5&&id<33.5){
+  // Brushed brass hardware supports the instrument without a chain of bright dots.
+  base=mix(vec3(.44,.285,.12),vec3(.51,.345,.155),macro*.38);
+  metal=.83;rough=.43+micro*.035;
  }
  else if(id>27.5&&id<28.5){
   base=vec3(.82,.54,.20);metal=.92;rough=.16;
@@ -4830,7 +4901,7 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const width = Math.max(1, Number(viewport.width) || 1), height = Math.max(1, Number(viewport.height) || 1);
         const mobile = width <= 700, reservation = 1 - ease(16.35, 16.70, frame.time);
         const top = clamp(Number.isFinite(viewport.traceTop) ? viewport.traceTop : mobile ? 56 : 62, 0, height * .13) * reservation;
-        const bottom = clamp(Number.isFinite(viewport.traceInset) ? viewport.traceInset : mobile ? 116 : 124, 0, height * .30) * reservation;
+        const bottom = clamp(Number.isFinite(viewport.traceInset) ? viewport.traceInset : width <= 360 ? 136 : mobile ? 128 : 124, 0, height * .30) * reservation;
         const contentHeight = Math.max(1, height - top - bottom);
         return { width, height, top, bottom, contentHeight, aspect: width / contentHeight, reservation };
     }
@@ -4922,7 +4993,7 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const wide = ease(3.03, 3.55, frame.time) * (1 - ease(15.8, 16.65, frame.time));
         const focus = wide * (1 - base.quenchFocus);
         if (focus <= 0) return { ...base, fov: 35 };
-        const yaw = mix(base.yaw, .08, focus), pitch = mix(base.pitch, .98, focus), fov = mix(35, 64, focus);
+        const yaw = mix(base.yaw, .22, focus), pitch = mix(base.pitch, 1.12, focus), fov = mix(35, 64, focus);
         const axes = cameraAxes(yaw, pitch), [right, up, back] = axes, points = worldBounds(frame, assembly);
         const extrema = axes.map(axis => {
             let lo = Infinity, hi = -Infinity;
@@ -4981,11 +5052,9 @@ GuziczakModules.define('scene/cast-motion',['math','config/casting'],(m,cfg)=>{
    const phase=t<j.load[0]?'in-mould':t<j.at?'loading-gate':t<j.transfer[0]?'gate-release':u<.20?'break-seal':u<.46?'lever-out':u<1?'carry-to-rim':contact?'on-front-rim':t<cfg.turn[0]?'pickup':'presentation';
    const gateLift=.004*load*(1-snap)-.012*snap;
    // @live:cast
-   const pose=C(
-    M.T(0,y,z),
-    M.Ry(yaw),M.Rx(rotation),
-    localTilt,M.S(scale)
-   );
+   const shift = M.T(0,y,z);
+   const turn = M.Ry(yaw);
+   const pose=C(shift,turn,M.Rx(rotation),localTilt,M.S(scale));
    // @live:end
    if((load>0&&load<1)||(snap>0&&snap<1)||(u>0&&u<1)||(pickup>0&&pickup<1)||(reveal>0&&reveal<1))
     globalThis.GUZICZAK_TRACE?.emit('cast',{piece:j.name,y,z,yaw,progress:u},{objectId:'signature/signature'+j.name+'/0',priority:80});
@@ -5370,7 +5439,7 @@ GuziczakModules.define("ui/controller", ["math", "config/sequence"], (math, conf
             const castTransform = packet.castTransform;
             $('intro-controls').style.opacity = '1';
 
-            document.querySelector('.intro-brand').style.opacity = String((1 - ease(...cues.brandOut, t)) * .48);
+            document.querySelector('.intro-brand').style.opacity = String((1 - ease(...cues.brandOut, t)) * .72);
             body.classList.toggle('handoff', t > cues.handoff);
             body.style.setProperty('--hero-reveal', hero.toFixed(5));
             body.style.setProperty('--header-reveal', header.toFixed(5));
@@ -7056,8 +7125,8 @@ GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/in
  const first = diatonic(low), last = diatonic(high);
  const angularStep = (TAU-seam)/Math.max(1,last-first);
  const rows = Object.freeze({
-  outer:Object.freeze({ scale:.932,radius:.153,mouthRadius:.111,height:.326,material:30 }),
-  inner:Object.freeze({ scale:.802,radius:.112,mouthRadius:.078,height:.258,material:31 })
+  outer:Object.freeze({ scale:.932,radius:.153,mouthRadius:.111,height:.290,material:30 }),
+  inner:Object.freeze({ scale:.802,radius:.118,mouthRadius:.082,height:.430,material:31 })
  });
  const keys = Object.freeze(pitches.map(midi => {
   const isBlack = BLACK.has(midi%12), row = isBlack ? 'inner' : 'outer';
@@ -7083,28 +7152,28 @@ GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/in
  function lightScale(slot) { return keyAt(slot).mouthRadius/.108; }
  function create({ build, ringY }) {
   const instrumentBody = build(b => {
-   // Three delicate rails bind both rows into a single circular instrument.
-   for (const scale of [.984,.866,.758]) {
+   // Two recessed brass rails frame the raised piano rows quietly.
+   for (const scale of [.984,.755]) {
     const rail=[];
     for (let i=0;i<=192;i++) {
      const angle=i/192*TAU;
      rail.push([docking.hull[0]*scale*Math.cos(angle),docking.deckY+.018,
       docking.hull[2]+docking.hull[1]*scale*Math.sin(angle)]);
     }
-    b.tube(rail,.010,1,6);
+    b.tube(rail,.0065,33,6);
    }
    for (let slot=0;slot<slots;slot++) {
     const key=keys[slot], r=key.radius, bore=key.mouthRadius, h=key.height;
     b.at(M.T(...position(slot)), () => {
-     // Ivory/champagne naturals and smaller ebony accidentals have separate bodies.
+     // Ivory naturals sit below narrow, raised ebony accidentals.
      b.lathe([[0,.011],[r*.94,.011],[r,.027],[r,.051],[r*.94,.075],
       [r*.91,h-.074],[r*.955,h-.031]],key.material,20);
      // The gold lip is an annulus. Its inner edge continues into a recessed dark
      // wall and floor, leaving a real open bore rather than a solid glowing cap.
      b.lathe([[r*.955,h-.031],[r,h-.021],[r,h-.012],[r*.924,h],
-      [bore,h],[bore*.975,h-.017]],1,20);
-     b.lathe([[bore*.975,h-.017],[bore*.975,.049],[0,.049]],31,20);
-     ringY(b,r*.94,.035,.012,.014,1,20);
+      [bore,h],[bore*.975,h-.017]],33,20);
+     b.lathe([[bore*.975,h-.017],[bore*.975,.049],[0,.049]],0,20);
+     ringY(b,r*.94,.035,.010,.012,33,20);
     });
    }
   });
@@ -7117,75 +7186,74 @@ GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/in
 
 GuziczakModules.define('geometry/airflow', ['math'], math => {
  'use strict';
- const { TAU, norm, cross, dot, vadd, vsub, vmul } = math;
- const airSegments = 64, burstSegments = 48, burstSides = 10;
- function airPath(s, lane = 0) {
-  // Heard-note tracers approach the lip, turn upward, and separate as they dissipate.
-  // This visual path does not claim to solve fluid pressure or pipe acoustics.
-  if (s <= .36) {
-   const u = s / .36, v = 1 - u;
-   const a = [-.61, .12, lane * .12], b = [-.29, .16, lane * .066];
-   const c = [-.020, -.065, lane * .012], d = [.012, .025, lane * .012];
-   return a.map((p, k) => p*v*v*v + 3*b[k]*v*v*u + 3*c[k]*v*u*u + d[k]*u*u*u);
+ const { TAU,ease,norm,cross,dot,vadd,vsub,vmul }=math;
+ const airSegments=64,mistSegments=36;
+ function airPath(s,lane=0){
+  // A short, quiet intake leads into an open rising plume. There is no coiled tube.
+  if(s<=.18){
+   const u=s/.18,v=1-u;
+   const a=[-.30,.045,lane*.036],b=[-.15,.025,lane*.024];
+   const c=[-.024,.005,lane*.008],d=[0,.025,lane*.008];
+   return a.map((p,k)=>p*v*v*v+3*b[k]*v*v*u+3*c[k]*v*u*u+d[k]*u*u*u);
   }
-  const u = (s - .36) / .64, turn = u * 4.2 + lane * .65;
-  return [.012 + .07*u + .14*u*u*Math.cos(turn), .025 + .975*u,
-   lane*.012 + lane*.025*u + .17*u*u*Math.sin(turn)];
+  const u=(s-.18)/.82;
+  return [.032*u+.075*Math.sin(Math.PI*u)*u+lane*.012*u*u,
+   .025+.975*u,
+   lane*.008+lane*.042*Math.sin(Math.PI*u/2)+.052*Math.sin(Math.PI*u*.88+lane*.38)*u];
  }
- function airRibbon(b, laneIndex) {
-  const lane = laneIndex - 1, points = [], frames = [];
-  for (let k = 0; k <= airSegments; k++) points.push(airPath(k / airSegments, lane));
-  let previousAxis = null;
-  for (let k = 0; k <= airSegments; k++) {
-   const tangent = norm(vsub(points[Math.min(airSegments, k+1)], points[Math.max(0, k-1)]));
-   let axis = previousAxis ? norm(vsub(previousAxis, vmul(tangent, dot(previousAxis, tangent))))
-    : norm(cross(tangent, [0,0,1]));
-   if (Math.hypot(...axis) < .1) axis = norm(cross(tangent, [0,1,0]));
-   const across = cross(tangent, axis), s = k / airSegments;
-   // A readable halo spans several phone pixels; the shader supplies its narrow core.
-   const width = (lane === 0 ? .057 : .046) * (.78 + .22*Math.sin(Math.PI*s));
-   frames.push({ tangent, axes:[axis, across], width }); previousAxis = axis;
-  }
-  // Crossed ribbons preserve screen coverage from both oblique and overhead views.
-  for (let k = 0; k < airSegments; k++) for (let plane = 0; plane < 2; plane++) {
-   const f = frames[k], g = frames[k+1], a = f.axes[plane], c = g.axes[plane];
-   const p = vadd(points[k], vmul(a, -f.width)), q = vadd(points[k+1], vmul(c, -g.width));
-   const r = vadd(points[k+1], vmul(c, g.width)), z = vadd(points[k], vmul(a, f.width));
-   const n = norm(cross(f.tangent, a)), m = norm(cross(g.tangent, c));
-   const u = laneIndex*2 + k/airSegments, v = laneIndex*2 + (k+1)/airSegments;
-   b.tri(p,q,r,29,n,m,m,[[u,-1],[v,-1],[v,1]]);
-   b.tri(p,r,z,29,n,m,n,[[u,-1],[v,1],[u,1]]);
-  }
+ function mistPath(s,lane){
+  return [(lane*.24*s*s+.05*Math.sin(s*Math.PI))*1.75,s,
+   (lane*.075*s+.18*Math.sin(Math.PI*s+lane*.9)*s)*1.75];
  }
- function burst(b) {
-  // A translucent toroidal puff opens from the mouth on the actual heard onset.
-  // Its broad soft section reads as exhalation instead of a liquid splash or solid ring.
-  const point = (u,v) => {
-   const a=u*TAU,c=v*TAU,r=1+.22*Math.cos(c);
-   return [r*Math.cos(a),.19*Math.sin(c),r*Math.sin(a)];
-  };
-  const normal = (u,v) => {
-   const a=u*TAU,c=v*TAU;
-   return norm([Math.cos(c)*Math.cos(a),Math.sin(c)*(.22/.19),Math.cos(c)*Math.sin(a)]);
-  };
-  for (let i=0;i<burstSegments;i++) for(let j=0;j<burstSides;j++) {
-   const u=i/burstSegments,v=j/burstSides,x=(i+1)/burstSegments,y=(j+1)/burstSides;
-   const a=point(u,v),c=point(x,v),d=point(x,y),e=point(u,y);
-   const na=normal(u,v),nc=normal(x,v),nd=normal(x,y),ne=normal(u,y);
-   b.tri(a,c,d,32,na,nc,nd,[[u,v],[x,v],[x,y]]);
-   b.tri(a,d,e,32,na,nd,ne,[[u,v],[x,y],[u,y]]);
+ function ribbon(b,{segments,path,width,material,lane,planes=2}){
+  const points=[],frames=[];
+  for(let k=0;k<=segments;k++)points.push(path(k/segments));
+  let previousAxis=null;
+  for(let k=0;k<=segments;k++){
+   const tangent=norm(vsub(points[Math.min(segments,k+1)],points[Math.max(0,k-1)]));
+   let axis=previousAxis?norm(vsub(previousAxis,vmul(tangent,dot(previousAxis,tangent))))
+    :norm(cross(tangent,[0,0,1]));
+   if(Math.hypot(...axis)<.1)axis=norm(cross(tangent,[0,1,0]));
+   frames.push({tangent,axis,other:cross(tangent,axis),width:width(k/segments)});
+   previousAxis=axis;
+  }
+  for(let k=0;k<segments;k++)for(let plane=0;plane<planes;plane++){
+   const a=frames[k],c=frames[k+1];
+   const angle=planes===1?lane*TAU/3:plane*Math.PI/2;
+   const across=f=>vadd(vmul(f.axis,Math.cos(angle)),vmul(f.other,Math.sin(angle)));
+   const ax=across(a),cx=across(c);
+   const p=vadd(points[k],vmul(ax,-a.width)),q=vadd(points[k+1],vmul(cx,-c.width));
+   const r=vadd(points[k+1],vmul(cx,c.width)),z=vadd(points[k],vmul(ax,a.width));
+   const n=norm(cross(a.tangent,ax)),m=norm(cross(c.tangent,cx));
+   const u=lane*2+k/segments,v=lane*2+(k+1)/segments;
+   b.tri(p,q,r,material,n,m,m,[[u,-1],[v,-1],[v,1]]);
+   b.tri(p,r,z,material,n,m,n,[[u,-1],[v,1],[u,1]]);
   }
  }
- function create({ build }) {
-  const instrumentAir=build(b=>{for(let lane=0;lane<3;lane++)airRibbon(b,lane);});
-  const instrumentBurst=build(burst);
-  return { instrumentAir,instrumentBurst };
+ function create({build}){
+  const instrumentAir=build(b=>{
+   for(let lane=0;lane<3;lane++)ribbon(b,{
+    segments:airSegments,lane,material:29,path:s=>airPath(s,lane-1),
+    width:s=>(.042+.117*ease(.16,.80,s))*(lane===1?1:.76)
+     *(.65+.35*Math.sin(Math.PI*s))*(1-.60*ease(.70,1,s))
+   });
+  });
+  // Three separated, open veils replace the closed torus. Noise dissolves their
+  // edges; they never form a complete ring or an opaque shell around the mouth.
+  const instrumentBurst=build(b=>{
+   for(let lane=0;lane<3;lane++)ribbon(b,{
+    segments:mistSegments,lane,planes:1,material:32,path:s=>mistPath(s,lane-1),
+    width:s=>(.10+.30*s)*(.60+.40*Math.sin(Math.PI*s))*1.75
+   });
+  });
+  return {instrumentAir,instrumentBurst};
  }
- const airflowBounds=Object.freeze({ maximumMobileHeight:1.05,maximumDesktopHeight:1.20,
-  maximumWidth:1.29,maximumRibbonHalfWidth:.057,maximumBend:.028,
-  burstDuration:.52,burstOuterRadiusFactor:1.22*2.85,burstMaximumRise:.728 });
- return { create,airPath,airSegments,airflowBounds };
+ const airflowBounds=Object.freeze({maximumMobileHeight:1.05,maximumDesktopHeight:1.20,
+  maximumWidth:1.12,maximumBend:.020,burstDuration:.52,
+  burstRadiusFactor:3.00,burstMaximumRise:.332,burstMaximumHeight:.57});
+ return {create,airPath,airSegments,airflowBounds};
 });
+
 
 GuziczakModules.define('geometry/instrument', ['geometry/keyboard', 'geometry/airflow'], (keyboard, airflow) => {
  'use strict';
@@ -7197,75 +7265,86 @@ GuziczakModules.define('geometry/instrument', ['geometry/keyboard', 'geometry/ai
  return { ...keyboard, airPath:airflow.airPath, airSegments:airflow.airSegments, create };
 });
 
-GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (math, geometry) => {
+GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math,geometry) => {
  'use strict';
- const { M, C, clamp, ease } = math, zero=[0,0,0];
- function sample(ctx) {
+ const {M,C,clamp,ease}=math,zero=[0,0,0];
+ function sample(ctx){
   const {t,state,meshes,push}=ctx,source=state.instrument||{};
   const emit=typeof ctx.emit==='function'?ctx.emit:()=>{};
   if(t<=.02||state.stage<.001)return {};
   const focus=state.phase==='reclaim'?ease(0,.12,state.phaseProgress)*(1-ease(.94,1,state.phaseProgress)):0;
-  const light=state.stage*ease(.02,.65,t)*(1-.42*focus);
-  push(meshes.instrumentBody,M.I(),0,zero,zero,false,light);
+  const light=state.stage*ease(.02,.65,t)*(1-.35*focus);
+  push(meshes.instrumentBody,M.I(),0,zero,zero,false,light*.90);
   const low=Number.isFinite(source.low)?source.low:28;
   const audible=source.running===true&&source.available!==false&&!source.paused&&!source.muted;
   const levels=audible?source.levels||[]:[],notes=audible?source.notes||[]:[];
   const reduced=!!(ctx.reduced||source.reduced||source.motionScale===0);
   const audioPosition=Number.isFinite(source.position)?source.position:0;
-  const motionClock=reduced?0:Math.max(0,audioPosition);
-  const heard=[];
+  const motionClock=reduced?0:Math.max(0,audioPosition),heard=[];
   for(const note of notes){
-   if(geometry.slotFor(note.midi)<0)continue;
+   const slot=geometry.slotFor(note.midi);if(slot<0)continue;
    const level=clamp(Number(levels[note.midi-low])||0,0,1),attack=clamp(Number(note.attack)||0,0,1);
    const onset=Number.isFinite(note.at)?note.at:audioPosition-(Number.isFinite(note.age)?note.age:0);
    const age=Number.isFinite(note.age)?note.age:audioPosition-onset;
    if(age<0||onset>audioPosition+.0001||!Number.isFinite(age))continue;
-   // Scheduled future notes never light up. Heard attacks appear before their level peaks.
    if(level<.003&&!(age<.16&&attack>=.006))continue;
    const onsetPulse=reduced?0:ease(0,.018,age)*(1-ease(.08,.52,age));
-   // Perceptual display gain leaves the measured audio level and sound untouched.
+   // Display gain keeps quiet heard notes legible without altering measured audio.
    const visualDrive=clamp(Math.pow(level*6.5,.40),0,1);
-   heard.push({note,level,attack,onset,age,onsetPulse,visualDrive});
+   heard.push({note,midi:note.midi,slot,position:geometry.mouth(slot),level,attack,onset,age,
+    onsetPulse,visualDrive,width:.86+.18*visualDrive+.08*onsetPulse,
+    rate:reduced?0:.86+(note.midi%12)*.018,
+    visualEnergy:clamp(.42+.58*visualDrive+.12*onsetPulse,0,1)});
   }
   const visibleFlows=new Set(heard.slice().sort((a,b)=>
-   (b.level+b.attack*.50+b.onsetPulse*.22)-(a.level+a.attack*.50+a.onsetPulse*.22)||a.note.midi-b.note.midi
-  ).slice(0,8).map(n=>n.note.midi));
-  const byMidi=new Map(heard.map(n=>[n.note.midi,n]));
+   (b.level+b.attack*.50+b.onsetPulse*.22)-(a.level+a.attack*.50+a.onsetPulse*.22)||a.midi-b.midi
+  ).slice(0,8).map(n=>n.midi));
+  const byMidi=new Map(heard.map(n=>[n.midi,n]));
   const traceTargets=[],flows=[],bursts=[];
-  let active=0,strongest=null;
+  const flowLight=light*(1-.18*clamp((visibleFlows.size-2)/6,0,1));
   const maximumHeight=(ctx.mobile?1.05:1.20)*(1-.20*focus);
+  let active=0,strongest=null;
+  // @live:organ
+  function heightFor(voice){
+   return maximumHeight*(.50+.40*voice.visualDrive+.10*voice.onsetPulse);
+  }
+  function poseFor(voice,height){
+   return C(M.T(...voice.position),M.Ry(geometry.outwardAngle(voice.slot)),M.S(voice.width,height,voice.width));
+  }
+  function drawFlow(pose,voice){
+   push(meshes.instrumentAir,pose,8,[voice.midi,motionClock,voice.onset],
+    [voice.rate,reduced?1:0,voice.onsetPulse],true,flowLight,0,1,voice.visualEnergy);
+  }
   for(let slot=0;slot<geometry.slots;slot++){
    const midi=geometry.pitches[slot],position=geometry.mouth(slot),objectId='instrument/note/'+midi;
-   traceTargets.push({key:'organ',objectId,world:position.slice(),radius:.20,midi});
+   const key=geometry.keys[slot];
+   // Selection belongs to the fixed pipe mouth, never to a moving packet above it.
+   traceTargets.push({key:'organ',objectId,world:position.slice(),radius:key.radius+.035,midi});
    const voice=byMidi.get(midi);if(!voice)continue;
-   const {note,level,attack,onset,age,onsetPulse,visualDrive}=voice;
-   const noteLight=clamp(.22+.68*visualDrive+.30*onsetPulse,0,1);
+   const {note,level,onset,age,onsetPulse,visualDrive}=voice;
+   const noteLight=clamp(.10+.40*visualDrive+.14*onsetPulse,0,.64);
    const lightScale=geometry.lightScale(slot);
    push(meshes.instrumentLight,C(M.T(...position),M.S(lightScale,1,lightScale)),0,zero,zero,false,light,0,1,noteLight);
    if(visibleFlows.has(midi)){
-    // Fixed path traversals per second prevent envelope changes from reversing the air.
-    const flowRate=reduced?0:.86+(midi%12)*.018;
-    const visualEnergy=clamp(.42+.58*visualDrive+.20*onsetPulse,0,1);
-    // @live:organ
-    const flowHeight = maximumHeight * (.48 + .42 * visualDrive + .10 * onsetPulse);
-    const flowWidth = .94 + .22 * visualDrive + .13 * onsetPulse;
-    const flowPose = C(M.T(...position), M.Ry(geometry.outwardAngle(slot)), M.S(flowWidth, flowHeight, flowWidth));
-    push(meshes.instrumentAir, flowPose, 8, [midi,motionClock,onset], [flowRate,reduced?1:0,onsetPulse], true, light, 0, 1, visualEnergy);
+    const flowHeight = heightFor(voice);
+    const flowPose = poseFor(voice, flowHeight);
+    drawFlow(flowPose, voice);
     // @live:end
-    flows.push({midi,height:flowHeight,width:flowWidth,position:position.slice(),clock:motionClock,
-     age,level,visualDrive,onsetPulse,rate:flowRate,rateUnit:'path/s',direction:'toward mouth, then upward'});
-    traceTargets[traceTargets.length-1].world=M.point(flowPose,geometry.airPath(.69));
+    flows.push({midi,height:flowHeight,width:voice.width,position:position.slice(),clock:motionClock,
+     age,level,visualDrive,onsetPulse,rate:voice.rate,rateUnit:'path/s',direction:'mouth to rising, dissipating air'});
     if(!reduced&&age>0&&age<.52&&onsetPulse>.012){
-     const progress=clamp(age/.52,0,1),mouthRadius=geometry.keys[slot].mouthRadius;
-     const burstRadius=mouthRadius*(1+1.85*Math.pow(progress,.55));
-     const burstRise=.028+.70*Math.pow(progress,.80);
+     const progress=clamp(age/.52,0,1),burstRadius=key.mouthRadius*(1.4+1.6*Math.sqrt(progress));
+     const burstRise=.012+.32*Math.pow(progress,.80),burstHeight=.27+.30*progress;
      const burstPose=C(M.T(position[0],position[1]+burstRise,position[2]),
-      M.Rx(.11*Math.sin(midi)*progress),M.S(burstRadius,burstRadius*.86,burstRadius));
-     push(meshes.instrumentBurst,burstPose,0,[midi,motionClock,onset],[onsetPulse,visualDrive,progress],true,light,0,1,visualEnergy);
-     bursts.push({midi,age,pulse:onsetPulse,radius:burstRadius,rise:burstRise,clock:motionClock,position:position.slice()});
+      M.Ry(geometry.outwardAngle(slot)+Math.sin(midi)*.20),M.S(burstRadius,burstHeight,burstRadius));
+     push(meshes.instrumentBurst,burstPose,0,[midi,motionClock,onset],
+      [onsetPulse,visualDrive,progress],true,flowLight,0,1,voice.visualEnergy);
+     bursts.push({midi,age,pulse:onsetPulse,radius:burstRadius,rise:burstRise,height:burstHeight,
+      clock:motionClock,position:position.slice()});
     }
-    emit('organ',{note:note.name||String(midi),flowHeight,flowClock:motionClock,flowRate,level,visualDrive,onsetPulse,midi},{
-     objectId,priority:34+level*8+onsetPulse*6,labelKey:'organ',focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']});
+    emit('organ',{note:note.name||String(midi),flowHeight,flowClock:motionClock,flowRate:voice.rate,level,visualDrive,onsetPulse,midi},{
+     objectId,priority:34+level*8+onsetPulse*6,labelKey:'organ',
+     focus:['const flowHeight =','const flowPose ='],valueKeys:['note','flowHeight']});
    }
    active++;
    if(!strongest||level>strongest.level)strongest={midi,slot,level,position:position.slice()};
@@ -7278,7 +7357,7 @@ GuziczakModules.define('scene/instrument', ['math', 'geometry/instrument'], (mat
 
 GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
     'use strict';
-    const MAX_RECORDS = 64, MAX_TARGETS = 96, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, MAX_ECHOES = 1, PAINT_INTERVAL = 125;
+    const MAX_RECORDS = 64, MAX_TARGETS = 96, MAX_LINES = 48, MAX_SOURCES = 32, MAX_HISTORY = 3, MAX_ECHOES = 1, PAINT_INTERVAL = 125, SELECTION_DWELL = 450;
     const TEXT = {
         pl: { title: 'Kod na żywo', live: 'LIVE', paused: 'PAUZA', waiting: 'CZEKA', expand: 'Pokaż pełne źródło', collapse: 'Ukryj pełne źródło', more: 'Źródło', less: 'Ukryj', source: 'Rzeczywisty fragment źródła', values: 'Wartości tej klatki', notes: 'Nuty', bands: 'Pasma', silent: 'Dźwięk wyłączony', loading: 'Oczekiwanie na dźwięk', release: 'Wybrzmiewanie', between: 'Cisza między nutami', pin: 'Przypnij ten obiekt', unpin: 'Wróć do automatycznego wyboru', pinned: 'Przypięty obiekt', last: 'Ostatni zapis · oczekiwanie na tę operację', pending: 'Oczekiwanie na wykonanie tej operacji', cpu: 'Fragment wykonany w tej klatce', gpu: 'Źródło shadera użytego w tej klatce', frame: 'klatka', object: 'obiekt', history: 'Ostatnie operacje' },
         en: { title: 'Live code', live: 'LIVE', paused: 'PAUSED', waiting: 'WAITING', expand: 'Show full source', collapse: 'Hide full source', more: 'Source', less: 'Hide', source: 'Actual source excerpt', values: 'Values from this frame', notes: 'Notes', bands: 'Bands', silent: 'Sound off', loading: 'Waiting for audio', release: 'Resonance', between: 'Between notes', pin: 'Pin this object', unpin: 'Return to automatic selection', pinned: 'Pinned object', last: 'Last capture · waiting for this operation', pending: 'Waiting for this operation to execute', cpu: 'Source executed for this frame', gpu: 'Shader source used for this frame', frame: 'frame', object: 'object', history: 'Recent operations' },
@@ -7304,6 +7383,92 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         tokens: { focus: ['letterInstances.push'], values: ['count', 'inside'] },
         gold: { focus: ['float level =', 'level=mix'], values: ['time', 'flow'] }
     };
+    // These helpers use CSS pixels and source text only. They are independent of
+    // the DOM so placement, bounded leaders and source fidelity can be verified.
+    function resolveTraceLayout({ viewport, bounds = null, safe = {}, size = {} } = {}) {
+        if (!viewport || !(viewport.width > 0) || !(viewport.height > 0)) return null;
+        const finite = (value, fallback) => Number.isFinite(value) ? value : fallback;
+        const limit = (value, low, high) => Math.min(Math.max(low, high), Math.max(low, value));
+        const vx = finite(viewport.left, 0), vy = finite(viewport.top, 0);
+        const left = vx + Math.max(0, finite(safe.left, 18)), right = vx + viewport.width - Math.max(0, finite(safe.right, 18));
+        const top = vy + Math.max(0, finite(safe.top, 70)), bottom = vy + viewport.height - Math.max(0, finite(safe.bottom, 16));
+        const width = Math.min(Math.max(1, right-left), Math.max(1, finite(size.width, Math.min(530, right-left))));
+        const height = Math.max(1, finite(size.height, 84)), gap = viewport.width <= 700 ? 14 : 18;
+        const validBounds = bounds && ['left','right','top','bottom'].every(key => Number.isFinite(bounds[key])) && bounds.right >= bounds.left && bounds.bottom >= bounds.top;
+        const middle = validBounds ? (bounds.left+bounds.right)*.5 : (left+right)*.5;
+        const x = limit(middle-width*.5, left, right-width);
+        const requestedTop = validBounds ? bounds.bottom+gap : bottom-height;
+        const y = limit(requestedTop, top, bottom-height);
+        return { left:x,top:y,right:x+width,bottom:y+height,width,height,gap,requestedTop,
+            requiredInset:height+gap+Math.max(0,finite(safe.bottom,16)),
+            placement:validBounds ? Math.abs(y-requestedTop)<.5 ? 'below' : 'clamped' : 'fallback',
+            fits:height<=bottom-top && right>left };
+    }
+    function resolveTraceConnector({ rect, target, viewport, maxLength, labelWidth = 32 } = {}) {
+        if (!rect || !target || !viewport || target.visible === false || ![target.x,target.y].every(Number.isFinite)) return null;
+        const vx=Number.isFinite(viewport.left)?viewport.left:0, vy=Number.isFinite(viewport.top)?viewport.top:0;
+        const right=vx+viewport.width,bottom=vy+viewport.height;
+        if (!(viewport.width>0&&viewport.height>0) || target.x<vx || target.x>right || target.y<vy || target.y>bottom) return null;
+        if (target.x>=rect.left && target.x<=rect.right && target.y>=rect.top && target.y<=rect.bottom) return null;
+        const clamp=(n,a,b)=>Math.min(Math.max(a,b),Math.max(a,n));
+        const bound=Number.isFinite(maxLength)?Math.max(24,maxLength):viewport.width<=700?112:160;
+        const end={x:target.x,y:target.y};
+        let start;
+        if(target.y<rect.top)start={x:clamp(target.x,rect.left+8,rect.right-8),y:rect.top};
+        else if(target.y>rect.bottom)start={x:clamp(target.x,rect.left+8,rect.right-8),y:rect.bottom};
+        else start={x:target.x<rect.left?rect.left:rect.right,y:clamp(target.y,rect.top+8,rect.bottom-8)};
+        let length=Math.hypot(start.x-end.x,start.y-end.y);
+        if(length<=bound)return {kind:'linked',start,end,length,maxLength:bound,label:null};
+        // A remote mouth keeps a labelled local pointer. The label repeats the
+        // selected note, avoiding either an unexplained stub or a giant diagonal.
+        const textWidth=Math.max(18,Math.min(188,labelWidth)),preferred=target.x<(vx+right)*.5?-1:1;
+        let direction=preferred;
+        const room=d=>d<0?target.x-vx:right-target.x;
+        if(room(direction)<textWidth+34)direction=-direction;
+        let label;
+        if(room(direction)>=textWidth+34){
+            start={x:target.x+direction*20,y:clamp(target.y-12,vy+12,bottom-12)};
+            label={x:start.x+direction*5,y:start.y+3,anchor:direction<0?'end':'start'};
+        }else{
+            start={x:target.x,y:target.y-vy>38?target.y-24:target.y+24};
+            label={x:clamp(target.x,vx+textWidth*.5+6,right-textWidth*.5-6),y:start.y+(start.y<target.y?-5:13),anchor:'middle'};
+        }
+        length=Math.hypot(start.x-end.x,start.y-end.y);
+        return {kind:'local',start,end,length,maxLength:bound,label};
+    }
+    function sourceInstructions(lines) {
+        const source=lines.map(line=>line.text).join('\n'), offsets=[];
+        let offset=0;
+        for(const line of lines){offsets.push(offset);offset+=line.text.length+1;}
+        const units=[],braces=[];
+        let start=-1,quote='',escaped=false,paren=0,bracket=0;
+        const rowAt=index=>{let row=0;while(row+1<offsets.length&&offsets[row+1]<=index)row++;return row;};
+        for(let i=0;i<source.length;i++){
+            const ch=source[i],next=source[i+1];
+            if(quote){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch===quote)quote='';continue;}
+            if(ch==='/'&&next==='/'){const end=source.indexOf('\n',i+2);if(end<0)break;i=end;continue;}
+            if(ch==='/'&&next==='*'){const end=source.indexOf('*/',i+2);if(end<0)break;i=end+1;continue;}
+            if(start<0&&/\s/.test(ch))continue;
+            if(start<0)start=i;
+            if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue;}
+            if(ch==='('){paren++;continue;}if(ch===')'){paren=Math.max(0,paren-1);continue;}
+            if(ch==='['){bracket++;continue;}if(ch===']'){bracket=Math.max(0,bracket-1);continue;}
+            if(ch==='{'){
+                const prefix=source.slice(start,i).trim();
+                const block=paren===0&&bracket===0&&/^(?:if|else|for|while|switch|try|catch|finally|do|function|class)\b/.test(prefix);
+                braces.push(block);if(block)start=-1;continue;
+            }
+            if(ch==='}'){if(braces.pop())start=-1;continue;}
+            if(ch===';'&&paren===0&&bracket===0&&braces.every(Boolean)&&start>=0){
+                const first=rowAt(start),last=rowAt(i),text=source.slice(start,i+1);
+                units.push({number:lines[first].number,endNumber:lines[last].number,
+                    column:start-offsets[first],endColumn:i-offsets[last]+1,text});
+                start=-1;
+            }
+        }
+        return units;
+    }
+
     function readSources(doc) {
         const sources = new Map();
         for (const script of Array.from(doc.scripts || [])) {
@@ -7319,6 +7484,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
                             const nonempty = block.lines.filter(line => line.text.trim());
                             const indent = nonempty.length ? Math.min(...nonempty.map(line => line.text.match(/^\s*/)[0].length)) : 0;
                             block.lines = block.lines.map(line => ({ number: line.number, text: line.text.slice(indent) }));
+                            block.instructions = sourceInstructions(block.lines);
                             sources.set(block.key, block);
                         }
                         block = null;
@@ -7366,14 +7532,16 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         const svg = name => doc.createElementNS('http://www.w3.org/2000/svg', name);
         const tether = svg('svg'); tether.setAttribute('class', 'live-trace-tether'); tether.setAttribute('aria-hidden', 'true'); tether.setAttribute('focusable', 'false'); tether.setAttribute('hidden', '');
         const thread = svg('path'); thread.setAttribute('class', 'live-trace-thread'); tether.appendChild(thread);
-        const halo = svg('circle'); halo.setAttribute('class', 'live-trace-target-halo'); halo.setAttribute('r', '7'); tether.appendChild(halo);
-        const point = svg('circle'); point.setAttribute('class', 'live-trace-target'); point.setAttribute('r', '2'); tether.appendChild(point);
+        const halo = svg('path'); halo.setAttribute('class', 'live-trace-target-halo'); tether.appendChild(halo);
+        const point = svg('circle'); point.setAttribute('class', 'live-trace-target'); point.setAttribute('r', '1.6'); tether.appendChild(point);
+        const targetLabel = svg('text'); targetLabel.setAttribute('class', 'live-trace-target-label'); tether.appendChild(targetLabel);
         doc.body.appendChild(tether);
         const expanded = { intro: false, page: false };
         let mode = 'intro', lang = '', dictionary = TEXT.pl, frame = {}, frameMs = 0, frameOpen = false;
         let destroyed = false, suspended = false, routeBlocked = false, visible = true, ready = false, paused = false, stale = false;
         let current = null, pinned = null, lastPaint = -Infinity, lastSwitch = -Infinity, lastAudio = null;
-        let sourceSignature = '', historyVersion = 0, paintedHistoryVersion = -1, dockAnchor = null, dockRect = null, geometryDirty = true;
+        let sourceSignature = '', historyVersion = 0, paintedHistoryVersion = -1, dockRect = null, geometryDirty = true;
+        let sceneLayout = null, sceneLayoutSignature = '', resolvedLayout = null, lastConnector = null;
         let echoSignature = '', echoEntries = [];
         let snapshots = [], excerptLines = [], frameCount = 0, emissionCount = 0, droppedCount = 0, paintCount = 0, selectionCount = 0, tetherVisible = false;
         const now = () => win.performance && typeof win.performance.now === 'function' ? win.performance.now() : Date.now();
@@ -7381,7 +7549,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         const samePin = record => !!pinned && record.key === pinned.key && (!pinned.objectId || record.objectId === pinned.objectId);
         const gpu = record => record && (record.key === 'shader' || record.key === 'gold');
         const historyId = record => record.key + '/' + record.labelKey;
-        function hideTether() { tetherVisible = false; tether.setAttribute('hidden', ''); }
+        function hideTether() { tetherVisible = false; lastConnector = null; tether.setAttribute('hidden', ''); }
         function routeIsBlocked() { return routeBlocked || doc.body.classList.contains('route-cv') || doc.body.classList.contains('route-score'); }
         function updateVisibility() {
             const hidden = !ready || !visible || suspended || !!doc.hidden || routeIsBlocked();
@@ -7407,6 +7575,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         // State labels bypass source/value throttling, including the final frame before pause.
         function paintControls() {
             const open = expanded[mode], stopped = paused || suspended;
+            if (root.dataset.waiting !== String(stale)) geometryDirty = true;
             content.hidden = !open; root.dataset.expanded = String(open); root.dataset.paused = String(stopped);
             root.dataset.pinned = String(!!pinned); root.dataset.waiting = String(stale);
             text(status, stopped ? dictionary.paused : stale ? dictionary.waiting : dictionary.live);
@@ -7424,6 +7593,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             mode = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro'; root.dataset.mode = mode;
             const parent = mode === 'page' ? doc.getElementById('artifact-stage') : doc.body;
             if (parent && root.parentNode !== parent) parent.appendChild(root);
+            if (mode === 'page') clearFloatingLayout();
             geometryDirty = true; paintControls(); updateVisibility();
         }
         function compactValue(value) {
@@ -7449,16 +7619,17 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             const source = sources.get(record.key); if (!source) return [];
             const picked = [], preferred = record.focus.length ? record.focus : (PROFILES[record.key]?.focus || []);
             for (const part of preferred) {
-                const found = source.lines.find(line => line.text.includes(part));
+                const found = source.instructions.find(unit => unit.text.includes(part));
                 if (found && !picked.includes(found)) picked.push(found);
                 if (picked.length === 3) break;
             }
-            if (!picked.length) {
-                const first = source.lines.find(line => line.text.trim() && !/^\s*(\/\/|[{}]\s*$)/.test(line.text));
-                if (first) picked.push(first);
-            }
-            picked.sort((a, b) => a.number - b.number);
-            return mode === 'page' ? picked.slice(-1) : picked.slice(-2);
+            if (!picked.length && source.instructions.length) picked.push(source.instructions[0]);
+            picked.sort((a,b) => a.number-b.number || a.column-b.column);
+            // A whole instruction stays intact, including a multi-line transform.
+            // A second short instruction can provide context without clipping either.
+            const selected = picked.slice(-2);
+            return mode === 'intro' && selected.length === 2 && selected.every(unit => unit.text.length <= 48 && unit.number === unit.endNumber)
+                ? selected : selected.slice(-1);
         }
         function syntax(parent, source) {
             // Tokens are emitted as text nodes. Source is never treated as HTML or evaluated.
@@ -7478,7 +7649,8 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             sourceSignature = next; excerptLines = sourceFocus(record); clear(excerpt);
             for (let index = 0; index < excerptLines.length; index++) {
                 const line = excerptLines[index];
-                const row = node('div', 'live-trace-excerpt-line' + (index === excerptLines.length - 1 ? ' is-active' : ''), excerpt); row.dataset.line = String(line.number);
+                const row = node('div', 'live-trace-excerpt-line' + (index === excerptLines.length - 1 ? ' is-active' : ''), excerpt); row.dataset.line = String(line.number); row.dataset.endLine = String(line.endNumber);
+                row.dataset.column = String(line.column); row.dataset.endColumn = String(line.endColumn);
                 syntax(node('code', '', row), line.text.trim());
             }
             geometryDirty = true;
@@ -7494,9 +7666,9 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             echoSignature = signature; echoEntries = []; clear(echo); echo.hidden = !line;
             if (line) {
                 const row = node('div', 'live-trace-echo-line', echo);
-                row.dataset.key = prior.key; row.dataset.line = String(line.number); row.dataset.frame = String(prior.frame.id);
+                row.dataset.key = prior.key; row.dataset.line = String(line.number); row.dataset.endLine = String(line.endNumber); row.dataset.column = String(line.column); row.dataset.endColumn = String(line.endColumn); row.dataset.frame = String(prior.frame.id);
                 node('code', '', row).textContent = line.text.trim();
-                echoEntries.push({ key: prior.key, line: line.number, frameId: prior.frame.id });
+                echoEntries.push({ key: prior.key, line: line.number, endLine: line.endNumber, column:line.column,endColumn:line.endColumn,frameId: prior.frame.id });
             }
             geometryDirty = true;
         }
@@ -7507,16 +7679,17 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             else { snapshots.push(record); if (snapshots.length > MAX_HISTORY) snapshots.shift(); historyVersion++; }
         }
         function paintHistory() {
-            if (paintedHistoryVersion === historyVersion) return;
-            paintedHistoryVersion = historyVersion; clear(history);
+            const version = historyVersion + '/' + current?.id + '/' + !!current?.pending;
+            if (paintedHistoryVersion === version) return;
+            paintedHistoryVersion = version; clear(history);
             // Latest capture is first; preserve the reader's own scroll position.
             for (let index = snapshots.length - 1; index >= 0; index--) {
                 const record = snapshots[index], source = sources.get(record.key); if (!source) continue;
-                const isCurrent = index === snapshots.length - 1;
+                const isCurrent = !!current && !current.pending && record.id === current.id && historyId(record) === historyId(current);
                 const block = node('div', 'live-trace-code' + (isCurrent ? ' is-current' : ''), history); block.dataset.key = record.key;
                 const caption = node('div', 'live-trace-code-label', block);
                 text(caption, label(record) + ' · ' + (gpu(record) ? 'GLSL' : 'JS'));
-                const focused = new Set(sourceFocus(record).map(line => line.number));
+                const focused = new Set(sourceFocus(record).flatMap(unit => Array.from({length:unit.endNumber-unit.number+1},(_,i)=>unit.number+i)));
                 for (const line of source.lines) {
                     const row = node('div', 'live-trace-line' + (isCurrent && focused.has(line.number) ? ' is-relevant' : ''), block);
                     const number = node('span', 'live-trace-line-number', row); number.textContent = String(line.number); number.setAttribute('aria-hidden', 'true');
@@ -7550,10 +7723,40 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             if (available && running && !notes.length) text(audioValue, peak > .015 ? dictionary.release : dictionary.between);
             footer.dataset.running = String(running);
         }
+        function clearFloatingLayout() {
+            for (const name of ['left','top','bottom','width','transform']) root.style.removeProperty(name);
+            doc.body.style.removeProperty('--trace-quench-bottom');
+            resolvedLayout = null; delete root.dataset.placement;
+        }
+        function setSceneLayout(input) {
+            if (destroyed) return false;
+            if (!input || !input.viewport || !(input.viewport.width > 0 && input.viewport.height > 0)) {
+                sceneLayout = null; sceneLayoutSignature = ''; clearFloatingLayout(); geometryDirty = true; return false;
+            }
+            const pick = (value, fallback = 0) => Number.isFinite(value) ? value : fallback;
+            const viewport = {left:pick(input.viewport.left),top:pick(input.viewport.top),width:input.viewport.width,height:input.viewport.height};
+            const bounds = input.bounds && ['left','right','top','bottom'].every(k => Number.isFinite(input.bounds[k])) ? {left:input.bounds.left,right:input.bounds.right,top:input.bounds.top,bottom:input.bounds.bottom} : null;
+            const safe = {left:pick(input.safe?.left,18),right:pick(input.safe?.right,18),top:pick(input.safe?.top,70),bottom:pick(input.safe?.bottom,16)};
+            sceneLayout = {viewport,bounds,safe};
+            const signature = JSON.stringify(sceneLayout,(_key,value) => typeof value === 'number' ? Math.round(value*4)/4 : value);
+            if (signature !== sceneLayoutSignature) {sceneLayoutSignature = signature;geometryDirty = true;}
+            return true;
+        }
         function measureDock() {
-            if (root.hidden || typeof dot.getBoundingClientRect !== 'function') return;
-            const rect = dot.getBoundingClientRect(); dockRect = root.getBoundingClientRect();
-            dockAnchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            if (root.hidden || typeof root.getBoundingClientRect !== 'function') return;
+            if (mode === 'intro' && sceneLayout) {
+                const available = Math.max(1,sceneLayout.viewport.width-sceneLayout.safe.left-sceneLayout.safe.right);
+                const width = Math.min(530,available);
+                root.style.setProperty('width',width+'px'); root.style.setProperty('transform','none');
+                const measured = root.getBoundingClientRect();
+                resolvedLayout = resolveTraceLayout({...sceneLayout,size:{width,height:measured.height || 84}});
+                if (resolvedLayout) {
+                    root.style.setProperty('left',resolvedLayout.left+'px'); root.style.setProperty('top',resolvedLayout.top+'px'); root.style.setProperty('bottom','auto');
+                    root.dataset.placement = resolvedLayout.placement;
+                    doc.body.style.setProperty('--trace-quench-bottom',Math.max(16,sceneLayout.viewport.top+sceneLayout.viewport.height-resolvedLayout.top+12)+'px');
+                    dockRect = {...resolvedLayout};
+                }
+            } else { resolvedLayout = null; dockRect = root.getBoundingClientRect(); }
             geometryDirty = false;
         }
         function projectObject(objectId, screen) {
@@ -7570,16 +7773,27 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             if (root.hidden || stale || !current || current.pending) { hideTether(); return; }
             const target = targets.get(current.objectId) || targets.get(current.key) || current.screen;
             if (!target || !target.visible) { hideTether(); return; }
-            if (geometryDirty || !dockAnchor) measureDock();
-            if (!dockAnchor || !dockRect) { hideTether(); return; }
+            if (geometryDirty || !dockRect) measureDock();
+            if (!dockRect) { hideTether(); return; }
             const width = win.innerWidth || doc.documentElement.clientWidth, height = win.innerHeight || doc.documentElement.clientHeight;
-            if (!width || !height || target.x < 0 || target.x > width || target.y < 0 || target.y > height || (target.x >= dockRect.left && target.x <= dockRect.right && target.y >= dockRect.top && target.y <= dockRect.bottom)) { hideTether(); return; }
-            const sx = dockAnchor.x, sy = dockAnchor.y, tx = target.x, ty = target.y, direction = ty < sy ? -1 : 1;
-            const bend = Math.max(25, Math.min(105, Math.abs(ty - sy) * .42));
-            tether.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-            thread.setAttribute('d', 'M' + sx.toFixed(1) + ',' + sy.toFixed(1) + ' C' + sx.toFixed(1) + ',' + (sy + direction * bend).toFixed(1) + ' ' + tx.toFixed(1) + ',' + (ty - direction * bend).toFixed(1) + ' ' + tx.toFixed(1) + ',' + ty.toFixed(1));
-            for (const circle of [halo, point]) { circle.setAttribute('cx', String(tx)); circle.setAttribute('cy', String(ty)); }
-            tether.removeAttribute('hidden'); tetherVisible = true;
+            const viewport = {left:0,top:0,width,height};
+            const note = current.values.find(value => value.name === 'note')?.value;
+            const caption = note || label(current);
+            const connector = resolveTraceConnector({rect:dockRect,target,viewport,labelWidth:caption.length*6.2});
+            if (!connector) {hideTether();return;}
+            const {start,end} = connector, x=end.x, y=end.y, r=7, inset=3;
+            tether.setAttribute('viewBox','0 0 '+width+' '+height);
+            thread.setAttribute('d','M'+start.x.toFixed(1)+','+start.y.toFixed(1)+' L'+x.toFixed(1)+','+y.toFixed(1));
+            // Four open corners frame the precise object point without adding a
+            // bright full ring to the circular keyboard.
+            halo.setAttribute('d',`M${x-r},${y-inset} V${y-r} H${x-inset} M${x+inset},${y-r} H${x+r} V${y-inset} M${x+r},${y+inset} V${y+r} H${x+inset} M${x-inset},${y+r} H${x-r} V${y+inset}`);
+            point.setAttribute('cx',String(x)); point.setAttribute('cy',String(y));
+            if (connector.label) {
+                text(targetLabel,caption); targetLabel.setAttribute('x',String(connector.label.x)); targetLabel.setAttribute('y',String(connector.label.y));
+                targetLabel.setAttribute('text-anchor',connector.label.anchor); targetLabel.removeAttribute('hidden');
+            } else {text(targetLabel,'');targetLabel.setAttribute('hidden','');}
+            lastConnector = {...connector,caption:connector.label?caption:null,objectId:current.objectId};
+            tether.dataset.kind = connector.kind; tether.removeAttribute('hidden'); tetherVisible = true;
         }
         function paint(audio, force = false) {
             paintControls();
@@ -7635,7 +7849,11 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             let candidate = bestRecord(records, record => !pinned || samePin(record));
             if (candidate && !pinned) {
                 const retained = current && records.get(current.id);
-                if (retained && candidate.key !== retained.key && candidate.priority < retained.priority + 12 && (candidate.priority <= retained.priority + 3 || frameMs - lastSwitch < 300)) candidate = retained;
+                if (retained) {
+                    const sameFamily = candidate.key === retained.key && candidate.labelKey === retained.labelKey;
+                    if (sameFamily && candidate.objectId !== retained.objectId && (frameMs-lastSwitch < SELECTION_DWELL || candidate.priority < retained.priority+1.25)) candidate = retained;
+                    else if (!sameFamily && candidate.priority < retained.priority+12 && (candidate.priority <= retained.priority+3 || frameMs-lastSwitch < 300)) candidate = retained;
+                }
             }
             let switched = false;
             if (candidate) {
@@ -7688,12 +7906,12 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             if (destroyed) return;
             records.clear(); recent.clear(); targets.clear(); frameOpen = false; current = pinned = null; ready = false; stale = false;
             sourceSignature = ''; echoSignature = ''; echoEntries = []; echo.hidden = true; snapshots = []; excerptLines = []; historyVersion++; paintedHistoryVersion = -1; clear(excerpt); clear(echo); clear(history);
-            lastPaint = lastSwitch = -Infinity; lastAudio = null; geometryDirty = true; paintControls(); updateVisibility();
+            lastPaint = lastSwitch = -Infinity; lastAudio = null; sceneLayout = null; sceneLayoutSignature = ''; lastConnector = null; clearFloatingLayout(); geometryDirty = true; paintControls(); updateVisibility();
         }
         function destroy() {
             if (destroyed) return;
             destroyed = true; scope.dispose(); records.clear(); recent.clear(); targets.clear(); sources.clear(); snapshots = []; echoEntries = []; lastAudio = current = pinned = null;
-            root.remove(); tether.remove(); doc.body.classList.remove('live-trace-open-intro', 'live-trace-visible-intro', 'live-trace-visible-page');
+            clearFloatingLayout(); root.remove(); tether.remove(); doc.body.classList.remove('live-trace-open-intro', 'live-trace-visible-intro', 'live-trace-visible-page');
         }
         scope.on(button, 'click', () => { expanded[mode] = !expanded[mode]; geometryDirty = true; paintControls(); updateVisibility(); paint(lastAudio, true); paintTether(); announceLayout(); });
         scope.on(objectButton, 'click', () => { if (current) { if (pinned) unpin(); else pin(current.key, current.objectId); } });
@@ -7706,11 +7924,11 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         if (win.visualViewport) { scope.on(win.visualViewport, 'resize', reposition); scope.on(win.visualViewport, 'scroll', reposition); }
         localize(); mount('intro');
         return {
-            beginFrame, emit, endFrame, setSuspended, reset, destroy, projectObject, setTargets, pin, unpin, setFocus, selection, executed,
-            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, waiting: stale, activeKey: current && current.key, activeObjectId: current && current.objectId, pinned: pinned && { ...pinned }, expanded: expanded[mode], compactLines: excerptLines.map(line => line.number), ambientEchoes: echoEntries.map(item => ({ ...item })), maxEchoes: MAX_ECHOES, records: records.size, history: snapshots.length, targets: targets.size, tether: tetherVisible, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: MAX_HISTORY, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
+            beginFrame, emit, endFrame, setSuspended, reset, destroy, projectObject, setTargets, setSceneLayout, pin, unpin, setFocus, selection, executed,
+            diagnostics: () => ({ sourceKeys: Array.from(sources.keys()), mode, ready, visible: !root.hidden, suspended, paused, waiting: stale, activeKey: current && current.key, activeObjectId: current && current.objectId, pinned: pinned && { ...pinned }, expanded: expanded[mode], compactLines: excerptLines.flatMap(unit => Array.from({length:unit.endNumber-unit.number+1},(_,i)=>unit.number+i)), compactInstructions: excerptLines.map(unit=>({text:unit.text,line:unit.number,endLine:unit.endNumber,column:unit.column,endColumn:unit.endColumn})), layout: resolvedLayout && {...resolvedLayout}, connector: lastConnector && JSON.parse(JSON.stringify(lastConnector)), minSelectionDwellMs: SELECTION_DWELL, ambientEchoes: echoEntries.map(item => ({ ...item })), maxEchoes: MAX_ECHOES, records: records.size, history: snapshots.length, targets: targets.size, tether: tetherVisible, frames: frameCount, emissions: emissionCount, dropped: droppedCount, paints: paintCount, selections: selectionCount, maxRecords: MAX_RECORDS, maxHistory: MAX_HISTORY, maxPaintHz: 1000 / PAINT_INTERVAL, scopeSize: scope.size, frame: { ...frame }, destroyed })
         };
     }
-    return { create };
+    return { create,resolveTraceLayout,resolveTraceConnector,sourceInstructions };
 });
 
 
