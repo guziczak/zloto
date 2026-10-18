@@ -53,9 +53,50 @@ They verify that a marker remains on its exact target, that a source cannot stay
 live after its operation stops, and that clearing the intro layout removes its
 placement. The cinema-to-exhibit projection is checked at the handoff frame.
 
+Water-control checks execute the production motion module, impulse detector,
+water driver, engine, clock and DOM controllers against controls parsed from the
+current HTML. They verify that both sensor permission requests begin within the
+same click, before either promise settles, and that a click or grant cannot
+produce a wave. Synthetic orientation samples move the water; a measured
+acceleration sequence produces a single sensor impulse. Disabling clears tilt,
+target, speed, acceleration and any pending impulse immediately, while existing
+water waves remain free to decay. Fresh orientation events cannot prolong an old
+acceleration force.
+
+Permission cases cover denial, absent APIs, an insecure context, one available
+sensor, a thrown or rejected request, and APIs that emit only null/NaN data.
+Controlled timers check the no-data warning and disappearance of status messages.
+Engine integration checks cover one button handler, removal of the manual wave
+shortcut/API and cooling panel, initialization, language changes, show completion,
+replay and graphics failure with the removed DOM elements absent. With reduced
+motion enabled, only a successful deliberate sensor activation unlocks the
+initial water pause; ordinary sensor events preserve an explicit pause and cannot
+replay an impulse later. A controlled thermal response also verifies that the
+real engine and clock still apply the cooling rate and restore normal playback
+speed outside cooling. Graphics, audio and the thermal response are substituted
+in these engine integration fixtures; existing scene tests exercise the real
+cooling simulation separately.
+
+Run just these water checks with:
+
+```bash
+node tests/runtime-regression.cjs --only=water
+```
+
 DOM and WebGL uploads are substituted in the Node checks; these do not validate
 browser CSS layout, font wrapping in a real browser, visible steam motion,
-fragment-depth clipping or hardware audio.
+fragment-depth clipping or hardware audio. Sensor events, permission decisions
+and timers are simulated. These checks do not test a physical phone, native
+permission dialogs or browser transient-activation rules on a device.
+
+For the water controls, also inspect a real mobile browser: the phone button
+should remain in the top playback toolbar during and after the show, with a
+comfortable touch target and a highlighted active state. Grant sensor access
+while holding the phone still, then tilt and move it; only the physical movement
+should disturb the water. Repeat with denied permissions and with reduced motion
+enabled. Disable while the phone is tilted: existing waves should settle, with
+no continuing force or delayed pulse. The scene must remain uncovered during
+cooling, and status messages should disappear below the toolbar.
 
 For native shader compilation on Linux with EGL and GLES libraries installed:
 

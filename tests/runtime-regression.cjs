@@ -991,6 +991,343 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
     echoExecutionFrames: true, pausedClockStable: true, pendingHasNoEcho: true, manualHistoryScroll: true, resetClears: true };
 });
 
-console.log(JSON.stringify({ htmlPath, baseline, only: only || undefined, findings, failures,
-  limitations: ['No browser layout or interactive visual inspection.', 'No real GLSL compilation or WebGL driver execution.', 'No audio hardware or perceived synchronization check.'] }, null, 2));
-process.exitCode = failures.length ? 1 : 0;
+// Water controls cross the DOM, asynchronous permission APIs and the render clock.
+// Use isolated production modules, deterministic browser clocks and the actual
+// HTML controls. No permission prompt or physical phone is provided by Node.
+const asynchronousChecks = [];
+function checkAsync(name, fn) {
+  if (!only || name.includes(only)) asynchronousChecks.push({ name, fn });
+}
+const moduleDeclarations = [...main.slice(0, boot).matchAll(/^GuziczakModules\.define\((['"])([^'"]+)\1/gm)];
+const moduleSources = new Map(moduleDeclarations.map((entry, i) => [entry[2],
+  main.slice(entry.index, moduleDeclarations[i + 1]?.index ?? boot)]));
+const localeMessages = JSON.parse(scripts.find(script => /id=['"]site-locales['"]/.test(script.attrs)).textContent).messages;
+const bodyMarkup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+  .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '').match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)[1];
+const removedWaterIds = ['quench-controls', 'water-surge', 'water-wave', 'quench-wave', 'water-pause', 'quench-preview', 'motion-mobile', 'quench-sensors'];
+function populateProductionDom(doc) {
+  doc.body.replaceChildren();
+  const stack = [doc.body], voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+  for (const token of bodyMarkup.matchAll(/<!--[\s\S]*?-->|<\/?[a-z][\w:-]*\b[^>]*>|[^<]+/gi)) {
+    const text = token[0]; if (text.startsWith('<!--')) continue;
+    const tag = text.match(/^<(\/)?([\w:-]+)/);
+    if (!tag) { stack.at(-1).appendChild(doc.createTextNode(text)); continue; }
+    const name = tag[2].toLowerCase();
+    if (tag[1]) { for (let i = stack.length - 1; i > 0; i--) if (stack[i].tagName.toLowerCase() === name) { stack.length = i; break; } continue; }
+    const el = doc.createElement(name);
+    for (const attribute of text.slice(tag[0].length).matchAll(/([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
+      const key = attribute[1], value = attribute[2] ?? attribute[3] ?? attribute[4] ?? '';
+      el.setAttribute(key, value);
+      if (['hidden', 'disabled', 'inert'].includes(key)) el[key] = true;
+      if (['value', 'type'].includes(key)) el[key] = value;
+    }
+    stack.at(-1).appendChild(el);
+    if (!voidTags.has(name) && !/\/>$/.test(text)) stack.push(el);
+  }
+  doc.createRange = () => ({ selectNodeContents(el) { this.el = el; }, getBoundingClientRect() { return this.el.getBoundingClientRect(); } });
+}
+function waterEnvironment({ reduced = false, orientation = {}, acceleration = {}, secure = true } = {}) {
+  const { win, doc } = makeDom(); populateProductionDom(doc);
+  win.isSecureContext = secure; win.DeviceOrientationEvent = orientation; win.DeviceMotionEvent = acceleration;
+  win.screen = { orientation: { angle: 0 } }; win.scrollTo = () => {};
+  const preference = Object.assign(new EventTarget(), { matches: reduced });
+  win.matchMedia = query => query.includes('prefers-reduced-motion') ? preference : Object.assign(new EventTarget(), { matches: false });
+  win.IntersectionObserver = win.ResizeObserver = class { observe() {} disconnect() {} };
+  win.getComputedStyle = el => ({ ...el.style, display: el.hidden ? 'none' : 'block', fontFamily: 'sans-serif', fontSize: '24px', letterSpacing: '0px' });
+  const timers = new Map(), frames = new Map(), errors = []; let serial = 0, language = 'pl';
+  win.setTimeout = (fn, delay = 0) => { const id = ++serial; timers.set(id, { fn, at: win.performance.now() + delay }); return id; };
+  win.clearTimeout = id => timers.delete(id);
+  win.requestAnimationFrame = fn => { const id = ++serial; frames.set(id, fn); return id; };
+  win.cancelAnimationFrame = id => frames.delete(id);
+  const i18n = { t: key => localeMessages[language][key] ?? localeMessages.pl[key] ?? key };
+  win.GUZICZAK_I18N = i18n;
+  const definitions = new Map(), instances = new Map(), overrides = new Map();
+  const isolatedContext = vm.createContext({ console: { ...console, error: (...args) => errors.push(args.map(String).join(' ')) },
+    atob, btoa, URL, URLSearchParams, TextDecoder, TextEncoder, Event, EventTarget, CustomEvent: DetailEvent, Element: FakeElement,
+    performance: win.performance, window: win, document: doc, location: win.location,
+    innerWidth: win.innerWidth, innerHeight: win.innerHeight, devicePixelRatio: 1,
+    setTimeout: win.setTimeout, clearTimeout: win.clearTimeout, setInterval, clearInterval,
+    requestAnimationFrame: win.requestAnimationFrame, cancelAnimationFrame: win.cancelAnimationFrame,
+    getComputedStyle: win.getComputedStyle, GUZICZAK_I18N: i18n,
+    GuziczakModules: { define(name, dependencies, factory) { definitions.set(name, { dependencies, factory }); } }
+  });
+  function get(name) {
+    if (overrides.has(name)) return overrides.get(name);
+    if (!instances.has(name)) {
+      if (!definitions.has(name)) { assert(moduleSources.has(name), 'Production module exists: ' + name); vm.runInContext(moduleSources.get(name), isolatedContext, { filename: 'water-check:' + name }); }
+      const entry = definitions.get(name); instances.set(name, entry.factory(...entry.dependencies.map(get)));
+    }
+    return instances.get(name);
+  }
+  function advanceTo(time) {
+    assert(time >= win.performance.now(), 'Test clock is monotonic');
+    while (true) {
+      const due = [...timers].filter(([, entry]) => entry.at <= time).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!due) break;
+      timers.delete(due[0]); win.advanceTime(due[1].at); due[1].fn();
+    }
+    win.advanceTime(time);
+  }
+  function frame(dt = 16) { advanceTo(win.performance.now() + dt); const pending = [...frames.values()]; frames.clear(); for (const fn of pending) fn(win.performance.now()); }
+  function sensor(type, data, dt = 16) { advanceTo(win.performance.now() + dt); win.dispatchEvent(Object.assign(new Event(type), data)); }
+  const button = doc.getElementById('motion'), originalListen = button?.addEventListener.bind(button); let clickHandlers = 0;
+  if (button) button.addEventListener = (type, ...args) => { if (type === 'click') clickHandlers++; return originalListen(type, ...args); };
+  return { win, doc, get, overrides, button, errors, frame, advanceTo, sensor,
+    click: () => button.dispatchEvent(new Event('click')),
+    clickHandlers: () => clickHandlers,
+    language(value) { language = value; doc.documentElement.lang = value; win.dispatchEvent(new DetailEvent('guziczak:languagechange', { detail: { language: value } })); },
+    status: () => doc.getElementById('motion-status')?.textContent,
+    t: i18n.t };
+}
+async function settlePermissions() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
+function noForcing(sample, label) {
+  for (const key of ['tilt', 'target', 'acceleration']) assert.deepEqual(Array.from(sample[key]), [0, 0], label + ': neutral ' + key);
+  assert.equal(sample.speed, 0, label + ': no speed'); assert.equal(sample.impulse, null, label + ': no queued impulse');
+}
+function physicalPulse(env) {
+  env.sensor('devicemotion', { acceleration: { x: 0, y: 0, z: 0 } });
+  env.sensor('devicemotion', { acceleration: { x: 16, y: 0, z: 0 } });
+  env.sensor('devicemotion', { acceleration: { x: 18, y: 0, z: 0 } });
+}
+function mountWaterEngine(options = {}) {
+  const env = waterEnvironment(options), rendered = [];
+  const noop = () => {};
+  // Keep engine, clock, motion/impulse, water driver, DOM controller, exhibit UI
+  // and trace real. Substitute graphics, audio and a controlled thermal response.
+  env.overrides.set('render/device', { createDevice() {
+    if (options.graphicsFailure) throw Error('Controlled WebGL initialization failure');
+    return { gl: { flush: noop }, counts: () => ({}), surface: () => ({}), disposed: false, dispose() { this.disposed = true; } };
+  } });
+  env.overrides.set('geometry/brand', { create: () => ({}) });
+  env.overrides.set('geometry/catalog', { createGeometry: () => ({ triangleCount: 0 }) });
+  env.overrides.set('scene/composer', { createScene: () => ({ sample: () => ({ commands: [], vesselTransform: env.get('math').M.I(), assembly: {} }) }) });
+  env.overrides.set('scene/camera', { sampleCamera: () => ({}) });
+  env.overrides.set('render/renderer', { createRenderer: () => ({ ready: () => true, render: frame => rendered.push(frame), project: value => value, suspend: noop, stats: () => ({}) }) });
+  env.overrides.set('render/exhibit', { create: () => ({ render: noop, suspend: noop, stats: () => ({}) }) });
+  env.overrides.set('audio/music', { createMusic: () => ({ attachEffects: noop, finish: noop, ready: noop, begin: noop, timelinePause: noop,
+    selectTrack: noop, setVolume: noop, destroy: noop, diagnostics: () => ({}), instrumentState: () => null }) });
+  env.overrides.set('audio/foley', {});
+  env.overrides.set('audio/score', { create: () => ({ finish: noop, reset: noop, setScene: noop, setPaused: noop, setSuspended: noop, destroy: noop, diagnostics: () => ({}) }) });
+  env.overrides.set('interaction/quench', { create: () => ({ sample: () => ({ coolingRate: options.coolingRate ?? 1 }), reset: noop, destroy: noop, diagnostics: () => ({}) }) });
+  const player = env.get('app/engine').mount(env.win, env.doc);
+  return { ...env, player, rendered };
+}
+
+if (!baseline) check('water-control-surface-and-locales', () => {
+  const env = waterEnvironment();
+  for (const id of removedWaterIds) {
+    assert.equal(env.doc.getElementById(id), null, 'Removed water control absent from HTML: ' + id);
+    assert(!html.includes(id), 'No stale CSS, listener or initialization reference: ' + id);
+  }
+  assert(!registry.graph().some(entry => entry.name === 'ui/quench' || entry.dependencies.includes('ui/quench')), 'Cooling UI module and dependency removed');
+  assert.equal(env.doc.querySelectorAll('#motion').length, 1, 'Exactly one sensor button');
+  assert.equal(env.button.tagName, 'BUTTON');
+  assert(env.button.closest('#intro-controls'), 'Sensor button belongs to the playback toolbar');
+  assert(env.button.querySelector('svg'), 'Sensor button retains a visible vector icon');
+  const obsoleteHint = /\[W\]|(?:wave|fali|falę|Wzburz wodę|Wellen?)[^.!\n]{0,45}(?:button|przycisk|Taste)|(?:button|przycisk|Taste)[^.!\n]{0,45}(?:wave|fali|falę|Wzburz wodę|Wellen?)/i;
+  for (const language of ['pl', 'en', 'de']) for (let key = 0; key <= 10; key++) {
+    const value = localeMessages[language]['engine.' + key];
+    assert(typeof value === 'string' && value.trim(), language + ': translated sensor message ' + key);
+    assert(!obsoleteHint.test(value), language + ': sensor text cannot refer to a removed wave button or shortcut');
+  }
+  return { removedControls: removedWaterIds.length, sensorButtons: 1, languages: ['pl', 'en', 'de'], limitation: 'DOM structure only; touch target and visual placement require browser inspection.' };
+});
+
+if (!baseline) checkAsync('water-motion-permission-click-without-wave', async () => {
+  const requests = []; let grantOrientation, grantAcceleration;
+  const env = waterEnvironment({ orientation: { requestPermission() { requests.push('orientation'); return new Promise(resolve => { grantOrientation = resolve; }); } },
+    acceleration: { requestPermission() { requests.push('acceleration'); return new Promise(resolve => { grantAcceleration = resolve; }); } } });
+  const motion = env.get('input/motion').create(env.win, env.doc); let enabled = 0;
+  env.win.addEventListener('guziczak:motion-enabled', () => enabled++);
+  try {
+    assert.equal(env.clickHandlers(), 1, 'Motion owns exactly one click handler');
+    const offLabel = env.button.getAttribute('aria-label');
+    env.click();
+    assert.deepEqual(requests, ['orientation', 'acceleration'], 'Both permission requests begin in the click stack before either resolves');
+    assert.equal(enabled, 0); noForcing(motion.sample(.1), 'Pending permission');
+    env.click(); assert.equal(requests.length, 2, 'Repeated tap while requesting cannot duplicate permission requests');
+    grantOrientation('granted'); await settlePermissions();
+    assert.equal(motion.diagnostics().active, false, 'Wait for the acceleration decision as well');
+    grantAcceleration('granted'); await settlePermissions();
+    assert.equal(motion.diagnostics().active, true); assert.equal(enabled, 1, 'Successful enable produces one activation event');
+    noForcing(motion.sample(.1), 'Grant without physical movement');
+    assert.equal(env.button.getAttribute('aria-pressed'), 'true'); assert(env.button.classList.contains('on'));
+    assert(env.button.getAttribute('aria-label') && env.button.getAttribute('aria-label') !== offLabel, 'Accessible action changes from enable to disable');
+    assert.equal(env.status(), env.t('engine.8'));
+    for (const language of ['en', 'de', 'pl']) { env.language(language); assert.equal(env.button.getAttribute('aria-label'), env.t('engine.2')); }
+    env.click(); await settlePermissions();
+    assert.equal(enabled, 1, 'Disabling cannot announce a second successful enable');
+    assert.equal(env.button.getAttribute('aria-pressed'), 'false'); assert(!env.button.classList.contains('on'));
+    assert.equal(env.button.getAttribute('aria-label'), offLabel); noForcing(motion.sample(0, true), 'Disabled while frozen');
+    return { synchronousRequests: 2, grantEvents: enabled, noClickImpulse: true, accessibleToggle: true };
+  } finally { motion.destroy(); }
+});
+
+if (!baseline) checkAsync('water-motion-physical-input-disable-and-staleness', async () => {
+  const env = waterEnvironment(), motion = env.get('input/motion').create(env.win, env.doc), drive = env.get('world/water-drive').create();
+  try {
+    env.click(); await settlePermissions();
+    env.sensor('deviceorientation', { beta: 20, gamma: 10 });
+    noForcing(motion.sample(.1), 'First orientation establishes the neutral position');
+    for (let i = 0; i < 5; i++) env.sensor('devicemotion', { acceleration: { x: 0, y: 0, z: 0 } });
+    assert.equal(motion.sample(.1).impulse, null, 'Stationary sensor data cannot make a wave');
+    env.sensor('deviceorientation', { beta: 38, gamma: 23 });
+    const tilted = motion.sample(.1);
+    assert(Math.hypot(...tilted.tilt) > .05 && tilted.speed > 0, 'Changing phone orientation produces tilt and speed');
+    assert.equal(tilted.impulse, null, 'Tilting without a physical acceleration impulse does not invent one');
+    assert(drive.advance(.1, tilted).energy > 0, 'The production water driver responds to measured tilt');
+    physicalPulse(env);
+    const pushed = motion.sample(.016); assert(pushed.impulse && pushed.impulse.source === 'sensor', 'A physical acceleration sequence produces a sensor impulse');
+    assert(pushed.impulse.strength > 0 && pushed.impulse.direction.every(Number.isFinite));
+    assert(drive.impulse(pushed.impulse).accepted); assert.equal(drive.snapshot().serial, 1);
+    assert.equal(motion.sample(.016).impulse, null, 'Impulse is consumed exactly once');
+    env.sensor('deviceorientation', { beta: 39, gamma: 24 }, 300);
+    assert.deepEqual(Array.from(motion.sample(.016).acceleration), [0, 0], 'Fresh orientation cannot keep an old acceleration force alive');
+    env.advanceTo(env.win.performance.now() + 900); physicalPulse(env);
+    assert(motion.diagnostics().impulses >= 2, 'A second physical impulse is pending before disable');
+    env.click(); await settlePermissions();
+    noForcing(motion.sample(0, true), 'Disabling immediately clears all forcing, including a queued impulse');
+    assert.equal(motion.diagnostics().active, false);
+    env.sensor('deviceorientation', { beta: 80, gamma: 60 }); physicalPulse(env);
+    noForcing(motion.sample(.1), 'Sensor callbacks after disable');
+    const remaining = drive.advance(.1, motion.sample(.1));
+    assert.equal(remaining.packets.length, 1, 'An already emitted water wave remains to decay naturally');
+    assert(remaining.energy > 0, 'Disabling the input does not reset existing water momentum');
+    env.click(); await settlePermissions(); noForcing(motion.sample(.1), 'Re-enabling cannot replay an old impulse');
+    return { tiltMovesWater: true, physicalImpulse: true, oneShotConsumption: true, pendingReset: true, staleAcceleration: true, existingWavePreserved: true };
+  } finally { motion.destroy(); }
+});
+
+if (!baseline) checkAsync('water-motion-denial-unavailable-and-data-watchdog', async () => {
+  const cases = [
+    { name: 'denied', orientation: { requestPermission: () => Promise.resolve('denied') }, acceleration: { requestPermission: () => Promise.resolve('denied') }, permission: 'denied', message: 'engine.7' },
+    { name: 'unavailable', orientation: undefined, acceleration: undefined, permission: 'unavailable', message: 'engine.6' },
+    { name: 'insecure', secure: false, permission: 'insecure', message: 'engine.5' }
+  ];
+  for (const test of cases) {
+    const env = waterEnvironment(test);
+    if (test.name === 'unavailable') { delete env.win.DeviceOrientationEvent; delete env.win.DeviceMotionEvent; }
+    const motion = env.get('input/motion').create(env.win, env.doc); let enabled = 0;
+    env.win.addEventListener('guziczak:motion-enabled', () => enabled++);
+    try {
+      env.click(); await settlePermissions();
+      assert.equal(motion.diagnostics().active, false, test.name); assert.equal(motion.diagnostics().permission, test.permission);
+      assert.equal(enabled, 0); assert.equal(env.status(), env.t(test.message));
+      physicalPulse(env); noForcing(motion.sample(.1), test.name);
+      env.advanceTo(env.win.performance.now() + 10000); assert.equal(env.status(), '', test.name + ': status message disappears');
+    } finally { motion.destroy(); }
+  }
+  const env = waterEnvironment(), motion = env.get('input/motion').create(env.win, env.doc);
+  try {
+    env.click(); await settlePermissions();
+    for (let i = 0; i < 4; i++) {
+      env.sensor('deviceorientation', { beta: null, gamma: NaN }, 500);
+      env.sensor('devicemotion', { acceleration: { x: null, y: NaN, z: null }, accelerationIncludingGravity: null });
+    }
+    env.advanceTo(4600);
+    assert.equal(motion.diagnostics().events + motion.diagnostics().motionEvents, 0, 'Null/NaN events are not sensor data');
+    assert.equal(motion.diagnostics().permission, 'no-data'); assert.equal(env.status(), env.t('engine.10'));
+    noForcing(motion.sample(.1), 'No data');
+    env.advanceTo(12000); assert.equal(env.status(), '', 'No-data warning also disappears');
+  } finally { motion.destroy(); }
+  for (const permitted of ['orientation', 'acceleration']) {
+    const requests = [];
+    const env = waterEnvironment({ orientation: { requestPermission() { requests.push('orientation'); if (permitted === 'acceleration') throw Error('No orientation access'); return Promise.resolve('granted'); } },
+      acceleration: { requestPermission() { requests.push('acceleration'); return permitted === 'acceleration' ? Promise.resolve('granted') : Promise.reject(Error('No acceleration access')); } } });
+    const motion = env.get('input/motion').create(env.win, env.doc);
+    try {
+      env.click(); assert.deepEqual(requests, ['orientation', 'acceleration'], 'A rejected/throwing API does not skip the other permission request'); await settlePermissions();
+      assert.equal(motion.diagnostics().active, true, 'The available sensor remains usable: ' + permitted);
+      noForcing(motion.sample(.1), 'Partial sensor grant');
+      if (permitted === 'orientation') {
+        env.sensor('deviceorientation', { beta: 0, gamma: 0 }); env.sensor('deviceorientation', { beta: 20, gamma: 10 });
+        assert(Math.hypot(...motion.sample(.1).tilt) > 0);
+        physicalPulse(env); assert.equal(motion.sample(.1).impulse, null, 'Denied acceleration events are ignored');
+      } else { physicalPulse(env); assert(motion.sample(.016).impulse, 'Acceleration-only access still supports physical impulses'); }
+    } finally { motion.destroy(); }
+  }
+  return { refusal: true, absentApis: true, insecureContext: true, nullDataWatchdog: true, transientMessages: true, partialGrants: true, thrownAndRejectedPermissions: true };
+});
+
+if (!baseline) checkAsync('water-control-engine-lifecycle-without-removed-dom', async () => {
+  const env = mountWaterEngine();
+  try {
+    assert.equal(env.player.diagnostics().mode, 'intro'); env.frame();
+    assert.equal(env.player.diagnostics().ready, true, 'Production engine and UI initialize against the reduced control DOM');
+    assert.equal(env.clickHandlers(), 1, 'Engine cannot add a second sensor-button handler');
+    assert(!('surge' in env.player), 'No public manual surge API');
+    const key = Object.assign(new Event('keydown', { cancelable: true }), { code: 'KeyW', repeat: false });
+    env.win.dispatchEvent(key); env.frame();
+    assert.equal(key.defaultPrevented, false, 'W no longer belongs to wave controls'); assert.equal(env.player.diagnostics().waterState.serial, 0);
+    env.click(); await settlePermissions(); env.frame();
+    assert.equal(env.player.diagnostics().motion.active, true); assert.equal(env.player.diagnostics().waterState.serial, 0, 'Click/grant creates no wave through the full engine');
+    physicalPulse(env); env.frame();
+    assert.equal(env.player.diagnostics().waterState.serial, 1, 'Real motion -> impulse detector -> waterFrame -> water driver');
+    env.click(); await settlePermissions(); env.frame();
+    noForcing(env.player.motion.sample(0, true), 'Engine disable'); assert.equal(env.player.diagnostics().waterState.packets.length, 1);
+    for (const language of ['en', 'de', 'pl']) { env.language(language); env.frame(); }
+    const skipped = env.player.skip(); env.frame(); await skipped;
+    assert.equal(env.player.diagnostics().mode, 'page'); assert.equal(env.doc.querySelectorAll('#motion').length, 1);
+    env.click(); await settlePermissions(); env.frame();
+    assert.equal(env.player.diagnostics().motion.active, true, 'The same sensor button also works after the show');
+    env.player.play(); env.frame(); assert.equal(env.player.diagnostics().mode, 'intro');
+    assert.deepEqual(env.errors, [], 'No application errors during boot, language changes, completion or replay');
+  } finally { env.player.destroy(); }
+  const broken = mountWaterEngine({ graphicsFailure: true });
+  try {
+    broken.frame();
+    assert.equal(broken.player.diagnostics().mode, 'failed');
+    assert.equal(broken.player.diagnostics().error, 'Controlled WebGL initialization failure');
+    assert.equal(broken.doc.getElementById('fallback').style.display, 'block', 'Graphics failure renders the real fallback UI');
+    for (const language of ['en', 'de', 'pl']) { broken.language(language); assert.equal(broken.doc.getElementById('fallback-message').textContent, broken.t('engine.15')); }
+    assert.equal(broken.errors.length, 1, 'Only the deliberately injected graphics failure was logged');
+  } finally { broken.player.destroy(); }
+  return { actualEngineMount: true, oneClickHandler: true, removedShortcutAndApi: true, physicalInputIntegration: true, replayAndCompletion: true,
+    languageChanges: 3, graphicsFallback: true, limitation: 'Node DOM and sensor events; graphics/audio and thermal response substituted.' };
+});
+
+if (!baseline) checkAsync('water-control-engine-reduced-motion-pause', async () => {
+  const env = mountWaterEngine({ reduced: true });
+  try {
+    env.frame(); assert.equal(env.player.diagnostics().mode, 'page'); assert.equal(env.player.diagnostics().waterPaused, true);
+    env.win.dispatchEvent(new Event('guziczak:water-input')); env.frame();
+    assert.equal(env.player.diagnostics().waterPaused, true, 'An ordinary water-input event does not cancel reduced-motion pause');
+    env.click(); await settlePermissions(); env.frame();
+    assert.equal(env.player.diagnostics().waterPaused, false, 'Successful conscious enable unlocks water paused by reduced motion');
+    assert.equal(env.player.diagnostics().waterState.serial, 0, 'Unlocking does not add an impulse');
+    env.player.setWaterPaused(true); physicalPulse(env); env.frame();
+    assert.equal(env.player.diagnostics().waterPaused, true, 'Subsequent physical sensor events do not undo an explicit pause');
+    assert.equal(env.player.diagnostics().waterState.serial, 0, 'Paused input cannot leak an impulse to the driver');
+    env.click(); await settlePermissions(); env.click(); await settlePermissions(); env.frame();
+    assert.equal(env.player.diagnostics().waterPaused, false, 'A new deliberate enable may unlock water again');
+    assert.equal(env.player.diagnostics().waterState.serial, 0, 'No previously paused impulse is replayed');
+    physicalPulse(env); env.frame(); assert.equal(env.player.diagnostics().waterState.serial, 1, 'Fresh physical movement works after unlocking');
+    assert.deepEqual(env.errors, []);
+  } finally { env.player.destroy(); }
+  return { startsPaused: true, explicitEnableUnlocks: true, ordinaryEventsKeepPause: true, noDelayedImpulse: true };
+});
+
+if (!baseline) checkAsync('water-control-engine-cooling-clock-preserved', async () => {
+  const env = mountWaterEngine({ coolingRate: 1.75 });
+  try {
+    const seek = env.player.seekAuthored(11.9); env.frame(); await seek;
+    assert.equal(env.player.diagnostics().phase, 'cooling');
+    assert.equal(env.player.diagnostics().playbackRate, 1.75, 'The real clock receives the thermal cooling rate without a cooling panel');
+    env.player.resume(); env.frame(); env.frame(100);
+    assert(env.player.diagnostics().savedCoolingSeconds > 0, 'The real clock applies the rate to elapsed cooling time');
+    const leave = env.player.seekAuthored(13.5); env.frame(); await leave;
+    assert.notEqual(env.player.diagnostics().phase, 'cooling'); assert.equal(env.player.diagnostics().playbackRate, 1, 'Other phases retain normal playback speed');
+    assert.deepEqual(env.errors, []);
+    return { coolingRate: 1.75, elapsedClockAffected: true, normalRateOutsideCooling: true, limitation: 'Thermal response injected; clock and engine are production code.' };
+  } finally { env.player.destroy(); }
+});
+
+(async () => {
+  for (const { name, fn } of asynchronousChecks) {
+    try { const detail = await fn(); findings.push({ name, status: 'pass', ...detail }); }
+    catch (error) { failures.push({ name, message: error.message, stack: error.stack?.split('\n').slice(0, 6) }); }
+  }
+  console.log(JSON.stringify({ htmlPath, baseline, only: only || undefined, findings, failures,
+    limitations: ['No browser layout or interactive visual inspection.', 'No real GLSL compilation or WebGL driver execution.', 'No audio hardware or perceived synchronization check.', 'Sensor events, permission decisions and watchdog timers are simulated; no physical phone or native permission dialogs.'] }, null, 2));
+  process.exitCode = failures.length ? 1 : 0;
+})().catch(error => { console.error(error); process.exitCode = 1; });
