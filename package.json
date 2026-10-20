@@ -11,8 +11,9 @@
     "build:check": "node scripts/build.cjs --check",
     "test:routes": "node tests/routes.test.cjs && node tests/router-integration.test.cjs && node tests/static-routes.test.cjs",
     "test:audio": "node tests/audio-regression.cjs index.html",
+    "test:casting": "node tests/casting-liquid.test.cjs && node tests/foundry-clearance.test.cjs",
     "test:runtime": "node tests/runtime-regression.cjs",
-    "test": "npm run test:routes && npm run test:audio && npm run test:runtime",
+    "test": "npm run test:routes && npm run test:audio && npm run test:casting && npm run test:runtime",
     "check": "npm run build:check && npm test"
   }
 }

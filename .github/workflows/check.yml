@@ -31,5 +31,9 @@ jobs:
           node tests/static-routes.test.cjs
       - name: Check audio behavior
         run: node tests/audio-regression.cjs index.html
+      - name: Check casting and foundry clearance
+        run: |
+          node tests/casting-liquid.test.cjs
+          node tests/foundry-clearance.test.cjs
       - name: Check runtime behavior
         run: node tests/runtime-regression.cjs

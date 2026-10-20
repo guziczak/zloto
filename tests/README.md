@@ -4,8 +4,22 @@ Run from the repository root with Node.js (no npm dependencies):
 
 ```bash
 node tests/audio-regression.cjs index.html
+node tests/casting-liquid.test.cjs
+node tests/foundry-clearance.test.cjs
 node tests/runtime-regression.cjs
 ```
+
+The casting checks use the production liquid model and packed feeder mesh. They
+check the stream's arrival and cutoff, contact with the rising surface, and the
+settling/cooling behavior. This is a deterministic visual model, not a fluid
+solver or a physical foundry calculation.
+
+Foundry clearance checks build the actual meshes and sample the moving flask,
+raised cartridge and released castings against all 66 pipe envelopes. They cover
+arrival, seating, extraction, support on the front plank, pickup and departure.
+The water terrain is checked against the same moving frame and casting footprint
+used by rendering. These numeric checks complement visual review of the actual
+shaders; they do not establish browser rendering or performance by themselves.
 
 The audio checks execute the production scheduler and instrument sampler against
 a controlled AudioContext. They cover audible start times, delayed frames,
