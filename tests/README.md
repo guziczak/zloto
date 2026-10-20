@@ -135,3 +135,50 @@ portrait and landscape layouts, and repeat
 with the system's reduced-motion preference enabled. A pinned pipe whose cloud
 and sustain have finished should show `CZEKA` / `WAITING` until its next real
 execution; changing source must not scroll the expanded history automatically.
+
+## Published routes and document navigation
+
+Run from the repository root after generating the publication files:
+
+```bash
+node scripts/build.cjs
+node scripts/build.cjs --check
+node tests/routes.test.cjs
+node tests/router-integration.test.cjs
+node tests/static-routes.test.cjs
+```
+
+The route-model checks cover parsing and serialization independently of the DOM.
+The router integration checks execute the actual bootstrap, localization and
+router scripts against controls parsed from `index.html`. They verify that URL
+languages override saved preferences; an explicit CV language survives a UI
+language change, including when both languages initially match; and document
+formats, canonical URLs, metadata and language alternatives remain consistent.
+They also exercise normal links, modified clicks, new-tab and download semantics,
+History API failure, and Back/Forward without creating extra history entries.
+Returning home restores the recorded scroll position and focus target, while
+inactive views remain hidden and inert. Local `file:` previews also exercise
+initial and changed section hashes, and a hash update that makes an unchanged
+document language an explicit selection.
+
+The integration harness substitutes DOM, history and animation scheduling, and
+keeps document media offline. It does not validate native browser layout, actual
+screen-reader behavior, remote document availability or embedded PDF rendering.
+The existing audio and rendering suites remain separate and unchanged.
+
+The static-route checks build into temporary directories and start a short-lived
+HTTP file server on `127.0.0.1` with **no SPA fallback**. They verify physical home,
+CV and score entrypoints, parameter-preserving directory redirects, real 404s for
+unknown paths and missing assets, initial metadata and visible views, skip links,
+and ordinary HTML/PDF fallback links when JavaScript is unavailable. They also
+rebuild from the generated root document to check deterministic, idempotent
+output. The temporary files and listener are removed when the checks finish.
+These tests need permission to bind a local TCP port in restricted environments.
+
+The local server tests the generated file contract, not GitHub's deployed CDN.
+After publishing, a browser check should cover direct links and reloads for
+`/zloto/cv/` and `/zloto/score/`, language and PDF choices, Back/Forward, and opening
+links in a new tab. The deployed response status and slash redirect should also
+be checked directly; a development server with automatic SPA rewrites can hide
+the original missing-entrypoint regression.
+

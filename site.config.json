@@ -1,0 +1,66 @@
+{
+  "siteOrigin": "https://guziczak.github.io",
+  "basePath": "/zloto/",
+  "defaultLanguage": "pl",
+  "languages": [
+    "pl",
+    "en",
+    "de"
+  ],
+  "routes": {
+    "home": "",
+    "cv": "cv/",
+    "score": "score/"
+  },
+  "documentOrigin": "https://guziczak.github.io/",
+  "documents": {
+    "cv": {
+      "pl": {
+        "html": "cv-html/cv_fixed_pl.html",
+        "pdf": "cv_pl.pdf"
+      },
+      "en": {
+        "html": "cv-html/cv_fixed.html",
+        "pdf": "cv_en.pdf"
+      },
+      "de": {
+        "html": "cv-html/cv_fixed_de.html",
+        "pdf": "cv_de.pdf"
+      }
+    },
+    "score": {
+      "html": "swiatlo-full.png",
+      "pdf": "swiatlo.pdf"
+    }
+  },
+  "pages": {
+    "cv": {
+      "pl": {
+        "title": "Curriculum vitae — Łukasz Guziczak",
+        "description": "Curriculum vitae Łukasza Guziczaka — doświadczenie, projekty oraz oryginalne dokumenty HTML i PDF w trzech językach."
+      },
+      "en": {
+        "title": "Curriculum vitae — Łukasz Guziczak",
+        "description": "Curriculum vitae of Łukasz Guziczak — experience, projects and original HTML and PDF documents in three languages."
+      },
+      "de": {
+        "title": "Lebenslauf — Łukasz Guziczak",
+        "description": "Lebenslauf von Łukasz Guziczak — Erfahrung, Projekte und Originaldokumente als HTML und PDF in drei Sprachen."
+      }
+    },
+    "score": {
+      "pl": {
+        "title": "Lux in tenebris — Partytura — GUZICZAK",
+        "description": "Oryginalna partytura „Lux in tenebris” — zapis nutowy i PDF."
+      },
+      "en": {
+        "title": "Lux in tenebris — Score — GUZICZAK",
+        "description": "The original score of “Lux in tenebris” — sheet music and PDF."
+      },
+      "de": {
+        "title": "Lux in tenebris — Partitur — GUZICZAK",
+        "description": "Die Originalpartitur „Lux in tenebris” — Noten und PDF."
+      }
+    }
+  }
+}
