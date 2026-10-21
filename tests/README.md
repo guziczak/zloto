@@ -6,6 +6,7 @@ Run from the repository root with Node.js (no npm dependencies):
 node tests/audio-regression.cjs index.html
 node tests/casting-liquid.test.cjs
 node tests/foundry-clearance.test.cjs
+node tests/ignition.test.cjs
 node tests/runtime-regression.cjs
 ```
 
@@ -15,11 +16,24 @@ settling/cooling behavior. This is a deterministic visual model, not a fluid
 solver or a physical foundry calculation.
 
 Foundry clearance checks build the actual meshes and sample the moving flask,
-raised cartridge and released castings against all 66 pipe envelopes. They cover
-arrival, seating, extraction, support on the front plank, pickup and departure.
+raised cartridge and released castings against all 66 pipe and igniter envelopes.
+They cover arrival, seating, extraction, support on the front plank, pickup and departure.
 The water terrain is checked against the same moving frame and casting footprint
 used by rendering. These numeric checks complement visual review of the actual
 shaders; they do not establish browser rendering or performance by themselves.
+Actual electrode, ceramic and arc vertices are also checked against each mouth's
+hardware envelope, so a new igniter cannot silently invalidate the casting path.
+
+Ignition checks drive the production gas simulation through the heard-note ledger.
+They verify a separate gap above each of the 66 mouths, an initial white packet
+below the gap, a volume straddling both phases, and detached burning gas above it.
+A repeated note can emit fresh white gas under an older burning packet. Sparks
+require actual gas contact with their own electrode segment; cinematic time alone
+cannot create them. Mute, pause and reduced motion remove animated gas and arcs.
+The renderer preserves each negative world-space ignition height through sorting
+and reflected draws. Missing metadata stays ordinary steam. The shared instance
+stride remains 12 floats, with at most 128 lobes and six ray samples per lobe.
+This is an alchemical visual effect, not a model of electrolysis or combustion.
 
 The audio checks execute the production scheduler and instrument sampler against
 a controlled AudioContext. They cover audible start times, delayed frames,

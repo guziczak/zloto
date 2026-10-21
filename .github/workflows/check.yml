@@ -35,5 +35,7 @@ jobs:
         run: |
           node tests/casting-liquid.test.cjs
           node tests/foundry-clearance.test.cjs
-      - name: Check runtime behavior
+      - name: Check pipe ignition
+        run: node tests/ignition.test.cjs
+      - name: Check scene and browser runtime
         run: node tests/runtime-regression.cjs

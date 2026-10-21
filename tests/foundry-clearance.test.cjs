@@ -40,7 +40,7 @@ const catalog = registry.get('geometry/catalog').createGeometry(gl);
 const pipes = instrument.keys.map((key, slot) => ({
   midi: key.midi, center: instrument.position(slot), radius: key.radius,
   minY: instrument.position(slot)[1] + .011,
-  maxY: instrument.mouth(slot)[1]
+  maxY: Math.max(instrument.mouth(slot)[1], instrument.ignitionBounds(slot).max[1])
 }));
 
 function bounds(points) {
@@ -101,10 +101,61 @@ function centroid(polygon) {
 }
 const logo = registry.get('assets').logo;
 
-test('the whole flask, its fittings and sand clear every pipe throughout arrival and departure', t => {
+test('every mouth has separate ceramic and metal ignition hardware inside its clearance envelope', t => {
+  const mouths = pipes.map((_pipe, slot) => instrument.mouth(slot));
+  const lowestMouth = Math.min(...mouths.map(point => point[1]));
+  const boxes = pipes.map((_pipe, slot) => instrument.ignitionBounds(slot));
+  const counts = pipes.map(() => ({ metal: 0, ceramic: 0 }));
+  let highestHardware = 0;
+  const within = (point, box) => point.every((value, axis) => value >= box.min[axis] - 1e-5 && value <= box.max[axis] + 1e-5);
+  const body = uploads.get(catalog.meshes.instrumentBody.buffer);
+  for (let offset = 0; offset < body.length; offset += 9) {
+    const material = body[offset + 8];
+    if (material !== 2 && material !== 30) continue;
+    const point = Array.from(body.slice(offset, offset + 3));
+    // Existing ivory pipe walls stop at the mouth. Only the added ceramic rises
+    // above it; steel material is used by the added electrodes in this mesh.
+    if (material === 30 && point[1] <= lowestMouth + .0001) continue;
+    let slot = 0, distance2 = Infinity;
+    mouths.forEach((mouth, index) => {
+      const d = (point[0] - mouth[0]) ** 2 + (point[2] - mouth[2]) ** 2;
+      if (d < distance2) { slot = index; distance2 = d; }
+    });
+    if (material === 30 && point[1] <= mouths[slot][1] + .0001) continue;
+    assert(within(point, boxes[slot]), `Actual ignition vertex fits its exported bounds for MIDI ${pipes[slot].midi}`);
+    assert(Math.sqrt(distance2) <= pipes[slot].radius + 1e-5,
+      'Ignition hardware never widens the original pipe clearance cylinder');
+    highestHardware = Math.max(highestHardware, point[1] - mouths[slot][1]);
+    counts[slot][material === 2 ? 'metal' : 'ceramic']++;
+  }
+  const spark = uploads.get(catalog.meshes.instrumentSpark.buffer);
+  assert(spark?.length > 0, 'The active gap has one shared arc mesh');
+  for (let slot = 0; slot < pipes.length; slot++) {
+    assert(counts[slot].metal > 0 && counts[slot].ceramic > 0,
+      `MIDI ${pipes[slot].midi} has its own fixed electrodes and ceramic insulators`);
+    const point = instrument.ignition(slot), mouth = mouths[slot];
+    assert(Math.hypot(point[0] - mouth[0], point[2] - mouth[2]) < 1e-8,
+      'Each ignition gap is centred above its own bore');
+    assert(Math.abs(point[1] - mouth[1] - instrument.ignitionConfig.height) < 1e-8);
+    const pose = M.mul(M.T(...point), M.Ry(instrument.outwardAngle(slot)));
+    for (let offset = 0; offset < spark.length; offset += 9) {
+      assert.equal(spark[offset + 8], 34, 'The arc has its own emissive material');
+      const vertex = M.point(pose, Array.from(spark.slice(offset, offset + 3)));
+      assert(within(vertex, boxes[slot]), 'The active arc fits the same bounded ignition assembly');
+      assert(Math.hypot(vertex[0] - mouth[0], vertex[2] - mouth[2]) <= pipes[slot].radius + 1e-5);
+    }
+  }
+  assert(highestHardware > instrument.ignitionConfig.height,
+    'The ignition point lies between real metal tips, rather than above empty space');
+  assert(highestHardware <= instrument.ignitionConfig.maxHeight + 1e-5);
+  t.diagnostic(`66 fixed ignition assemblies; actual hardware top ${highestHardware.toFixed(6)} above each mouth`);
+});
+
+test('the whole flask, its fittings and sand clear every pipe and igniter throughout arrival and departure', t => {
   let minimum = Infinity, closest;
   // Full mesh boxes include handles, corner straps and the sand underside. This
   // intentionally overestimates their occupied space instead of checking timber alone.
+  // Each pipe cylinder also encloses its ceramic mounts, electrodes and active arc.
   for (const time of sampleTimes(7.66, 17.55, .005)) {
     const placement = motion.sample(time);
     for (const name of ['flask', 'sand']) {
@@ -140,7 +191,7 @@ test('the raised cartridge and nozzle clear the moving flask, then align over th
   t.diagnostic(`Minimum conservative cartridge/flask clearance ${minimum.toFixed(6)} scene units`);
 });
 
-test('both released castings clear the pipes during transfer, parking and pickup', t => {
+test('both released castings clear the pipes and igniters during transfer, parking and pickup', t => {
   const triangles = { A: trianglesFor('signatureA'), B: trianglesFor('signatureB') };
   let minimum = Infinity, closest;
   for (const time of sampleTimes(casting.phase.coolEnd, casting.phase.travelEnd, .005)) {

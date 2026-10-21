@@ -3190,6 +3190,13 @@ GuziczakModules.define('scene/foundry-motion',['math','config/casting'],(math,ca
 });
 
 
+GuziczakModules.define('config/ignition', [], () => {
+    'use strict';
+    // The gap belongs to each mouth. Geometry, gas and its volume shader share
+    // this boundary; the alchemical flame is a visual treatment of the score.
+    return Object.freeze({ height:.085, transition:.028, maxHeight:.095, gapHalf:.022 });
+});
+
 GuziczakModules.define('config/materials', [], () => {
     'use strict';
     // IDs are an ABI shared with the existing binary assets and GLSL, not reusable slots.
@@ -3197,7 +3204,7 @@ GuziczakModules.define('config/materials', [], () => {
         LIQUID_GOLD: 5, TEXT_LIGHT: 6, FLOOR: 7, ACCENT: 8, GLASS: 9, GOLD_LIGHT: 10,
         RECEIVER: 11, SIGNATURE_A: 12, SIGNATURE_B: 13, RIFT: 14, TIMBER: 15,
         SAND: 16, CAVITY: 17, RIFT_EDGE: 18, CAST_METAL: 20, OVERFLOW_METAL: 21,
-        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29, ORGAN_BURST:32, ORGAN_IVORY:30, ORGAN_EBONY:31, ORGAN_BRASS:33 });
+        PEDESTAL: 22, RIFT_HAZE: 23, FRACTURE_GOLD: 24, RECLAIM_GOLD: 25, TRAY_STEEL: 26, HOT_BADGE:27, ORGAN_LIGHT:28, ORGAN_AIR:29, ORGAN_BURST:32, ORGAN_IVORY:30, ORGAN_EBONY:31, ORGAN_BRASS:33, ORGAN_SPARK:34 });
     const ids = new Set(Object.values(Material));
     function validate(id) { if (!Number.isInteger(id) || !ids.has(id))
         throw Error('Unknown material ID: ' + id); }
@@ -4026,9 +4033,10 @@ GuziczakModules.define('render/device', [], () => {
 });
 
 
-GuziczakModules.define('render/steam', ['math'], math => {
+GuziczakModules.define('render/steam', ['math','config/ignition'], (math,ignition) => {
     'use strict';
     const MAX_LOBES = 128, STRIDE_FLOATS = 12, RAY_STEPS = 6;
+    const IGNITION_TRANSITION = ignition.transition;
     const steamVS = `#version 300 es
 precision highp float;
 layout(location=0) in vec4 aCenterDensity;
@@ -4038,12 +4046,13 @@ uniform mat4 uVP;
 uniform vec3 uCam,uViewRight,uViewUp;
 uniform float uReflectionPass,uReflectionY;
 flat out vec4 vCenterDensity,vRadiiSeed;
-flat out vec2 vAgeLife;
+flat out vec4 vAgeLife;
 void main(){
     vec3 center=aCenterDensity.xyz;
     if(uReflectionPass>.5)center.y=2.*uReflectionY-center.y;
     vCenterDensity=vec4(center,aCenterDensity.w);
-    vRadiiSeed=aRadiiSeed;vAgeLife=aAgeLife.xy;
+    // zw carry the original world-space ignition plane and reactive fraction.
+    vRadiiSeed=aRadiiSeed;vAgeLife=aAgeLife;
     vec2 corner=vec2((gl_VertexID&1)==0?-1.:1.,(gl_VertexID&2)==0?-1.:1.);
     vec3 radii=aRadiiSeed.xyz;
     // The quad only bounds the volume. Its plane is never used as cloud depth.
@@ -4057,13 +4066,14 @@ void main(){
     const steamFS = `#version 300 es
 precision highp float;
 flat in vec4 vCenterDensity,vRadiiSeed;
-flat in vec2 vAgeLife;
+flat in vec4 vAgeLife;
 uniform mat4 uVP,uInvVP;
 uniform vec3 uCam;
 uniform vec2 uResolution;
 uniform highp sampler2D uOpaqueDepth;
 uniform float uLight,uUseDepth,uReflectionPass,uReflectionY;
 out vec4 outColor;
+const float IGNITION_TRANSITION=${IGNITION_TRANSITION.toFixed(8)};
 float hash3(vec3 p){p=fract(p*.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);}
 float densityNoise(vec3 p){
     vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
@@ -4096,7 +4106,8 @@ void main(){
     // one 3D value-noise evaluation per sample, no layered octaves or secondary rays.
     float segment=(exit-entry)/float(${RAY_STEPS});
     float softContact=max(.012,min(radii.x,min(radii.y,radii.z))*.18);
-    float optical=0.,weight=0.;vec3 mean=vec3(0.);
+    float optical=0.,weight=0.,transmission=1.,steamWeight=0.;
+    vec3 mean=vec3(0.),fireRadiance=vec3(0.);
     float seed=vRadiiSeed.w;
     vec3 offset=vec3(seed*.731,seed*.379,seed*.193);
     float evolution=vAgeLife.x/max(.08,vAgeLife.y);
@@ -4104,15 +4115,43 @@ void main(){
         float distance=entry+(float(i)+.5)*segment;
         vec3 q=ro+rd*distance;
         vec3 cloudQ=q;if(uReflectionPass>.5)cloudQ.y=-cloudQ.y;
-        float noise=densityNoise(cloudQ*3.15+offset+vec3(.19,-.31,.13)*evolution);
+        // Classify the actual quadrature point, never the lobe centre or its age.
+        // Reflection geometry lives below the lake; ignition still lives above it.
+        float worldY=uCam.y+ray.y*distance;
+        if(uReflectionPass>.5)worldY=2.*uReflectionY-worldY;
+        float height=worldY-vAgeLife.z;
+        float burn=vAgeLife.w*smoothstep(0.,IGNITION_TRANSITION,height);
+        vec3 frequency=mix(vec3(3.15),vec3(4.6,2.1,4.6),burn);
+        vec3 advection=mix(vec3(.19,-.31,.13),vec3(.12,-2.35,.08),burn);
+        float noise=densityNoise(cloudQ*frequency+offset+advection*evolution);
         float rim=max(0.,1.-dot(q,q));
         float body=smoothstep(0.,.72,rim)*(.28+.72*smoothstep(.24,.76,noise));
-        body*=smoothstep(0.,softContact,solidDistance-distance);
-        float rho=body*vCenterDensity.w;
-        weight+=rho;mean+=q*rho;optical+=rho*segment*4.6;
+        float contact=smoothstep(0.,softContact,solidDistance-distance);
+        float steamDensity=body*vCenterDensity.w*contact*(1.-burn);
+        // Narrow, broken tongues occupy the same bounded volume. One value-noise
+        // sample supplies both phases; no extra ray, octave, mesh or draw is added.
+        float tip=smoothstep(-.65,.95,cloudQ.y),width=mix(.86,.23,tip);
+        vec2 curl=vec2(sin(cloudQ.y*3.6+seed*.13-evolution*2.1),
+                       cos(cloudQ.y*4.3+seed*.19-evolution*1.7))*.055*tip;
+        float core=1.-smoothstep(width*.42,width,length(cloudQ.xz+curl));
+        float tongues=smoothstep(.25,.78,noise)*core*smoothstep(0.,.72,rim);
+        float fireDensity=tongues*vCenterDensity.w*contact*burn;
+        float steamOptical=steamDensity*segment*4.6*uLight;
+        float fireOptical=fireDensity*segment*1.15*uLight;
+        float stepOptical=steamOptical+fireOptical;
+        float stepAlpha=1.-exp(-stepOptical),share=1./max(stepOptical,.000001);
+        float contribution=transmission*stepAlpha;
+        steamWeight+=contribution*steamOptical*share;
+        // A small blue root warms into gold above the gap. Radiance is integrated
+        // with extinction, so overlap cannot add an unbounded glowing fog.
+        float warmth=smoothstep(.025,.20,max(0.,height));
+        vec3 flame=mix(vec3(.12,.38,1.25),vec3(1.55,.66,.095),warmth);
+        flame*=.76+.24*smoothstep(.38,.82,noise);
+        fireRadiance+=contribution*fireOptical*share*flame;
+        transmission*=1.-stepAlpha;optical+=stepOptical;
+        weight+=steamDensity;mean+=q*steamDensity;
     }
-    optical*=uLight;
-    float alpha=1.-exp(-optical);
+    float alpha=1.-transmission;
     if(alpha<.002)discard;
     vec3 front=ro+rd*(entry+(exit-entry)*.16);
     vec3 average=mean/max(weight,.0001);
@@ -4125,16 +4164,22 @@ void main(){
     vec3 silver=mix(vec3(.145,.167,.181),vec3(.53,.565,.585),.30+.57*lit);
     silver*=innerShade;
     silver+=vec3(.115,.122,.125)*rimLight*(.35+.65*lit);
-    // A little reflected brass warms the underside, never an emissive core.
+    // Unreacted steam remains silver, with only reflected brass underneath.
     float reflected=max(0.,-normal.y)*.11;
     silver+=vec3(.27,.205,.115)*reflected;
     silver=clamp(silver,vec3(0.),vec3(.58));
-    if(uReflectionPass>.5)alpha*=.58;
+    vec3 radiance=silver*steamWeight+fireRadiance;
+    if(uReflectionPass>.5){alpha*=.58;radiance*=.58;}
     vec3 firstWorld=uCam+ray*entry;
     vec4 firstClip=uVP*vec4(firstWorld,1.);
     gl_FragDepth=clamp(firstClip.z/firstClip.w*.5+.5,0.,1.);
-    outColor=vec4(silver*alpha,alpha);
+    outColor=vec4(radiance,alpha);
 }`;
+    function ignitionAt(worldY,ignitionY,fuel=1){
+        if(!Number.isFinite(worldY)||!Number.isFinite(ignitionY)||!Number.isFinite(fuel))return 0;
+        const u=math.clamp((worldY-ignitionY)/IGNITION_TRANSITION,0,1);
+        return math.clamp(fuel,0,1)*u*u*(3-2*u);
+    }
     const finiteVector = value => (Array.isArray(value)||ArrayBuffer.isView(value))&&value.length>=3&&Array.from(value).slice(0,3).every(Number.isFinite);
     function sanitizeLobes(input){
         const lobes=[];
@@ -4145,6 +4190,8 @@ void main(){
             if(item.radii.some(value=>!(value>0))||!Number.isFinite(item.seed)||!Number.isFinite(item.age)||!Number.isFinite(item.life)||item.age<0||item.life<=0||item.age>item.life)continue;
             lobes.push({center:Array.from(item.center).slice(0,3),radii:Array.from(item.radii).slice(0,3).map(value=>Math.max(.008,Math.min(1.2,value))),
                 density:Math.min(4,item.density),seed:item.seed,age:item.age,life:item.life,
+                ignitionY:Number.isFinite(item.ignitionY)?item.ignitionY:0,
+                fuel:Number.isFinite(item.ignitionY)&&Number.isFinite(item.fuel)?math.clamp(item.fuel,0,1):0,
                 midi:item.midi,onsetId:item.onsetId,kind:item.kind,index});
         }
         return lobes;
@@ -4159,8 +4206,10 @@ void main(){
         }).filter(item=>item.depth+Math.max(...item.lobe.radii)>.1)
           .sort((a,b)=>b.depth-a.depth||a.lobe.index-b.lobe.index);
         const data=new Float32Array(sorted.length*STRIDE_FLOATS);
-        sorted.forEach(({lobe},i)=>data.set([...lobe.center,lobe.density,...lobe.radii,lobe.seed,lobe.age,lobe.life,0,0],i*STRIDE_FLOATS));
-        return {data,count:sorted.length,order:sorted.map(({lobe,depth})=>({index:lobe.index,onsetId:lobe.onsetId,midi:lobe.midi,kind:lobe.kind,depth}))};
+        sorted.forEach(({lobe},i)=>data.set([...lobe.center,lobe.density,...lobe.radii,lobe.seed,lobe.age,lobe.life,lobe.ignitionY,lobe.fuel],i*STRIDE_FLOATS));
+        return {data,count:sorted.length,order:sorted.map(({lobe,depth})=>({index:lobe.index,onsetId:lobe.onsetId,midi:lobe.midi,kind:lobe.kind,depth,
+            ignitionY:lobe.ignitionY,fuel:lobe.fuel,
+            ignitionRange:[ignitionAt(lobe.center[1]-lobe.radii[1],lobe.ignitionY,lobe.fuel),ignitionAt(lobe.center[1]+lobe.radii[1],lobe.ignitionY,lobe.fuel)]}))};
     }
     function create(gl,{program,m4,f1,f2,f3,texture}){
         const prog=program(steamVS,steamFS),vao=gl.createVertexArray(),instances=gl.createBuffer();
@@ -4201,10 +4250,11 @@ void main(){
         function clear(){lobes=[];submitted=mainCount=reflectionCount=0;light=0;lastMainOrder=[];}
         function stats(){return {model:'ray-integrated ellipsoid steam',maxLobes:MAX_LOBES,raySteps:RAY_STEPS,strideBytes:STRIDE_FLOATS*4,
             submitted,lobes:lobes.length,mainCount,reflectionCount,draws,light,depthTextureUnit:7,
+            reactiveLobes:lobes.filter(lobe=>lobe.fuel>0).length,ignitionTransition:IGNITION_TRANSITION,
             blend:'premultiplied alpha',depth:'ellipsoid front surface; clipped by opaque depth',order:lastMainOrder.map(item=>({...item}))};}
         return {update,draw,clear,stats};
     }
-    return {create,steamVS,steamFS,prepareLobes,sanitizeLobes,MAX_LOBES,STRIDE_FLOATS,RAY_STEPS};
+    return {create,steamVS,steamFS,prepareLobes,sanitizeLobes,ignitionAt,MAX_LOBES,STRIDE_FLOATS,RAY_STEPS,IGNITION_TRANSITION};
 });
 
 GuziczakModules.define("render/renderer", ["math", "render/shaders", "config/vocabulary", "world/water","render/profile","config/cup-effects","render/quench","render/steam"], (math, shaders, vocabulary, lake, profiles, cupConfig, quenchRenderer, steamRenderer) => {
@@ -4846,6 +4896,15 @@ void main(){
  vec3 q=vLocal,p=vWorld,n=normalize(vNormal),cam=uCam;if(uReflection>.5){p.y=2.*uReflectY-p.y;n.y=-n.y;cam.y=2.*uReflectY-cam.y;if(p.y<uReflectY-.003)discard;}
  vec3 v=normalize(cam-p);float nv=max(dot(n,v),.001),id=vMat;float rough=.25,metal=.9,occ=1.,alpha=uAlpha;vec3 base=vec3(.13),emission=vec3(0.);
  float castHeat=0.,castSkin=0.;bool isCast=id>19.5&&id<20.5,castLetter=isCast&&uFrom.x>11.5;
+ if(id>33.5&&id<34.5){
+  // A small electrical gap, driven by gas reaching this particular mouth.
+  // Its transparent command neither writes opaque depth nor casts a shadow.
+  float charge=clamp(uNoteEnergy,0.,1.);
+  float opacity=charge*clamp(uObjectLight,0.,1.)*uAlpha;
+  if(opacity<.002)discard;
+  vec3 electric=mix(vec3(.20,.43,1.),vec3(.78,.90,1.),charge);
+  outColor=vec4(electric*(1.45+1.10*charge),opacity);return;
+ }
  if(id>28.5&&id<29.5){
   // Broken density and broad feathering reveal air without a solid luminous core.
   float lane=floor(vUV.x*.5),path=clamp(vUV.x-lane*2.,0.,1.);
@@ -7589,9 +7648,10 @@ GuziczakModules.define('audio/instrument', ['math'], (math) => {
 });
 
 
-GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/instrument'], (math, docking, audio) => {
+GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/instrument', 'config/ignition'], (math, docking, audio, ignitionConfig) => {
  'use strict';
- const { M, TAU } = math;
+ const { M, C, TAU } = math;
+ const igniter = Object.freeze({ mountOffset:.014, ceramicRadius:.012, bottom:-.018, electrodeRadius:.0045, tipRadius:.005, sparkRadius:.0016 });
  // A complete chromatic keyboard remains present when a score uses only some notes.
  // Naturals are uniformly spaced on the diatonic axis; each accidental sits halfway
  // between its two natural neighbours. E–F and B–C have no intervening black mouth.
@@ -7623,6 +7683,13 @@ GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/in
    docking.hull[2]+docking.hull[1]*key.scale*Math.sin(key.angle)];
  }
  function mouth(slot) { const p=position(slot); p[1]+=keyAt(slot).height; return p; }
+ function ignition(slot) { const p=mouth(slot); p[1]+=ignitionConfig.height; return p; }
+ function ignitionBounds(slot) {
+  const p=mouth(slot),reach=keyAt(slot).mouthRadius+igniter.mountOffset+igniter.ceramicRadius;
+  const a=outwardAngle(slot),c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));
+  const x=reach*c+igniter.ceramicRadius*s,z=reach*s+igniter.ceramicRadius*c;
+  return {min:[p[0]-x,p[1]+igniter.bottom,p[2]-z],max:[p[0]+x,p[1]+ignitionConfig.maxHeight,p[2]+z]};
+ }
  function slotFor(midi) { return Number.isInteger(midi) && midi >= low && midi <= high ? midi-low : -1; }
  function outwardAngle(slot) {
   const p = position(slot);
@@ -7653,14 +7720,36 @@ GuziczakModules.define('geometry/keyboard', ['math', 'config/docking', 'audio/in
       [bore,h],[bore*.975,h-.017]],33,20);
      b.lathe([[bore*.975,h-.017],[bore*.975,.049],[0,.049]],0,20);
      ringY(b,r*.94,.035,.010,.012,33,20);
+     // A separate ignition gap stays above the open bore. Two ceramic mounts
+     // support short steel electrodes; neither the pipe nor its lip is the spark.
+     b.at(C(M.T(0,h,0),M.Ry(outwardAngle(slot))),()=>{
+      const mount=bore+igniter.mountOffset,height=ignitionConfig.height;
+      for(const side of [-1,1]){
+       b.at(M.T(side*mount,0,0),()=>{
+        b.lathe([[.008,igniter.bottom],[igniter.ceramicRadius,igniter.bottom],
+         [igniter.ceramicRadius,-.006],[.009,-.003]],33,10);
+        b.lathe([[0,-.012],[.009,-.012],[.010,.004],[.010,.030],[.008,.038],[0,.038]],30,10);
+       });
+       b.tube([[side*mount,.031,0],[side*mount,height-.014,0],
+        [side*(mount-.013),height-.002,0],[side*ignitionConfig.gapHalf,height,0]],igniter.electrodeRadius,2,8);
+       b.at(M.T(side*ignitionConfig.gapHalf,height,0),()=>b.sphere(igniter.tipRadius,2,4,8));
+      }
+     });
     });
    }
   });
   // Keep one shared light mesh; callers scale only its X/Z radius for each mouth.
   const instrumentLight=build(b => ringY(b,.108,-.004,.012,.008,28,20));
-  return { instrumentBody,instrumentLight };
+  // The active arc is centred on ignition(slot), with the same radial attitude
+  // as the fixed electrodes. Its two endpoints are embedded in their metal tips.
+  const instrumentSpark=build(b=>{
+   const g=ignitionConfig.gapHalf;
+   b.tube([[-g,0,0],[-g*.56,.0035,.0015],[-.003,-.003,-.0013],
+    [.004,.004,.0014],[g*.58,-.0015,-.001],[g,0,0]],igniter.sparkRadius,34,6);
+  });
+  return { instrumentBody,instrumentLight,instrumentSpark };
  }
- return { create,pitches,slots,keys,rows,seam,angularStep,position,mouth,slotFor,outwardAngle,lightScale };
+ return { create,pitches,slots,keys,rows,seam,angularStep,position,mouth,ignition,ignitionBounds,ignitionConfig,slotFor,outwardAngle,lightScale };
 });
 
 GuziczakModules.define('geometry/airflow', ['math'], math => {
@@ -7758,7 +7847,7 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
  const drive=level=>clamp(Math.pow(Math.max(0,level)*6.5,.40),0,1);
  function makePuff(event){
   const slot=geometry.slotFor(event.midi),seed=seedFor(identity(event));
-  return {...event,key:identity(event),slot,seed,origin:geometry.mouth(slot),
+  return {...event,key:identity(event),slot,seed,origin:geometry.mouth(slot),ignitionY:geometry.ignition(slot)[1],
    yaw:geometry.outwardAngle(slot),drive:drive(event.strength),
    scale:.90+.10*geometry.keys[slot].mouthRadius/.111,
    life:1.12+.26*noise(seed,19),releaseAt:null};
@@ -7774,9 +7863,11 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
   const phase=TAU*noise(puff.seed,23)+i*2.399;
   const radius=1.60*(.068+.128*spread)*(.95+.12*puff.drive)*puff.scale;
   const ring=1.30*(.014+.155*spread)*(i===0?0:.80+.20*Math.sin(roll));
-  const lift=1.25*(.020+(2.50+.55*puff.drive)*.24*(1-Math.exp(-age/.24))+.28*age);
+  // The first few frames remain below the electrical gap. The pressure packet
+  // then rises and opens out; its upper and lower halves can straddle ignition.
+  const lift=.012+.55*age+.72*Math.pow(1-Math.exp(-age/.35),2);
   const drift=(.055+.065*noise(puff.seed,31))*age/(1+.60*age);
-  const curl=i===0?0:ring*.62*Math.cos(roll+.24*noise(puff.seed,i));
+  const curl=i===0?0:ring*.62*Math.cos(roll+.24*noise(puff.seed,i))*ease(.08,.26,age);
   const x=Math.cos(phase+.24*age)*ring+Math.cos(puff.yaw)*drift;
   const z=Math.sin(phase+.24*age)*ring-Math.sin(puff.yaw)*drift;
   const y=tail?lift*(.50+.11*(i-5)):lift+curl;
@@ -7784,9 +7875,9 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
   const fade=ease(0,.022,age)*(1-ease(tail?.22:.24,1,age/life));
   const density=fade*(tail?.36+.24*puff.drive:(i===0?1.05: .82)+.45*puff.drive);
   return {center:[puff.origin[0]+x*(tail?.44:1),puff.origin[1]+y,puff.origin[2]+z*(tail?.44:1)],
-   radii:[size*(.88+.12*noise(puff.seed,i+3)),size*(tail?1.30:1.08),size],
+   radii:[size*(.88+.12*noise(puff.seed,i+3)),size*(tail?1.30:1.08)*(.16+.84*ease(.025,.22,age)),size],
    density,seed:(puff.seed+i*97)%4096,age,life,midi:puff.midi,onsetId:puff.key,
-   kind:tail?'tail':i===0?'head':'curl'};
+   kind:tail?'tail':i===0?'head':'curl',ignitionY:puff.ignitionY,fuel:1};
  }
  function emitPuff(puff,clock,fade,out){
   const puffAge = clock-puff.onsetAt;
@@ -7806,17 +7897,41 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
  }
  function sustainLobes(feed,clock){
   const out=[],end=Math.min(clock,feed.endAt??clock),last=Math.floor((end-feed.from)/limits.sustainPeriod);
+  // A sounding voice keeps a narrow, white feed below its own igniter. Its
+  // finite advancing front prevents a flame from appearing before gas arrives.
+  if(feed.endAt===null&&clock>feed.onsetAt){
+   const age=clock-feed.onsetAt,top=Math.min(geometry.ignitionConfig.height+.055,.68*age);
+   if(top>.018){
+    const height=top-.004,radius=.026*feed.scale;
+    out.push({center:[feed.origin[0],feed.origin[1]+.004+height*.5,feed.origin[2]],
+     radii:[radius,height*.5,radius],density:.18+.24*drive(feed.level),seed:feed.seed,
+     age:Math.min(age,limits.sustainLife),life:limits.sustainLife,midi:feed.midi,onsetId:feed.key,
+     kind:'jet',ignitionY:feed.ignitionY,fuel:1});
+   }
+  }
   for(let n=Math.max(0,last-3);n<=last;n++){
    const born=feed.from+n*limits.sustainPeriod,age=clock-born;if(age<=0||age>=limits.sustainLife)continue;
    const r=(.034+.068*(1-Math.exp(-age/.16)))*feed.scale;
-   const phase=feed.seed*.021+n*2.399,y=.014+.35*(1-Math.exp(-age/.20))+.13*age;
+   const phase=feed.seed*.021+n*2.399,y=.008+.42*age+.22*Math.pow(1-Math.exp(-age/.22),2);
    const sway=.022*Math.sin(age*4+phase),width=.010+.035*age;
    const density=(.14+.22*drive(feed.level))*ease(0,.022,age)*(1-ease(.16,limits.sustainLife,age));
    if(density>.006)out.push({center:[feed.origin[0]+Math.cos(phase)*width+sway,feed.origin[1]+y,
-    feed.origin[2]+Math.sin(phase)*width],radii:[r*.85,r*1.18,r],density,
-    seed:(feed.seed+n*59)%4096,age,life:limits.sustainLife,midi:feed.midi,onsetId:feed.key,kind:'sustain'});
+    feed.origin[2]+Math.sin(phase)*width],radii:[r*.85,r*1.18*(.28+.72*ease(.02,.18,age)),r],density,
+    seed:(feed.seed+n*59)%4096,age,life:limits.sustainLife,midi:feed.midi,onsetId:feed.key,kind:'sustain',
+    ignitionY:feed.ignitionY,fuel:1});
   }
   return out;
+ }
+ function gapContact(lobe){
+  const slot=geometry.slotFor(lobe.midi);if(slot<0||!(lobe.fuel>0))return 0;
+  const gap=geometry.ignition(slot),yaw=geometry.outwardAngle(slot),axis=[Math.cos(yaw),-Math.sin(yaw)];
+  const [rx,ry,rz]=lobe.radii,dx=lobe.center[0]-gap[0],dz=lobe.center[2]-gap[2];
+  const denominator=axis[0]*axis[0]/(rx*rx)+axis[1]*axis[1]/(rz*rz);
+  const along=clamp((dx*axis[0]/(rx*rx)+dz*axis[1]/(rz*rz))/denominator,
+   -geometry.ignitionConfig.gapHalf,geometry.ignitionConfig.gapHalf);
+  const distance=Math.pow((dx-axis[0]*along)/rx,2)+Math.pow((lobe.center[1]-gap[1])/ry,2)
+   +Math.pow((dz-axis[1]*along)/rz,2);
+  return Math.max(0,1-distance)*lobe.density;
  }
  function create(){
   let puffs=[],generation=null,lastClock=null,lastReduced=null,lastAudible=null,admitted=0,dropped=0,feedBoundary=-Infinity;
@@ -7896,7 +8011,8 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
      let feed=feeds.get(key);
      if(!feed){const slot=geometry.slotFor(voice.midi);feed={key,midi:voice.midi,seed:seedFor(key),
       name:(source.notes||[]).find(note=>note.midi===voice.midi)?.name||String(voice.midi),
-      origin:geometry.mouth(slot),scale:.9+.1*geometry.keys[slot].mouthRadius/.111,
+      origin:geometry.mouth(slot),ignitionY:geometry.ignition(slot)[1],onsetAt:voice.onsetAt,
+      scale:.9+.1*geometry.keys[slot].mouthRadius/.111,
       from:Math.max(voice.onsetAt+.22,feedBoundary),level:voice.level,endAt:null};feeds.set(key,feed);}
      feed.level=voice.level;feed.endAt=null;
     }
@@ -7932,15 +8048,28 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
       focus:['const tail ='],valueKeys:['note','tailAge']});
     }
    }
+   // One bounded arc per physical mouth, only while emitted gas intersects its
+   // actual electrode gap. No timer, visual score or global scene clock ignites it.
+   const contacts=new Map(),sparks=[];
+   for(const lobe of steamLobes){const contact=gapContact(lobe);
+    if(contact>.006)contacts.set(lobe.midi,Math.max(contacts.get(lobe.midi)||0,contact));}
+   for(const [midi,contact] of contacts){
+    const slot=geometry.slotFor(midi),position=geometry.ignition(slot);
+    const tremor=.86+.14*Math.pow(Math.sin(clock*93+slot*2.399),2);
+    const charge=clamp(Math.sqrt(contact)*.86*tremor,0,.84);
+    push(meshes.instrumentSpark,C(M.T(...position),M.Ry(geometry.outwardAngle(slot))),0,zero,zero,true,light,0,1,charge);
+    sparks.push({midi,position:position.slice(),charge});
+   }
    const visiblePuffs=puffs.filter(p=>clock-p.onsetAt<p.life&&releaseFade(p,clock)>.001);
    return {steamLobes,steamLight:light,instrument:{active,strongest,slots:geometry.slots,pitches:geometry.pitches,
     puffs:visiblePuffs.map(p=>({id:p.id,onsetId:p.key,midi:p.midi,onsetAt:p.onsetAt,age:clock-p.onsetAt,
      life:p.life,releaseAt:p.releaseAt,fade:releaseFade(p,clock),seed:p.seed,origin:p.origin.slice()})),
-    primary:visiblePuffs.filter(p=>p.releaseAt===null).length,lobes:steamLobes.length,admitted,dropped,clock,reduced},traceTargets};
+    primary:visiblePuffs.filter(p=>p.releaseAt===null).length,lobes:steamLobes.length,admitted,dropped,clock,reduced,
+    igniters:geometry.slots,sparks},traceTargets};
   }
   return {sample};
  }
- return {create,sample:ctx=>create().sample(ctx),limits,lobeAt};
+ return {create,sample:ctx=>create().sample(ctx),limits,lobeAt,gapContact};
 });
 
 
@@ -7953,9 +8082,9 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         de: { title: 'Code live', live: 'LIVE', paused: 'PAUSE', waiting: 'WARTET', expand: 'Quelltext anzeigen', collapse: 'Quelltext ausblenden', more: 'Code', less: 'Zu', source: 'Tatsächlicher Quelltext', values: 'Werte dieses Frames', notes: 'Noten', bands: 'Frequenzen', silent: 'Ton aus', loading: 'Warte auf Audio', release: 'Nachklang', between: 'Pause zwischen Noten', pin: 'Dieses Objekt anheften', unpin: 'Zur automatischen Auswahl', pinned: 'Angeheftetes Objekt', last: 'Letzter Stand · wartet auf diese Operation', pending: 'Wartet auf die Ausführung dieser Operation', cpu: 'Für diesen Frame ausgeführter Code', gpu: 'In diesem Frame verwendeter Shader', frame: 'Frame', object: 'Objekt', history: 'Letzte Operationen' }
     };
     const LABELS = {
-        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Wyrzut pary', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
-        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Steam burst', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
-        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Dampfausstoß', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
+        pl: { lift: 'Podnoszenie wkładu', assembly: 'Składanie mechanizmu', pour: 'Przelewanie kawy', mould: 'Przesunięcie formy', cast: 'Podnoszenie odlewu', water: 'Ruch powierzchni wody', quench: 'Chłodzenie wodą', exhibit: 'Obrót artefaktu', shader: 'Transformacja wierzchołków', organ: 'Para i zapłon', tokens: 'Tokeny w cieczy', gold: 'Powierzchnia złota', fill: 'Wypełnianie formy', cooling: 'Stygnięcie złota' },
+        en: { lift: 'Lifting the insert', assembly: 'Assembling the mechanism', pour: 'Pouring coffee', mould: 'Moving the mould', cast: 'Lifting the casting', water: 'Moving the water surface', quench: 'Cooling with water', exhibit: 'Rotating the artifact', shader: 'Transforming vertices', organ: 'Vapor and ignition', tokens: 'Tokens in the liquid', gold: 'The gold surface', fill: 'Filling the mould', cooling: 'Cooling gold' },
+        de: { lift: 'Einsatz anheben', assembly: 'Mechanismus montieren', pour: 'Kaffee eingießen', mould: 'Gussform verschieben', cast: 'Gussstück anheben', water: 'Wasseroberfläche bewegen', quench: 'Mit Wasser kühlen', exhibit: 'Artefakt drehen', shader: 'Vertices transformieren', organ: 'Dampf und Zündung', tokens: 'Token in der Flüssigkeit', gold: 'Die Goldoberfläche', fill: 'Gussform füllen', cooling: 'Gold abkühlen' }
     };
     // These selectors choose real lines in a marked source block, never replacement code.
     const PROFILES = {
