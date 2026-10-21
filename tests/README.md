@@ -4,9 +4,11 @@ Run from the repository root with Node.js (no npm dependencies):
 
 ```bash
 node tests/audio-regression.cjs index.html
+node tests/score-placement.test.cjs
 node tests/casting-liquid.test.cjs
 node tests/foundry-clearance.test.cjs
 node tests/ignition.test.cjs
+node tests/exhibit-quality.test.cjs
 node tests/runtime-regression.cjs
 ```
 
@@ -41,6 +43,21 @@ release tails, mute, pause, seeking, track changes and volume automation. The
 heard-onset history is checked independently of current note levels: repeated
 notes retain separate attack IDs, and restoring sound cannot replay attacks that
 occurred during a silent interval.
+
+Score-placement checks use the actual score renderer with controlled layout
+rectangles and a recorded 2D canvas. The same canvas moves from the cinematic
+viewport into its own hero row and back on replay, while retaining source notes
+and the heard audio clock. Offscreen, suspended and hidden states stop rendering;
+returning to the slot cannot emit notes missed while it was out of view. Pause,
+reduced motion and the existing 180-particle cap are covered.
+
+Exhibit-quality checks exercise the real exhibit renderer with recorded GL calls.
+Opaque geometry uses at most four MSAA samples, chosen from the intersection of
+the color and depth formats supported by the device. Color and depth resolve
+before water rendering. Tests cover HDR/LDR, no compatible samples, incomplete
+framebuffers, cleanup/reallocation and preserved full vertical-axis rotation,
+pause and reduced motion. Actual edge quality and lighting require native shader
+renders or a browser; the recorded-call checks alone do not establish them.
 
 The runtime checks load the actual modules from `index.html`. They exercise mesh
 construction, scene transforms, the 66-key chromatic instrument, camera bounds,
@@ -153,7 +170,7 @@ objects, and avoid bright closed rings or flat visible billboards. Pause, mute,
 set volume to zero, seek and restart; none should produce a delayed replay of
 old attacks. Soft notes should remain visible without obscuring the pipe mouths
 or the central scene.
-The source should sit directly in the background, close to the scene, with one
+During the film, the source should sit directly in the background, close to the scene, with one
 emphasized complete instruction and at most one faint historical echo on desktop.
 Long transforms should wrap with their closing punctuation visible. A nearby
 pipe should have a short connecting line; a distant pipe should have a short
@@ -163,6 +180,15 @@ portrait and landscape layouts, and repeat
 with the system's reduced-motion preference enabled. A pinned pipe whose cloud
 and sustain have finished should show `CZEKA` / `WAITING` until its next real
 execution; changing source must not scroll the expanded history automatically.
+
+On the finished page, inspect mobile and desktop layouts: the model and its
+44px pause control precede a separate score row and music credit, followed by the
+live-source panel. Expanding source must grow the page below it without covering
+the score or model. Scrolling the model offscreen preserves the source panel in
+place with a paused status. The model's target label is hidden during automatic
+selection and appears only after an explicit pin. Replay must restore the
+cinematic score and trace placement. Decorative link arrows are SVGs, including
+after switching languages, so no platform emoji appears in the main button.
 
 ## Published routes and document navigation
 

@@ -722,15 +722,7 @@ body:is(.intro,.route-cv,.route-score) #reading-progress{visibility:hidden}
 #score-bridge.score-fixed::before{content:'';position:absolute;inset:0 -12px -10px;z-index:-1;background:linear-gradient(transparent,#080c0b33 38%,#080c0b70 85%,transparent);pointer-events:none}
 body.menu-open #score-bridge.score-fixed{visibility:hidden}
 body:is(.route-cv,.route-score) #score-bridge{display:none!important}
-/* The empty former slot remains as an engine anchor, not a second visual score. */
-#page-score-slot{height:0!important;min-height:0;--score-bleed:0px;overflow:hidden;width:100%;margin:0}
-.hero{padding-bottom:180px;grid-template-rows:minmax(400px,1fr) 0 auto 64px}
-@media(min-width:1051px){.hero{grid-template-rows:minmax(400px,1fr) 0 auto 70px}}
-@media(min-width:1800px){.hero{grid-template-rows:minmax(470px,1fr) 0 auto 70px}}
-@media(min-width:1051px) and (max-height:780px){.hero{grid-template-rows:minmax(350px,1fr) 0 auto 61px;padding-bottom:160px}}
-@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(390px,1fr) 0 auto 60px;padding-bottom:160px}}
-@media(max-width:700px){.hero{grid-template-rows:max-content minmax(190px,1fr) 0 auto auto;padding-bottom:142px}}
-@media(max-width:360px){.hero{grid-template-rows:max-content minmax(165px,1fr) 0 auto auto}}
+/* The page score uses its own hero row; only the cinematic score is fixed. */
 
 /* Contact and legal footer share a single viewport-sized ending.
    min-height, not a fixed height: zoomed text and small phones keep normal scrolling. */
@@ -996,16 +988,66 @@ body:not(.intro) #intro-controls .playback-controls>button{min-width:40px;justif
 @media(prefers-reduced-motion:reduce){.live-trace-chevron{transition:none}.live-trace-excerpt-line.is-active{text-shadow:none}}
 @media print{.live-trace,.live-trace-tether{display:none!important}}
 
-/* The page reserves only a few lines of typography beneath the artifact. */
+/* Each exhibit layer owns a row: model, score, credit, live source, navigation.
+   Expanding the source grows the page instead of covering the model or music. */
 body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
-#artifact-slot{bottom:105px}
-.artifact-caption{bottom:77px}
+.hero{grid-template-rows:minmax(440px,1fr) auto auto auto auto;padding-bottom:0}
+#exhibit-world{grid-area:1/1/2/-1;inset:calc(-1 * var(--head)) calc(-1 * var(--pad)) 0}
+#artifact-stage{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:360px;height:auto;padding:0 0 14px}
+#artifact-slot{position:relative;grid-area:1/1;inset:auto;width:100%;height:auto;min-height:280px;max-height:none;aspect-ratio:auto;outline-offset:-8px}
+.artifact-caption{position:relative;grid-area:2/1;inset:auto;justify-content:space-between;gap:16px;padding:4px 0 0;min-height:48px;opacity:1}
+.artifact-caption>span{display:block;max-width:none;font-size:9px;letter-spacing:.16em;color:#ac9a76}
+#artifact-toggle{min-height:44px;padding:10px 12px;font-size:11px;color:#d9c29c;background:#d9c29c08;border:1px solid #d9c29c26;border-radius:3px;text-shadow:none}
+#artifact-toggle:hover{background:#d9c29c12;border-color:#d9c29c55}
 .artifact-help{display:none}
-@media(min-width:1051px){.hero{grid-template-rows:minmax(475px,1fr) 150px 82px}}
-@media(min-width:1051px) and (max-height:780px){.hero{grid-template-rows:minmax(425px,1fr) 123px 61px}}
-@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(465px,1fr) 112px 60px}}
-@media(max-width:700px){.hero{grid-template-rows:max-content minmax(324px,1fr) 94px auto}#artifact-stage{min-height:324px}#artifact-slot{bottom:105px}.artifact-caption{bottom:77px}}
-@media(max-width:360px){.hero{grid-template-rows:max-content minmax(299px,1fr) 88px auto}#artifact-stage{min-height:299px}}
+#page-score-slot{grid-area:2/1/3/-1;width:100%;height:132px;min-height:132px;--score-bleed:0px;margin:0;overflow:hidden;border-top:1px solid #d3c7a31c;background:#080a0a}
+#score-bridge.score-page{position:absolute;inset:0!important;width:100%!important;height:100%!important;transform:none!important;z-index:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.music-caption{grid-area:3/1/4/-1;padding:0 0 18px;background:#080a0a}
+#page-trace-slot{grid-area:4/1/5/-1;position:relative;min-width:0;background:#0c100f}
+#page-trace-slot:empty{display:none}
+.live-trace[data-mode=page]{position:relative;inset:auto;width:100%;transform:none;z-index:4;padding:14px 18px 16px;border:1px solid #d3c7a322;border-radius:4px;background:#0c100f;pointer-events:auto}
+.live-trace[data-mode=page] .live-trace-header{gap:14px;min-height:44px}
+.live-trace[data-mode=page] .live-trace-object-button,.live-trace[data-mode=page] .live-trace-toggle{min-height:44px}
+.live-trace[data-mode=page] .live-trace-name{font-size:11px}
+.live-trace[data-mode=page] .live-trace-toggle{font-size:11px;max-width:none;flex-shrink:0}
+.live-trace[data-mode=page] .live-trace-status{font-size:8px}
+.live-trace[data-mode=page] .live-trace-excerpt{font-size:12px;line-height:1.7;padding:2px 0 7px}
+.live-trace[data-mode=page] .live-trace-bottom{min-height:22px}
+.live-trace[data-mode=page] .live-trace-value dt{font-size:9px}
+.live-trace[data-mode=page] .live-trace-value dd{font-size:11px}
+.live-trace[data-mode=page] .live-trace-body{position:relative;inset:auto;height:clamp(210px,32svh,300px);margin:12px 0 0;padding-top:12px;border-top:1px solid #d3c7a322;pointer-events:auto}
+.live-trace[data-mode=page] .live-trace-line{font-size:11px;line-height:1.7;min-height:19px}
+.live-trace[data-mode=page] .live-trace-history{scroll-padding:8px}
+.hero-bottom{grid-area:5/1/6/-1;margin-top:20px;padding:18px 0 24px;min-height:64px;background:#080a0a}
+.icon-arrow{display:block;width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media(min-width:1800px){.hero{grid-template-rows:minmax(490px,1fr) auto auto auto auto}#page-score-slot{height:150px;min-height:150px}}
+@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(410px,1fr) auto auto auto auto}}
+@media(max-width:700px){
+ .hero{grid-template-rows:max-content auto auto auto auto auto;min-height:0;row-gap:0;padding-bottom:0}
+ .hero-copy{padding-bottom:16px}
+ .hero-actions{flex-wrap:wrap;gap:10px 18px}
+ #exhibit-world{grid-area:1/1/3/-1}
+ #artifact-stage{grid-area:2/1/3/-1;min-height:clamp(350px,49svh,430px);margin-top:8px;padding-bottom:16px}
+ #artifact-slot{min-height:280px}
+ .artifact-caption{padding-top:8px;min-height:52px}
+ #page-score-slot{grid-area:3/1/4/-1;height:122px;min-height:122px}
+ .music-caption{grid-area:4/1/5/-1;padding:2px 0 18px;min-height:64px}
+ .music-caption-credit{font-size:10px;max-width:none}
+ #page-trace-slot{grid-area:5/1/6/-1}
+ .live-trace[data-mode=page]{padding:10px 12px 13px}
+ .live-trace[data-mode=page] .live-trace-header{gap:9px}
+ .live-trace[data-mode=page] .live-trace-name{font-size:10px;letter-spacing:0}
+ .live-trace[data-mode=page] .live-trace-excerpt{font-size:11px;line-height:1.65}
+ .live-trace[data-mode=page] .live-trace-body{height:240px}
+ .hero-bottom{grid-area:6/1/7/-1;margin-top:18px;min-height:60px}
+}
+@media(max-width:360px){
+ #artifact-stage{min-height:330px}
+ #artifact-slot{min-height:260px}
+ #page-score-slot{height:114px;min-height:114px}
+ .music-caption{flex-wrap:wrap;gap:2px 12px}
+ .music-score-link{max-width:none;font-size:10px}
+}
 </style></head>
 <body class="route-score" data-view="score"><div id="reading-progress" aria-hidden="true"><i></i></div><script>if(!window.GUZICZAK_SPA_BOOT.cv)document.body.classList.add('intro','booting');</script><a class="skip-content" data-l10n="n12" href="#score-title">Przejdź do treści</a>
 <canvas aria-label="Rzeczywisty model 3D: kielich, odlew i złoty znak Guziczak." data-l10n="n13" id="scene" role="img"></canvas>
@@ -1015,38 +1057,39 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 <section aria-label="Odtwarzacz muzyki" data-l10n="n23" hidden="" id="audio-panel"><h2 data-l10n="n24">Partytura światła</h2><p aria-live="polite" data-l10n="n25" id="audio-library-status" role="status">Wczytuję wcześniejsze partytury…</p><button aria-pressed="true" class="track" data-track="main">Lux in tenebris<small data-l10n="n26">Temat główny</small></button><button aria-pressed="false" class="track" data-l10n="n27" data-track="variation">Wariacja<small data-l10n="n28">Wariacja tematu</small></button><label data-l10n="n29" for="music-volume">Głośność</label><input aria-label="Głośność muzyki i efektów" data-l10n="n30" id="music-volume" max="100" min="0" type="range" value="80"/><button aria-pressed="false" data-l10n="n31" id="staff-pause">Wstrzymaj przewijanie nut</button></section></div>
 <div aria-hidden="true" id="flying-mark"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></div><div aria-hidden="true" id="flying-word">GUZICZAK</div><div aria-hidden="true" data-l10n="n36" id="signature-line">Przekuwam AI w wartość.</div><div aria-atomic="true" aria-live="polite" id="motion-status" role="status"></div>
 <header id="header"><a aria-label="Guziczak — strona główna" class="identity" data-l10n="n37" href="/zloto/#top"><span id="header-logo"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></span><span><strong id="header-word">GUZICZAK</strong><small>ŁUKASZ GUZICZAK / GUITS</small></span></a><div class="header-links"><nav aria-label="Nawigacja" class="site-nav" data-l10n="n38" id="site-navigation"><a data-l10n="n39" href="/zloto/#realizacje">Realizacje</a><a data-l10n="n40" href="/zloto/#wspolpraca">Współpraca</a><a data-l10n="n41" href="/zloto/#o-mnie">O mnie</a><a data-cv-open="html" href="/zloto/cv/" id="nav-cv">CV</a><a data-l10n="n42" href="/zloto/#kontakt">Kontakt</a></nav><div aria-label="Language" class="language-switch"><a aria-current="page" aria-label="Polski" data-site-language="pl" href="/zloto/score/" hreflang="pl" lang="pl">PL</a><a aria-label="English" data-site-language="en" href="/zloto/score/?lang=en" hreflang="en" lang="en">EN</a><a aria-label="Deutsch" data-site-language="de" href="/zloto/score/?lang=de" hreflang="de" lang="de">DE</a></div><button aria-controls="site-navigation" aria-expanded="false" id="nav-toggle" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 8h18M3 16h18"></path></svg><span data-l10n="n43">Menu</span></button></div></header>
-<main class="site" id="site" hidden inert><section aria-labelledby="hero-heading" class="hero" id="top"><div aria-hidden="true" id="exhibit-world"></div><div class="hero-copy"><div class="eyebrow" data-l10n="n44">Ludzkie rzemiosło. Inteligentne systemy.</div><h1 data-l10n="n45" id="hero-heading" tabindex="-1">Przekuwam AI<br/><em data-l10n="n46">w wartość.</em></h1><p data-l10n="n47">Od pierwszego tokenu do działającego systemu.<br/>Inżynieria, która nie kończy się na obietnicach.</p><div class="hero-actions"><a class="button-main" data-l10n="n48" href="/zloto/#kontakt">Porozmawiajmy <span aria-hidden="true">↗</span></a><button class="replay" data-l10n="n49" id="replay"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M6 3 16 10 6 17Z"></path></svg>Obejrzyj przemianę</button></div></div>
+<main class="site" id="site" hidden inert><section aria-labelledby="hero-heading" class="hero" id="top"><div aria-hidden="true" id="exhibit-world"></div><div class="hero-copy"><div class="eyebrow" data-l10n="n44">Ludzkie rzemiosło. Inteligentne systemy.</div><h1 data-l10n="n45" id="hero-heading" tabindex="-1">Przekuwam AI<br/><em data-l10n="n46">w wartość.</em></h1><p data-l10n="n47">Od pierwszego tokenu do działającego systemu.<br/>Inżynieria, która nie kończy się na obietnicach.</p><div class="hero-actions"><a class="button-main" data-l10n="n48" href="/zloto/#kontakt">Porozmawiajmy <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><button class="replay" data-l10n="n49" id="replay"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M6 3 16 10 6 17Z"></path></svg>Obejrzyj przemianę</button></div></div>
 <figure aria-label="Złoty odlew sygnetu Przesmyk" data-l10n="n50" id="artifact-stage"><div aria-describedby="artifact-help" aria-label="Model 3D sygnetu — obrót tylko wokół pionowej osi" data-l10n="n51" id="artifact-slot" role="group" tabindex="0"><div aria-hidden="true" id="artifact-poster"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></div></div><div aria-hidden="true" class="atelier-words">IDEAS<br/>SYSTEMS<br/>PEOPLE<br/>VALUE</div><figcaption class="artifact-caption"><span>PRZESMYK / 01</span><button aria-pressed="false" data-l10n="n52" id="artifact-toggle">Wstrzymaj obrót Ⅱ</button></figcaption><p class="artifact-help" data-l10n="n53" id="artifact-help">Przeciągnij w lewo lub w prawo albo użyj strzałek ← →, by obrócić sygnet.</p></figure>
-<div aria-hidden="true" id="page-score-slot"><span class="score-label" id="score-label">LUX IN TENEBRIS</span></div><div class="music-caption" id="music-caption"><div><span class="music-caption-title">Lux in tenebris</span><span class="music-caption-credit" data-l10n="score-credit">Łukasz Guziczak & Opus 4.6 · war. Fable 5</span></div><a class="music-score-link" id="score-open" href="/zloto/score/" data-score-open="html"><span data-l10n="score-open">Zobacz partyturę</span><span aria-hidden="true">↗</span></a></div>
+<div aria-hidden="true" id="page-score-slot"><span class="score-label" id="score-label">LUX IN TENEBRIS</span></div><div class="music-caption" id="music-caption"><div><span class="music-caption-title">Lux in tenebris</span><span class="music-caption-credit" data-l10n="score-credit">Łukasz Guziczak & Opus 4.6 · war. Fable 5</span></div><a class="music-score-link" id="score-open" href="/zloto/score/" data-score-open="html"><span data-l10n="score-open">Zobacz partyturę</span><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div>
+<div id="page-trace-slot"></div>
 <div class="hero-bottom"><div class="domains"><span data-l10n="n54">Systemy AI</span><span data-l10n="n55">Oprogramowanie</span><span data-l10n="n56">Automatyzacja</span></div><a data-l10n="n57" href="/zloto/#realizacje">Zobacz realizacje ↓</a></div></section>
 <section aria-label="Realizacje" class="portfolio-section projects" data-l10n="n58" id="realizacje"><span id="kompetencje"></span>
 <div class="portfolio-heading"><div class="eyebrow" data-l10n="n59">01 / Wybrane realizacje</div><div><h2 data-l10n="n60">Nie tylko możliwości.<br/><em data-l10n="n61">Działające rozwiązania.</em></h2><p class="section-intro" data-l10n="n62">Systemy w infrastrukturze klienta i własne produkty. Różne problemy, ta sama odpowiedzialność za rezultat.</p></div></div><article aria-labelledby="case-1-title" class="case">
 <div class="case-copy"><div class="case-meta"><span class="case-number">01</span><span data-l10n="n63">Bankowość / Document AI</span></div>
 <h3 id="case-1-title">On-prem Document AI</h3><p class="case-summary" data-l10n="n64">Lokalne modele wizyjne i językowe zamieniają skany sprawozdań finansowych w uporządkowane dane — na GPU banku, bez wysyłania dokumentów poza jego sieć.</p><p class="case-tech">Python · PyTorch · ViT · vLLM · Structured Outputs</p>
-<a class="text-link" data-l10n="n65" href="/zloto/#kontakt">Porozmawiajmy o podobnym systemie <span aria-hidden="true">↗</span></a></div>
+<a class="text-link" data-l10n="n65" href="/zloto/#kontakt">Porozmawiajmy o podobnym systemie <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div>
 <div class="case-aside"><span class="case-status" data-l10n="n66">W produkcji</span><dl class="case-facts"><div><dt data-l10n="n67">Moja rola</dt><dd data-l10n="n68">Jedyny inżynier, end to end</dd></div><div><dt data-l10n="n69">Kontekst</dt><dd data-l10n="n70">Natek · oddelegowanie do banku</dd></div><div><dt data-l10n="n71">Rezultat</dt><dd data-l10n="n72">System utrzymywany przez zespół banku</dd></div></dl>
 <figure class="process-mini"><figcaption data-l10n="n73">Schemat działania</figcaption><div class="process-chain"><span data-l10n="n74">Skan dokumentu</span><i aria-hidden="true">→</i><span data-l10n="n75">Lokalne modele</span><i aria-hidden="true">→</i><span data-l10n="n76">Dane ustrukturyzowane</span></div><p data-l10n="n77">Przetwarzanie w infrastrukturze banku</p></figure></div></article><article aria-labelledby="case-2-title" class="case">
 <div class="case-copy"><div class="case-meta"><span class="case-number">02</span><span data-l10n="n78">Weterynaria / Produkt</span></div>
 <h3 id="case-2-title">OpisAI</h3><p class="case-summary" data-l10n="n79">Rozmowa w gabinecie staje się dokumentacją kliniczną. Autorski AI-skryba dla klinik weterynaryjnych — zaprojektowany, zbudowany i wdrożony samodzielnie, a następnie sprzedany.</p><p class="case-tech" data-l10n="n80">Claude · GPT · Gemini · Aplikacja kliniczna</p>
-<a class="text-link" data-l10n="n81" href="https://guziczak.github.io/opisai" rel="noopener noreferrer" target="_blank">Zobacz prezentację OpisAI <span aria-hidden="true">↗</span></a></div>
+<a class="text-link" data-l10n="n81" href="https://guziczak.github.io/opisai" rel="noopener noreferrer" target="_blank">Zobacz prezentację OpisAI <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div>
 <div class="case-aside"><span class="case-status" data-l10n="n82">Zbudowany i sprzedany</span><dl class="case-facts"><div><dt data-l10n="n83">Moja rola</dt><dd data-l10n="n84">Założyciel i jedyny inżynier</dd></div><div><dt data-l10n="n85">Zastosowanie</dt><dd data-l10n="n86">Dokumentacja wizyt weterynaryjnych</dd></div><div><dt data-l10n="n87">Rezultat</dt><dd data-l10n="n88">Produkt sprzedany komercyjnie</dd></div></dl>
 <figure class="process-mini"><figcaption data-l10n="n89">Schemat działania</figcaption><div class="process-chain"><span data-l10n="n90">Rozmowa</span><i aria-hidden="true">→</i><span data-l10n="n91">AI-skryba</span><i aria-hidden="true">→</i><span data-l10n="n92">Dokumentacja</span></div><p data-l10n="n93">Od rozmowy do uporządkowanej dokumentacji</p></figure></div></article><article aria-labelledby="case-3-title" class="case">
 <div class="case-copy"><div class="case-meta"><span class="case-number">03</span><span data-l10n="n94">Medycyna / Asystent dokumentacji</span></div>
 <h3 id="case-3-title">Wizyta</h3><p class="case-summary" data-l10n="n95">Asystent dokumentacji medycznej: transkrypcja offline z rozróżnieniem lekarza i pacjenta, rozpoznania ICD-10, procedury ICD-9 i punktacja NFZ.</p><p class="case-tech" data-l10n="n96">Whisper · Diaryzacja offline · ICD-10 · ICD-9 · NFZ</p>
-<a class="text-link" data-l10n="n97" href="https://guziczak.github.io/wizyta" rel="noopener noreferrer" target="_blank">Zobacz prezentację Wizyty <span aria-hidden="true">↗</span></a></div>
+<a class="text-link" data-l10n="n97" href="https://guziczak.github.io/wizyta" rel="noopener noreferrer" target="_blank">Zobacz prezentację Wizyty <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div>
 <div class="case-aside"><span class="case-status" data-l10n="n98">17 specjalizacji</span><dl class="case-facts"><div><dt data-l10n="n99">Moja rola</dt><dd data-l10n="n100">Samodzielna realizacja</dd></div><div><dt data-l10n="n101">Zastosowanie</dt><dd data-l10n="n102">Wielospecjalizacyjna dokumentacja wizyt</dd></div><div><dt data-l10n="n103">Zakres</dt><dd data-l10n="n104">Transkrypcja · dokumentacja · rozliczenia</dd></div></dl>
 <figure class="process-mini"><figcaption data-l10n="n105">Schemat działania</figcaption><div class="process-chain"><span data-l10n="n106">Lekarz / pacjent</span><i aria-hidden="true">→</i><span data-l10n="n107">Transkrypcja offline</span><i aria-hidden="true">→</i><span data-l10n="n108">Dokumentacja / NFZ</span></div><p data-l10n="n109">Jeden proces — od nagrania do dokumentacji</p></figure></div></article></section>
 <section aria-label="Współpraca" class="portfolio-section" data-l10n="n110" id="wspolpraca">
 <div class="portfolio-heading"><div class="eyebrow" data-l10n="n111">02 / Współpraca</div><div><h2 data-l10n="n112">Działający system.<br/><em data-l10n="n113">Jasne przekazanie.</em></h2><p class="section-intro" data-l10n="n114">Kod to część rezultatu. Równie ważne jest to, co dostajesz, jak możesz z tego korzystać i co przejmuje Twój zespół.</p></div></div>
 <div class="handover"><div class="handover-top"><h3>Clean IP Handover</h3><p data-l10n="n115">Uzgodniony zakres, pochodzenie komponentów i zasady korzystania z rozwiązania — powiązane z konkretnym wydaniem.</p></div><div class="handover-grid"><article class="handover-step"><span data-l10n="n116">01 / Zakres</span><h4 data-l10n="n117">Co dokładnie otrzymujesz</h4><p data-l10n="n118">Kod, dokumentacja, modele i instrukcje uruchomienia przypisane do określonego wydania.</p></article><article class="handover-step"><span data-l10n="n119">02 / Pochodzenie</span><h4 data-l10n="n120">Z czego powstał system</h4><p data-l10n="n121">Rozdzielenie kodu projektu, wcześniejszego IP, bibliotek open source, modeli i źródeł danych.</p></article><article class="handover-step"><span data-l10n="n122">03 / Uprawnienia</span><h4 data-l10n="n123">Jak możesz z niego korzystać</h4><p data-l10n="n124">Uzgodnienie zasad utrzymania, zmian, integracji i dalszego przekazywania rozwiązania.</p></article><article class="handover-step"><span data-l10n="n125">04 / Przekazanie</span><h4 data-l10n="n126">Na czym opiera się odbiór</h4><p data-l10n="n127">Konkretna wersja repozytorium, dokumentacja oraz uzgodnione prawa i licencje.</p></article></div></div>
-<div class="section-action"><a class="text-link" data-l10n="n128" href="/zloto/#kontakt">Opowiedz o swoim projekcie <span aria-hidden="true">↗</span></a></div></section>
+<div class="section-action"><a class="text-link" data-l10n="n128" href="/zloto/#kontakt">Opowiedz o swoim projekcie <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div></section>
 <section aria-label="O mnie" class="portfolio-section" data-l10n="n129" id="o-mnie">
 <div class="portfolio-heading"><div class="eyebrow" data-l10n="n130">03 / Człowiek za systemami</div><div><h2>Łukasz Guziczak.<br/><em data-l10n="n131">Inżynier AI.</em></h2></div></div>
 <div class="about-layout"><div class="about-copy"><p data-l10n="n132">Wdrażam systemy LLM na produkcję. Łączę modele z oprogramowaniem, danymi i procesami — tak, żeby rozwiązanie dało się uruchomić, utrzymać i przekazać dalej.</p><p data-l10n="n133">Mam doświadczenie w ochronie zdrowia, systemach kosmicznych i fintechu. Fundamentem jest inżynieria: Python, Java/Spring i chmura, a także studia magisterskie z AI i Machine Learning oraz praca o transformerach w obrazowaniu medycznym.</p>
 <details class="certificates" id="certyfikaty"><summary data-l10n="n134">Wybrane certyfikaty</summary><div class="certificate-links"><a href="https://www.coursera.org/account/accomplishments/verify/W88ME7FTDEJH" rel="noopener noreferrer" target="_blank">Machine Learning — Stanford University ↗</a><a href="https://www.coursera.org/account/accomplishments/verify/9APHJHP9KE9H" rel="noopener noreferrer" target="_blank">Data Foundations — Google ↗</a><a href="https://www.linkedin.com/posts/lukasz-guziczak_luxoft-java-academy-activity-6968880524735967232-t9CI" rel="noopener noreferrer" target="_blank">Java Academy — Luxoft ↗</a></div></details></div>
 <div class="about-side"><div aria-hidden="true" class="about-mark">ŁG.</div><dl class="about-facts"><div><dt>2016</dt><dd data-l10n="n135">Początek pracy z ML</dd></div><div><dt>2024</dt><dd data-l10n="n136">Systemy AI na produkcji</dd></div><div><dt>Wrocław</dt><dd data-l10n="n137">Polska</dd></div></dl>
 <div class="cv-actions"><a class="button-main" data-cv-open="html" data-l10n="n138" href="/zloto/cv/" id="cv-open-html">Zobacz pełne CV <span aria-hidden="true">→</span></a><a class="text-link" data-cv-open="pdf" data-l10n="n139" href="/zloto/cv/?format=pdf" id="cv-open-pdf">CV w PDF <span aria-hidden="true">→</span></a></div><p class="cv-note" data-l10n="n140">Pełne CV i PDF otwierają się tutaj, bez opuszczania strony.</p></div></div></section>
-<section aria-label="04 / Pracownia" class="portfolio-section" data-l10n="n141" id="pracownia"><div class="portfolio-heading"><div class="eyebrow" data-l10n="n142">04 / Pracownia</div><div><h2 data-l10n="n143">Również poza<br/><em data-l10n="n144">głównym nurtem.</em></h2><p class="section-intro" data-l10n="n145">Narzędzia, eksperymenty i projekty użytkowe. Więcej kodu i innych realizacji.</p></div></div><div class="lab-grid"><a class="lab-item" href="https://github.com/guziczak/ide" rel="noopener noreferrer" target="_blank"><div><h3>IDE</h3><p data-l10n="n146">Jednoplikowe środowisko programistyczne i klient Git/GitHub</p></div><span aria-hidden="true">↗</span></a><a class="lab-item" href="https://zofiasiek.pl" rel="noopener noreferrer" target="_blank"><div><h3>Zofia Siek</h3><p data-l10n="n147">Strona studia artystycznego dla klienta</p></div><span aria-hidden="true">↗</span></a><a class="lab-item" href="https://github.com/guziczak/noteplayer" rel="noopener noreferrer" target="_blank"><div><h3>Noteplayer</h3><p data-l10n="n148">Odtwarzacz nut</p></div><span aria-hidden="true">↗</span></a><a class="lab-item" href="https://github.com/guziczak/przegladaczka" rel="noopener noreferrer" target="_blank"><div><h3>Przeglądaczka</h3><p data-l10n="n149">Przeglądarka sesji Claude Code i Codex</p></div><span aria-hidden="true">↗</span></a></div></section>
+<section aria-label="04 / Pracownia" class="portfolio-section" data-l10n="n141" id="pracownia"><div class="portfolio-heading"><div class="eyebrow" data-l10n="n142">04 / Pracownia</div><div><h2 data-l10n="n143">Również poza<br/><em data-l10n="n144">głównym nurtem.</em></h2><p class="section-intro" data-l10n="n145">Narzędzia, eksperymenty i projekty użytkowe. Więcej kodu i innych realizacji.</p></div></div><div class="lab-grid"><a class="lab-item" href="https://github.com/guziczak/ide" rel="noopener noreferrer" target="_blank"><div><h3>IDE</h3><p data-l10n="n146">Jednoplikowe środowisko programistyczne i klient Git/GitHub</p></div><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><a class="lab-item" href="https://zofiasiek.pl" rel="noopener noreferrer" target="_blank"><div><h3>Zofia Siek</h3><p data-l10n="n147">Strona studia artystycznego dla klienta</p></div><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><a class="lab-item" href="https://github.com/guziczak/noteplayer" rel="noopener noreferrer" target="_blank"><div><h3>Noteplayer</h3><p data-l10n="n148">Odtwarzacz nut</p></div><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><a class="lab-item" href="https://github.com/guziczak/przegladaczka" rel="noopener noreferrer" target="_blank"><div><h3>Przeglądaczka</h3><p data-l10n="n149">Przeglądarka sesji Claude Code i Codex</p></div><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div></section>
 <div id="page-ending">
 <section class="contact portfolio-section finale" id="kontakt" aria-labelledby="finale-heading">
  <div class="finale-stage" id="finale-stage">
@@ -1055,7 +1098,7 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
    <div class="eyebrow" data-l10n="finaleKicker">05 / Następny krok</div>
    <h2 class="finale-title" id="finale-heading"><span data-l10n="finaleLead">Zbudujmy coś</span><em data-l10n="finalePunch">razem.</em></h2>
    <p class="finale-intro" data-l10n="n154">Napisz, co chcesz usprawnić, z jakimi danymi pracujesz i na jakim etapie jest pomysł. Od tego zaczniemy.</p>
-<div class="finale-contact-row">   <a class="contact-email" href="mailto:guziczak@pm.me" id="contact-email">guziczak@pm.me</a><div class="contact-tools"><a class="text-link" data-l10n="n155" href="mailto:guziczak@pm.me">Napisz o projekcie <span aria-hidden="true">↗</span></a><button class="copy-email" data-l10n="n156" id="copy-email" type="button">Kopiuj e-mail</button></div><p aria-live="polite" class="copy-status" id="copy-status" role="status"></p></div><div class="finale-secondary-row"><div class="contact-links"><a href="tel:+48693069832">+48 693 069 832</a><a href="https://linkedin.com/in/guziczak" rel="noopener noreferrer" target="_blank">LinkedIn ↗</a><a href="https://github.com/guziczak" rel="noopener noreferrer" target="_blank">GitHub ↗</a></div>
+<div class="finale-contact-row">   <a class="contact-email" href="mailto:guziczak@pm.me" id="contact-email">guziczak@pm.me</a><div class="contact-tools"><a class="text-link" data-l10n="n155" href="mailto:guziczak@pm.me">Napisz o projekcie <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><button class="copy-email" data-l10n="n156" id="copy-email" type="button">Kopiuj e-mail</button></div><p aria-live="polite" class="copy-status" id="copy-status" role="status"></p></div><div class="finale-secondary-row"><div class="contact-links"><a href="tel:+48693069832">+48 693 069 832</a><a href="https://linkedin.com/in/guziczak" rel="noopener noreferrer" target="_blank">LinkedIn ↗</a><a href="https://github.com/guziczak" rel="noopener noreferrer" target="_blank">GitHub ↗</a></div>
    <button class="finale-replay" id="finale-replay" type="button" hidden aria-label="Dodaj kolejną złotą iskrę" data-l10n="finaleReplayButton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.9 7.1L21 11l-7.1 1.9L12 20l-1.9-7.1L3 11l7.1-1.9L12 2Zm7 16 1 4m-3-2h6"/></svg><span data-l10n="finaleReplay">Jeszcze jedna iskra</span></button></div>
   </div>
  </div><div class="company finale-company"><div><h3>Łukasz Guziczak GUITS</h3><p data-l10n="n157">Wrocław, Polska</p></div><dl><div><dt>NIP</dt><dd>8993039714</dd></div><div><dt>REGON</dt><dd>543090913</dd></div><div><dt data-l10n="n158">Forma działalności</dt><dd data-l10n="n159">Indywidualna działalność gospodarcza</dd></div></dl></div>
@@ -1829,25 +1872,32 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      if(cv.width!==width||cv.height!==height){cv.width=width;cv.height=height;}
      g.setTransform(dpr,0,0,dpr,0,0);
    }
-   // Fixed from its first visible frame: scrolling never scales or re-parents it.
+   // One canvas and audio clock: fixed during the film, in its own row on the page.
    let footerLift=0,finaleFocus=0;
    function placement(){
      const vp=window.visualViewport,vh=vp?.height||innerHeight,vw=vp?.width||innerWidth,vy=vp?.offsetTop||0,vx=vp?.offsetLeft||0;
+     footerLift=0;finaleFocus=0;
+     if(page){
+       if(mode!=='page'||root.parentElement!==pageSlot){
+         mode='page';pageSlot.appendChild(root);root.classList.remove('score-fixed','score-floating','score-dock','score-compact');root.classList.add('score-page');
+         root.dataset.placement='page';for(const key of ['top','left','width','height','bottom','transform','--score-left','--score-top'])root.style.removeProperty(key);
+         document.body.classList.remove('score-docked');
+       }
+       const rect=pageSlot.getBoundingClientRect();
+       visible=rect.width>0&&rect.height>0&&rect.bottom>Math.max(vy,header.getBoundingClientRect().bottom)&&rect.top<vy+vh;
+       resize();pageHeight=H;bleed=0;placementMix=1;layoutDirty=false;return;
+     }
      const mobile=vw<701,width=Math.max(180,Math.min(940,vw-(mobile?84:160))),height=Math.max(86,Math.min(mobile?118:156,vh*.24));
      if(mode!=='fixed'||root.parentElement!==document.body){
        mode='fixed';document.body.appendChild(root);root.classList.remove('score-page','score-floating','score-dock','score-compact');root.classList.add('score-fixed');
        root.dataset.placement='fixed';for(const key of ['top','left','width','height','bottom','transform'])root.style.removeProperty(key);
        document.body.classList.remove('score-docked');
      }
-     const footer=document.querySelector('#page-ending>.footer'),finale=document.getElementById('kontakt');
-     footerLift=page&&footer?Math.max(0,vy+vh-footer.getBoundingClientRect().top+14):0;
-     // At the closing invitation the decoration gives way to the actual contact.
-     finaleFocus=page&&finale?clamp((vy+vh*.72-finale.getBoundingClientRect().top)/(vh*.38),0,1):0;
-     const left=vx+Math.max(12,(vw-width)/2-(mobile?28:0)),top=vy+vh-height-(mobile?14:20)-footerLift;
+     const left=vx+Math.max(12,(vw-width)/2-(mobile?28:0)),top=vy+vh-height-(mobile?14:20);
      root.style.setProperty('--score-left',Math.round(left)+'px');root.style.setProperty('--score-top',Math.round(top)+'px');
      style('width',Math.round(width)+'px');style('height',Math.round(height)+'px');
-     pageHeight=height;bleed=0;placementMix=page?1:ease(20.35,22.70,sceneTime);
-     visible=(page||phaseOpacity>0)&&finaleFocus<.999&&top+height>Math.max(vy,header.getBoundingClientRect().bottom)+8;
+     pageHeight=height;bleed=0;placementMix=ease(20.35,22.70,sceneTime);
+     visible=phaseOpacity>0&&top+height>Math.max(vy,header.getBoundingClientRect().bottom)+8;
      resize();layoutDirty=false;
    }
    function schedule(){if(!raf&&!suspended&&!disposed&&!document.hidden)raf=window.requestAnimationFrame(tick);}
@@ -1861,7 +1911,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    }
    const noise=n=>{const f=Math.sin(n*127.1+17.7)*43758.5453;return f-Math.floor(f);};
    function burst(note,position){
-     const count=mode==='fixed'?6:9,max=mode==='fixed'?180:300;
+     const count=6,max=180;
      const at=effectTime-Math.max(0,position-note.t);
      for(let i=0;i<count;i++){
        const seed=note.i*23+i,angle=noise(seed)*Math.PI*2;
@@ -1894,8 +1944,8 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    }
    function drawPage(pos){
      g.clearRect(0,0,W,H);painted=[];
-     const compact=mode==='fixed',m=metrics=staffMetrics(W,pageHeight||H,prepared.ranges,compact),gap=m.gap;
-     const yPad=(H-(pageHeight||H))/2,pps=compact?66:90;
+      const compact=true,m=metrics=staffMetrics(W,pageHeight||H,prepared.ranges,compact),gap=m.gap;
+      const yPad=(H-(pageHeight||H))/2,pps=66;
      const curve=x=>m.amplitude*(Math.sin(x/W*Math.PI*2-.55+waveTime*.26)+.28*Math.sin(x/W*Math.PI*1.2+.8-waveTime*.17));
      const Y=(step,staff,x)=>yPad+(staff==='T'?m.originT:m.originB)+((staff==='T'?m.upperT:m.upperB)-step)*gap*.5+curve(x);
      const line=(x,y,a,b)=>{g.beginPath();g.moveTo(x,y);g.lineTo(a,b);g.stroke();};
@@ -1989,7 +2039,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      setScene(time){sceneTime=time;page=false;phaseOpacity=ease(...sequence.cues.scoreIn,time);schedule();},
      finish(){page=true;phaseOpacity=1;lastMs=null;wake();},
      reset(){sceneTime=0;page=false;phaseOpacity=0;lastCrossing=null;particles=[];lastMs=null;style('opacity','0');wake();},
-     diagnostics(){return {clock:'audio-output',paused,reduced,suspended,pps:mode==='fixed'?66:90,width:W,height:H,position:lastPosition,revision,notes:prepared.notes.length,
+      diagnostics(){return {clock:'audio-output',paused,reduced,suspended,pps:66,width:W,height:H,position:lastPosition,revision,notes:prepared.notes.length,
        trebleNotes:prepared.counts.treble,bassNotes:prepared.counts.bass,staffCount:2,clefs:['treble','bass'],frames,painted,opacity:Number(root.style.opacity),page,layoutHeight:pageHeight,placementMix,placement:mode,footerLift,finaleFocus,
        waveTime,curveSample:metrics?metrics.amplitude*(Math.sin(-.55+waveTime*.26)+.28*Math.sin(.8-waveTime*.17)):0,playhead:metrics?.head||0,
        particles:particles.length,bursts:burstCount,burstStaff:{...burstStaff},recentBursts:recentBursts.slice(),renderer:'golden-grand-staff',canvasId:cv.id};},
@@ -6331,7 +6381,7 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
   c+=vec3(1.,.85,.49)*panel(p,R,vec3(2.3,1.2,-1.9),vec2(.60,2.6),rough)*4.9;
   c+=vec3(.65,.74,.90)*panel(p,R,vec3(-1.8,1.5,-2.8),vec2(.32,2.0),rough)*2.1;
   c+=vec3(1.,.89,.68)*panel(p,R,vec3(0,3.,.2),vec2(2.5,.37),rough)*3.5;
-  c+=vec3(1.,.94,.82)*panel(p,R,vec3(.2,.8,4.5),vec2(2.6,2.3),rough)*.24;
+  c+=vec3(1.,.94,.82)*panel(p,R,vec3(-.6,.8,4.5),vec2(3.4,2.3),rough)*.24;
   return c;
  }
  vec3 brdf(vec3 N,vec3 V,vec3 L,vec3 F0,float r,vec3 light){
@@ -6488,10 +6538,16 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
  'use strict';const {M,C,PI,inverse4}=m;
  function create(device,meshes,canvas){
   const gl=device.gl,world=atelier.create(gl),handoff=bridge.create(device,meshes,canvas);
-  let W=0,H=0,frames=0,lastAngle=0,lastClock=0,lastRect=null,main=null,mirror=null,bloomA=null,bloomB=null,fogRT=null,waterBase=null,suspended=false;
+  let W=0,H=0,frames=0,lastAngle=0,lastClock=0,lastRect=null,main=null,msaa=null,mirror=null,bloomA=null,bloomB=null,fogRT=null,waterBase=null,suspended=false;
   const hdr=!!gl.getExtension('EXT_color_buffer_float');
   gl.getExtension('OES_texture_float_linear');
   const limits={maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE)};
+  // The offscreen target bypasses context antialiasing. Resolve opaque edges at
+  // the existing pixel budget; water, fog and bloom remain single-sample passes.
+  const colorFormat=hdr?gl.RGBA16F:gl.RGBA8;
+  const colorSamples=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,colorFormat,gl.SAMPLES)||[]);
+  const depthSamples=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.DEPTH_COMPONENT24,gl.SAMPLES)||[]);
+  const sampleCount=Math.max(1,...colorSamples.filter(n=>n>1&&n<=4&&depthSamples.includes(n)));
   function program(vs,fs){const v=gl.createShader(gl.VERTEX_SHADER),f=gl.createShader(gl.FRAGMENT_SHADER);for(const [s,txt]of [[v,vs],[f,fs]]){gl.shaderSource(s,txt);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error('Atelier shader: '+gl.getShaderInfoLog(s));}const p=gl.createProgram();gl.attachShader(p,v);gl.attachShader(p,f);gl.linkProgram(p);gl.deleteShader(v);gl.deleteShader(f);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error('Atelier link: '+gl.getProgramInfoLog(p));return {p,u:{}};}
   const mat=program(S.meshVS,S.meshFS),sky=program(S.screenVS,S.skyFS),water=program(S.screenVS,S.waterFS),post=program(S.screenVS,S.postFS),shadow=program(S.shadowVS,S.shadowFS),dust=program(S.dustVS,S.dustFS),blur=program(S.screenVS,S.blurFS),fog=program(S.screenVS,S.fogFS);
   const u=(p,k)=>p.u[k]??(p.u[k]=gl.getUniformLocation(p.p,k));
@@ -6502,6 +6558,20 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Atelier framebuffer incomplete');return {fb,t,d,w,h,depthTexture};
   }
   function dispose(rt){if(!rt)return;gl.deleteFramebuffer(rt.fb);gl.deleteTexture(rt.t);if(rt.d){if(rt.depthTexture)gl.deleteTexture(rt.d);else gl.deleteRenderbuffer(rt.d);}}
+  function disposeMultisample(rt){if(!rt)return;gl.deleteFramebuffer(rt.fb);gl.deleteRenderbuffer(rt.color);gl.deleteRenderbuffer(rt.depth);}
+  function multisampleTarget(w,h){
+   if(sampleCount<2)return null;
+   const rt={fb:gl.createFramebuffer(),color:gl.createRenderbuffer(),depth:gl.createRenderbuffer(),w,h,samples:sampleCount};
+   if(!rt.fb||!rt.color||!rt.depth){disposeMultisample(rt);return null;}
+   gl.bindFramebuffer(gl.FRAMEBUFFER,rt.fb);gl.bindRenderbuffer(gl.RENDERBUFFER,rt.color);
+   gl.renderbufferStorageMultisample(gl.RENDERBUFFER,sampleCount,colorFormat,w,h);
+   gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.RENDERBUFFER,rt.color);
+   gl.bindRenderbuffer(gl.RENDERBUFFER,rt.depth);
+   gl.renderbufferStorageMultisample(gl.RENDERBUFFER,sampleCount,gl.DEPTH_COMPONENT24,w,h);
+   gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,rt.depth);
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE)return rt;
+   disposeMultisample(rt);return null;
+  }
   const shadowRT=target(1024,1024,true),lightVP=C(M.O(-3.5,3.5,-3.5,3.5,.1,16),M.look([-2.7,4.6,3.1],[0,-.5,0]));
   const dustV=gl.createVertexArray(),dustB=gl.createBuffer();gl.bindVertexArray(dustV);gl.bindBuffer(gl.ARRAY_BUFFER,dustB);let seed=28471;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};const points=[];for(let i=0;i<220;i++){const a=rnd()*PI*2,r=Math.sqrt(rnd())*1.30;points.push(Math.cos(a)*r,rnd()*2.8-1.2,-.28-rnd()*.36);}gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(points),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,12,0);gl.bindVertexArray(null);
   const stoneTex=gl.createTexture(),stoneBytes=Uint8Array.from(atob(stone.data),c=>c.charCodeAt(0));gl.bindTexture(gl.TEXTURE_2D,stoneTex);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.R8,stone.size,stone.size,0,gl.RED,gl.UNSIGNED_BYTE,stoneBytes);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);gl.generateMipmap(gl.TEXTURE_2D);gl.pixelStorei(gl.UNPACK_ALIGNMENT,4);
@@ -6519,8 +6589,8 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    if(!overlay)device.claimSurface(prof.width,prof.height,'exhibit');
    const environmentReveal=overlay?m.clamp(motion.environmentReveal??0,0,1):1;
    const showWorld=!overlay||environmentReveal>0;
-   if(prof.width!==W||prof.height!==H||!main){W=prof.width;H=prof.height;dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);
-    main=target(W,H,false,true);waterBase=target(W,H,false,true);mirror=target(Math.max(160,Math.floor(W*.55)),Math.max(160,Math.floor(H*.55)));
+   if(prof.width!==W||prof.height!==H||!main){W=prof.width;H=prof.height;dispose(main);disposeMultisample(msaa);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);
+    main=target(W,H,false,true);msaa=multisampleTarget(W,H);waterBase=target(W,H,false,true);mirror=target(Math.max(160,Math.floor(W*.55)),Math.max(160,Math.floor(H*.55)));
     bloomA=target(Math.max(96,Math.floor(W/4)),Math.max(96,Math.floor(H/4)));bloomB=target(bloomA.w,bloomA.h);fogRT=target(bloomA.w,bloomA.h);}
    suspended=false;lastAngle=angle;lastClock=clock;lastRect=rect;
    // @live:exhibit
@@ -6550,11 +6620,15 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    for(const pose of rocks)drawMesh(world.rock,pose,1,VP,cam,true);
    for(const n of ['signatureA','signatureB'])drawMesh(meshes[n],model,0,VP,cam,true);
    }
-   bind(main);gl.clearColor(.003,.004,.004,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
+   bind(msaa||main);gl.clearColor(.003,.004,.004,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
    if(showWorld){gl.useProgram(sky.p);m4(sky,'uInvVP',inv);f3(sky,'uCam',cam);f1(sky,'uTime',clock);screen(sky);}
    gl.enable(gl.DEPTH_TEST);
    if(showWorld)for(const pose of rocks)drawMesh(world.rock,pose,1,VP,cam);
    for(const n of ['signatureA','signatureB'])drawMesh(meshes[n],model,0,VP,cam);
+   if(msaa){
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER,msaa.fb);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,main.fb);
+    gl.blitFramebuffer(0,0,W,H,0,0,W,H,gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT,gl.NEAREST);bind(main);
+   }
    if(showWorld){
    // Copy opaque rock/metal BEFORE water. Flooding is translucent and depth-tested,
    // not an opaque hump obscuring the altar with a flat black reflection.
@@ -6578,7 +6652,7 @@ GuziczakModules.define('render/exhibit',['math','render/profile','geometry/ateli
    f1(post,'uTextFade',innerWidth>700?environmentReveal:0);f1(post,'uOpacity',opacity);f1(post,'uEnvironmentReveal',environmentReveal);
    screen(post);gl.disable(gl.BLEND);gl.bindVertexArray(null);frames++;
   }
-  return {render,suspend(){suspended=true;dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);main=mirror=bloomA=bloomB=fogRT=waterBase=null;W=H=0;},stats:()=>({frames,angle:lastAngle,clock:lastClock,width:W,height:H,suspended,hdr,parts:2,triangles:(meshes.signatureA.count+meshes.signatureB.count)/3,rockTriangles:world.rock.count/3,mode:'solid-mesh / procedural rock / planar water reflection',depth:.16,bevel:.018,rect:lastRect,surface:device.surface()}),destroy(){dispose(main);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);dispose(shadowRT);for(const p of [mat,sky,water,post,shadow,dust,blur,fog])gl.deleteProgram(p.p);handoff.destroy();}};
+  return {render,suspend(){suspended=true;dispose(main);disposeMultisample(msaa);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);main=msaa=mirror=bloomA=bloomB=fogRT=waterBase=null;W=H=0;},stats:()=>({frames,angle:lastAngle,clock:lastClock,width:W,height:H,suspended,hdr,samples:msaa?.samples||1,parts:2,triangles:(meshes.signatureA.count+meshes.signatureB.count)/3,rockTriangles:world.rock.count/3,mode:'solid-mesh / procedural rock / planar water reflection',depth:.16,bevel:.018,rect:lastRect,surface:device.surface()}),destroy(){dispose(main);disposeMultisample(msaa);dispose(mirror);dispose(bloomA);dispose(bloomB);dispose(fogRT);dispose(waterBase);dispose(shadowRT);for(const p of [mat,sky,water,post,shadow,dust,blur,fog])gl.deleteProgram(p.p);handoff.destroy();}};
  }
  return {create};
 });
@@ -6816,7 +6890,7 @@ GuziczakModules.define('interaction/rotor',[],()=>{
 
 GuziczakModules.define('ui/exhibit',['core/scope','math','interaction/rotor'],(scopes,math,rotors)=>{
  'use strict';
- const initialPose=Object.freeze({yaw:-.64,pitch:0});
+ const initialPose=Object.freeze({yaw:-.32,pitch:0});
  function create(win,doc,changed){
   const scope=scopes.createScope(),slot=doc.getElementById('artifact-slot'),toggle=doc.getElementById('artifact-toggle');
   const reduced=win.matchMedia('(prefers-reduced-motion:reduce)');
@@ -8271,7 +8345,9 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         function hideTether() { tetherVisible = false; lastConnector = null; tether.setAttribute('hidden', ''); }
         function routeIsBlocked() { return routeBlocked || doc.body.classList.contains('route-cv') || doc.body.classList.contains('route-score'); }
         function updateVisibility() {
-            const hidden = !ready || !visible || suspended || !!doc.hidden || routeIsBlocked();
+            // The page source is part of the document flow. Scrolling its model
+            // offscreen pauses the capture; it must not collapse readable code.
+            const hidden = !ready || (mode === 'intro' && !visible) || suspended || !!doc.hidden || routeIsBlocked();
             if (root.hidden !== hidden) { root.hidden = hidden; geometryDirty = true; }
             doc.body.classList.toggle('live-trace-visible-intro', !hidden && mode === 'intro');
             doc.body.classList.toggle('live-trace-visible-page', !hidden && mode === 'page');
@@ -8293,7 +8369,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         }
         // State labels bypass source/value throttling, including the final frame before pause.
         function paintControls() {
-            const open = expanded[mode], stopped = paused || suspended;
+            const open = expanded[mode], stopped = paused || suspended || (mode === 'page' && !visible);
             if (root.dataset.waiting !== String(stale)) geometryDirty = true;
             content.hidden = !open; root.dataset.expanded = String(open); root.dataset.paused = String(stopped);
             root.dataset.pinned = String(!!pinned); root.dataset.waiting = String(stale);
@@ -8310,7 +8386,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         }
         function mount(nextMode) {
             mode = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro'; root.dataset.mode = mode;
-            const parent = mode === 'page' ? doc.getElementById('artifact-stage') : doc.body;
+            const parent = mode === 'page' ? doc.getElementById('page-trace-slot') || doc.body : doc.body;
             if (parent && root.parentNode !== parent) parent.appendChild(root);
             if (mode === 'page') clearFloatingLayout();
             geometryDirty = true; paintControls(); updateVisibility();
@@ -8487,7 +8563,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             for (const target of input.slice(0, MAX_TARGETS)) if (target && target.objectId != null) projectObject(target.objectId, target);
         }
         function paintTether() {
-            if (root.hidden || stale || !current || current.pending) { hideTether(); return; }
+            if (root.hidden || !visible || stale || !current || current.pending || (mode === 'page' && !pinned)) { hideTether(); return; }
             const target = targets.get(current.objectId) || targets.get(current.key) || current.screen;
             if (!target || !target.visible) { hideTether(); return; }
             if (geometryDirty || !dockRect) measureDock();

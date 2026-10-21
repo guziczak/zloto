@@ -30,12 +30,16 @@ jobs:
           node tests/router-integration.test.cjs
           node tests/static-routes.test.cjs
       - name: Check audio behavior
-        run: node tests/audio-regression.cjs index.html
+        run: |
+          node tests/audio-regression.cjs index.html
+          node tests/score-placement.test.cjs
       - name: Check casting and foundry clearance
         run: |
           node tests/casting-liquid.test.cjs
           node tests/foundry-clearance.test.cjs
       - name: Check pipe ignition
         run: node tests/ignition.test.cjs
+      - name: Check exhibit quality and rotation
+        run: node tests/exhibit-quality.test.cjs
       - name: Check scene and browser runtime
         run: node tests/runtime-regression.cjs

@@ -828,6 +828,7 @@ if (!baseline) check('trace-layout-and-stable-connectors', () => {
   for (const target of [{ x: 200, y: 540 }, { x: -1, y: 100 }, { x: 100, y: 100, visible: false }])
     assert.equal(runtime.resolveTraceConnector({ rect, target, viewport }), null, 'Covered or unavailable targets do not get misleading leaders');
   const isolated = makeDom(), trace = runtime.create(isolated.win, isolated.doc);
+  const pageSlot = isolated.doc.createElement('div'); pageSlot.id = 'page-trace-slot'; isolated.doc.body.appendChild(pageSlot);
   isolated.win.innerWidth = 390; isolated.win.innerHeight = 660;
   trace.setSceneLayout({ viewport, bounds: { left: 24, right: 366, top: 150, bottom: 420 }, safe: { left: 18, right: 18, top: 70, bottom: 16 } });
   function frame(ms, entries) {
@@ -856,13 +857,57 @@ if (!baseline) check('trace-layout-and-stable-connectors', () => {
   trace.unpin();
   trace.setSceneLayout({ viewport, bounds: { left: 24, right: 366, top: 150, bottom: 420 } });
   frame(1700, [c5]); assert(trace.diagnostics().layout, 'A later intro frame can restore the scene placement');
-  trace.beginFrame('page', { time: 23 }, 2100); trace.emit('exhibit', { yaw: .3 }, { objectId: 'exhibit/signature', priority: 70 }); trace.endFrame({});
+  function pageFrame(ms) {
+    trace.beginFrame('page', { time: 23 }, ms);
+    trace.emit('exhibit', { yaw: .3 }, { objectId: 'exhibit/signature', priority: 70 });
+    trace.projectObject('exhibit/signature', { x: 200, y: 300, visible: true });
+    trace.endFrame({ audio: legacyAudioSnapshot() });
+  }
+  pageFrame(2100);
   const traceRoot = isolated.doc.getElementById('live-trace');
   assert.equal(trace.diagnostics().layout, null, 'Entering the exhibit clears floating intro placement');
-  assert.equal(traceRoot.parentNode.id, 'artifact-stage', 'Page source is attached to its own artifact stage');
+  assert.equal(traceRoot.parentNode, pageSlot, 'Page source belongs to the dedicated document-flow slot');
   assert(!traceRoot.style.left && !traceRoot.style.top, 'Intro screen coordinates cannot leak into page layout');
+  assert.equal(trace.diagnostics().visible, true, 'Idle exhibit still exposes its real live source');
+  assert.equal(trace.diagnostics().tether, false, 'Automatic exhibit selection adds no on-object label or reticle');
+  const objectButton = traceRoot.querySelector('.live-trace-object-button');
+  objectButton.dispatchEvent(new Event('click'));
+  assert.equal(objectButton.getAttribute('aria-pressed'), 'true');
+  assert.equal(trace.diagnostics().tether, true, 'An explicitly pinned exhibit retains its spatial pointer');
+  const toggle = traceRoot.querySelector('.live-trace-toggle'), content = traceRoot.querySelector('.live-trace-body');
+  toggle.dispatchEvent(new Event('click'));
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true'); assert.equal(content.hidden, false);
+  trace.endFrame({ visible: false });
+  assert.equal(trace.diagnostics().visible, true, 'Scrolling the model offscreen cannot collapse its in-flow source');
+  assert.equal(traceRoot.dataset.paused, 'true', 'The retained source never claims a live offscreen capture');
+  assert.equal(content.hidden, false, 'An expanded source stays readable below the offscreen model');
+  assert.equal(trace.diagnostics().tether, false, 'An offscreen model has no stale spatial pointer');
+  isolated.win.dispatchEvent(new DetailEvent('guziczak:routechange', { detail: { view: 'cv' } }));
+  assert.equal(trace.diagnostics().visible, false, 'The in-flow panel still respects route suspension');
+  isolated.win.dispatchEvent(new DetailEvent('guziczak:routechange', { detail: { view: 'home' } }));
+  pageFrame(2200);
+  assert.equal(trace.diagnostics().visible, true); assert.equal(trace.diagnostics().tether, true);
+  assert.equal(traceRoot.dataset.paused, 'false', 'Returning to a rendered model restores the live status');
+  objectButton.dispatchEvent(new Event('click'));
+  assert.equal(objectButton.getAttribute('aria-pressed'), 'false'); assert.equal(trace.diagnostics().tether, false);
+  isolated.doc.documentElement.lang = 'de'; isolated.win.dispatchEvent(new DetailEvent('guziczak:languagechange'));
+  assert.equal(traceRoot.getAttribute('aria-label'), 'Code live');
+  assert.equal(traceRoot.querySelector('.live-trace-name').textContent, 'Artefakt drehen');
+  trace.beginFrame('intro', { time: 2 }, 2300);
+  trace.emit('water', { velocity: .4 }, { objectId: 'water/surface', priority: 70 });
+  trace.projectObject('water/surface', { x: 200, y: 300, visible: true }); trace.endFrame({});
+  assert.equal(traceRoot.parentNode, isolated.doc.body, 'Replay restores the original cinematic overlay container');
+  assert(trace.diagnostics().layout, 'Replay can restore its existing floating scene placement');
+  assert.equal(trace.diagnostics().tether, true, 'Cinematic automatic object pointers remain available');
+  assert.equal(trace.diagnostics().expanded, false, 'Intro and page source expansion remain independent');
+  pageFrame(2400);
+  assert.equal(traceRoot.parentNode, pageSlot); assert.equal(trace.diagnostics().expanded, true);
+  assert.equal(trace.diagnostics().tether, false, 'Returning to an unpinned exhibit restores the clean model');
+  const escape = new Event('keydown', { cancelable: true }); escape.key = 'Escape'; traceRoot.dispatchEvent(escape);
+  assert.equal(content.hidden, true); assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+  assert.equal(isolated.doc.activeElement, toggle, 'Escape returns keyboard focus to the source control');
   trace.destroy();
-  return { responsiveFixtures: fixtures.length, boundedLeaders: true, exactMouthMarker: true, noteLabels: true, stableSelection: true, absentVoiceNeverLive: true, pagePlacementCleanup: true };
+  return { responsiveFixtures: fixtures.length, boundedLeaders: true, exactMouthMarker: true, noteLabels: true, stableSelection: true, absentVoiceNeverLive: true, pagePlacementCleanup: true, pageFlowSlot: true, explicitExhibitPointer: true, offscreenSourceRetained: true, replayAndSourceControls: true };
 });
 
 if (!baseline) check('trace-ambient-execution-provenance', () => {
