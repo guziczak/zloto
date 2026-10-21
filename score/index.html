@@ -4122,16 +4122,16 @@ void main(){
         if(uReflectionPass>.5)worldY=2.*uReflectionY-worldY;
         float height=worldY-vAgeLife.z;
         float burn=vAgeLife.w*smoothstep(0.,IGNITION_TRANSITION,height);
-        vec3 frequency=mix(vec3(3.15),vec3(4.6,2.1,4.6),burn);
+        vec3 frequency=mix(vec3(3.15),vec3(3.8,3.2,3.8),burn);
         vec3 advection=mix(vec3(.19,-.31,.13),vec3(.12,-2.35,.08),burn);
         float noise=densityNoise(cloudQ*frequency+offset+advection*evolution);
         float rim=max(0.,1.-dot(q,q));
         float body=smoothstep(0.,.72,rim)*(.28+.72*smoothstep(.24,.76,noise));
         float contact=smoothstep(0.,softContact,solidDistance-distance);
         float steamDensity=body*vCenterDensity.w*contact*(1.-burn);
-        // Narrow, broken tongues occupy the same bounded volume. One value-noise
+        // Rounded, softly tapered fire fills more of the same bounded volume. One value-noise
         // sample supplies both phases; no extra ray, octave, mesh or draw is added.
-        float tip=smoothstep(-.65,.95,cloudQ.y),width=mix(.86,.23,tip);
+        float tip=smoothstep(-.65,.95,cloudQ.y),width=mix(.94,.62,tip);
         vec2 curl=vec2(sin(cloudQ.y*3.6+seed*.13-evolution*2.1),
                        cos(cloudQ.y*4.3+seed*.19-evolution*1.7))*.055*tip;
         float core=1.-smoothstep(width*.42,width,length(cloudQ.xz+curl));
