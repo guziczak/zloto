@@ -98,6 +98,16 @@ They verify that a marker remains on its exact target, that a source cannot stay
 live after its operation stops, and that clearing the intro layout removes its
 placement. The cinema-to-exhibit projection is checked at the handoff frame.
 
+Coffee-entry checks sample the production scene and camera in desktop and portrait
+viewports, including both sides of the mobile breakpoint. The apparent frame width
+at the cup's actual depth and its projected rim width must approach their final
+values without a rebound. Target excursions must stay below one pixel, and the
+composition holds through the first pour. Both transition boundaries are checked
+for position and velocity continuity. Reverse
+sampling verifies seek independence, and actual pitcher bounds must remain in the
+reserved content viewport after arrival. These are CPU projection checks, not a
+rendered assessment of the animation.
+
 Water-control checks execute the production motion module, impulse detector,
 water driver, engine, clock and DOM controllers against controls parsed from the
 current HTML. They verify that both sensor permission requests begin within the

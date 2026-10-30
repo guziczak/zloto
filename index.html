@@ -5377,9 +5377,9 @@ GuziczakModules.define("scene/assembly", ["math", "scene/curves", "config/vocabu
 });
 
 
-GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking', 'config/casting'], (math, config, docking, casting) => {
+GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking', 'config/casting', 'scene/cup-inflow'], (math, config, docking, casting, inflow) => {
     'use strict';
-    const { clamp, mix, ease, dot, M, C } = math, { shots } = config;
+    const { clamp, mix, ease, dot, M } = math, { shots } = config;
     function cameraTrack(t) {
         if (t >= config.settledAt)
             return { yaw: 0, pitch: 0, distance: 9.5, target: [0, 0, 0] };
@@ -5465,21 +5465,31 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const z = docking.hull[2] + (docking.hull[1] * .932 + .66) * Math.sin(a);
         for (const y of [docking.deckY - .32, docking.deckY + 2.37]) ringBounds.push([x, y, z]);
     }
-    function worldBounds(frame, assembly) {
+    // Frame the kettle's working poses, not its offstage approach. Otherwise its
+    // arrival pushes the camera out and pulls it back as it reaches the cup.
+    const pourBounds = [false, true].map(mobile => {
+        const points = [];
+        for (const t of [4.05, 4.62]) {
+            const pose = inflow.kettle(t, mobile).pose;
+            for (const x of [-.85, 1.02]) for (const y of [-.72, .72]) for (const z of [-.55, .55])
+                points.push(M.point(pose, [x, y, z]));
+        }
+        return points;
+    });
+    function worldBounds(frame, assembly, viewport) {
         const points = ringBounds.slice(), cup = assembly?.cupPose || M.I(), coil = assembly?.coilPose || cup;
         for (let i = 0; i < 48; i++) {
             const a = i * Math.PI / 24, c = Math.cos(a), s = Math.sin(a);
             for (const y of [-.35, 1.09]) points.push(M.point(cup, [1.24 * c, y, 1.24 * s]));
             for (const y of [-1.78, -.21]) points.push(M.point(coil, [.58 * c, y, .58 * s]));
         }
-        // The pouring vessel is above the cup. Fit its actual transform when present;
-        // easing its bounds away lets the authored entrance/exit leave the frame.
+        // Keep one composition through arrival and tilt; the vessel can enter and
+        // leave that frame. Only release its framing reserve during departure.
         const kettle = frame.inflow?.kettle;
         if (kettle?.pose) {
-            const weight = ease(3.00, 3.55, frame.time) * (1 - ease(7.90, 8.70, frame.time));
-            const pose = C(cup, kettle.pose), center = M.point(cup, [0, .4, 0]);
-            for (const x of [-.85, 1.02]) for (const y of [-.72, .72]) for (const z of [-.55, .55]) {
-                const p = M.point(pose, [x, y, z]);
+            const weight = 1 - ease(7.90, 8.70, frame.time), center = M.point(cup, [0, .4, 0]);
+            for (const point of pourBounds[viewport.width <= 700 ? 1 : 0]) {
+                const p = M.point(cup, point);
                 points.push(p.map((v, k) => mix(center[k], v, weight)));
             }
         }
@@ -5492,7 +5502,11 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         const focus = wide * (1 - base.quenchFocus);
         if (focus <= 0) return { ...base, fov: 35 };
         const yaw = mix(base.yaw, .22, focus), pitch = mix(base.pitch, .92, focus), fov = mix(35, 64, focus);
-        const axes = cameraAxes(yaw, pitch), [right, up, back] = axes, points = worldBounds(frame, assembly);
+        // Fit the destination once in its final perspective. Fitting every
+        // intermediate narrow lens creates an unnecessary outward excursion.
+        const entering = frame.time < 3.55;
+        const axes = cameraAxes(entering ? .22 : yaw, entering ? .92 : pitch);
+        const [right, up, back] = axes, points = worldBounds(frame, assembly, viewport);
         const extrema = axes.map(axis => {
             let lo = Infinity, hi = -Infinity;
             for (const p of points) { const value = dot(p, axis); lo = Math.min(lo, value); hi = Math.max(hi, value); }
@@ -5500,16 +5514,28 @@ GuziczakModules.define('scene/camera', ['math', 'config/camera', 'config/docking
         });
         const framed = [0, 1, 2].map(k => axes.reduce((sum, axis, i) => sum + axis[k] * extrema[i], 0));
         const target = base.target.map((v, i) => mix(v, framed[i], focus));
-        const content = contentViewport(frame, viewport), tan = Math.tan(fov * Math.PI / 360);
+        const fitTarget = entering ? framed : target;
+        const content = contentViewport(frame, viewport), tan = Math.tan((entering ? 64 : fov) * Math.PI / 360);
         let fit = .5;
         // Each inequality is solved at the point's own depth. A bounding sphere or
         // a screen-aspect multiplier clips the near/front rim on narrow phones.
         for (const p of points) {
-            const q = p.map((v, i) => v - target[i]), depthOffset = dot(q, back);
+            const q = p.map((v, i) => v - fitTarget[i]), depthOffset = dot(q, back);
             fit = Math.max(fit, depthOffset + .35,
                 depthOffset + Math.max(Math.abs(dot(q, right)) / (tan * content.aspect * .92), Math.abs(dot(q, up)) / (tan * .90)));
         }
-        return { yaw, pitch, fov, target, distance: mix(base.distance, fit, focus), quenchFocus: base.quenchFocus };
+        let distance = mix(base.distance, fit, focus);
+        if (entering) {
+            // Interpolate the visible scale at the cup, accounting for the moving
+            // aim and lens. Keep the incoming velocity and settle without rebound;
+            // this is sampled from time alone, so pause/seek/replay stay identical.
+            const anchor = M.point(assembly?.cupPose || M.I(), [0, .4, 0]);
+            const offset = (aim, axis) => dot(aim.map((v, i) => v - anchor[i]), axis);
+            const from = (base.distance + offset(base.target, cameraAxes(base.yaw, base.pitch)[2])) * Math.tan(35 * Math.PI / 360);
+            const to = (fit + offset(framed, back)) * tan;
+            distance = mix(from, to, focus) / Math.tan(fov * Math.PI / 360) - offset(target, cameraAxes(yaw, pitch)[2]);
+        }
+        return { yaw, pitch, fov, target, distance, quenchFocus: base.quenchFocus };
     }
     return { sampleCamera, cameraTrack, contentViewport };
 });

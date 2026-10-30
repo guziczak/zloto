@@ -433,6 +433,113 @@ if (!baseline) check('audio-ledger-to-pressure-steam', () => {
   } finally { fixtures.forEach(f => f.sampler.destroy()); }
 });
 
+if (!baseline) check('coffee-camera-transition-projection', () => {
+  assert(catalog, 'Geometry catalog required');
+  const math = registry.get('math'), { M } = math, cameras = registry.get('scene/camera');
+  const timeline = registry.get('core/timeline').createTimeline(registry.get('config/sequence').durations);
+  const states = registry.get('scene/state'), scene = registry.get('scene/composer').createScene(catalog);
+  const start = 3.03, settled = 3.55, firstPour = 4.60, reports = [];
+  const vector = shot => [shot.yaw, shot.pitch, shot.fov, shot.distance, ...shot.target];
+  function halfSpan({ shot, packet }) {
+    const anchor = M.point(packet.assembly.cupPose, [0, .4, 0]);
+    const back = [Math.sin(shot.yaw) * Math.cos(shot.pitch), Math.sin(shot.pitch), Math.cos(shot.yaw) * Math.cos(shot.pitch)];
+    const depth = shot.distance + math.dot(shot.target.map((value, axis) => value - anchor[axis]), back);
+    return depth * Math.tan(shot.fov * Math.PI / 360);
+  }
+  for (const [width, height] of [[2048, 1098], [1440, 900], [701, 900], [700, 900], [390, 844], [320, 568]]) {
+    const label = width + 'x' + height;
+    const viewport = { width, height, dpr: 1, traceTop: Math.min(width <= 700 ? 56 : 62, height * .13),
+      traceInset: Math.min(width <= 360 ? 136 : width <= 700 ? 128 : 124, height * .30) };
+    function sample(authored) {
+      const frame = states.sampleState(timeline.sample(timeline.toElapsed(authored)));
+      frame.frozen = true; frame.seek = true;
+      const packet = scene.sample(frame, viewport);
+      Object.assign(frame, { fluid: packet.fluid, docking: packet.docking, reclaim: packet.reclaim, inflow: packet.inflow }, packet.atmosphere);
+      return { frame, packet, shot: cameras.sampleCamera(frame, viewport, packet.assembly) };
+    }
+    function projection({ frame, shot }) {
+      const content = cameras.contentViewport(frame, viewport);
+      const eye = [shot.target[0] + Math.sin(shot.yaw) * Math.cos(shot.pitch) * shot.distance,
+        shot.target[1] + Math.sin(shot.pitch) * shot.distance,
+        shot.target[2] + Math.cos(shot.yaw) * Math.cos(shot.pitch) * shot.distance];
+      return M.mul(M.P(shot.fov * Math.PI / 180, content.aspect, .1, 1500), M.look(eye, shot.target));
+    }
+    function rimWidth(result, matrix = projection(result)) {
+      const xs = [];
+      for (let i = 0; i < 96; i++) {
+        const angle = i * Math.PI / 48, p = M.point(result.packet.assembly.cupPose, [1.19 * Math.cos(angle), 1.04, 1.19 * Math.sin(angle)]);
+        const q = M.point(matrix, p), w = matrix[3] * p[0] + matrix[7] * p[1] + matrix[11] * p[2] + matrix[15];
+        assert(w > 0, 'Coffee rim remains in front of the camera'); xs.push(q[0] / w);
+      }
+      return (Math.max(...xs) - Math.min(...xs)) * width * .5;
+    }
+    const initial = sample(start), destination = sample(settled), finalSpan = halfSpan(destination);
+    const initialSpan = halfSpan(initial), direction = Math.sign(finalSpan - initialSpan);
+    assert(direction > 0, 'The loading close-up opens into the pouring shot at ' + label);
+    let previousSpan = initialSpan, previousRimWidth = rimWidth(initial), maximumTargetExcursion = 0;
+    const samples = [];
+    for (let i = 0; i <= 52; i++) {
+      const authored = start + (settled - start) * i / 52, result = sample(authored), { shot } = result, span = halfSpan(result);
+      assert(vector(shot).every(Number.isFinite), 'Finite coffee camera at ' + label + ' t=' + authored);
+      assert(span >= initialSpan - 1e-6 && span <= finalSpan + 1e-6,
+        'Coffee framing cannot widen beyond its settled shot at ' + label + ' t=' + authored + ': ' + span + ' outside [' + initialSpan + ', ' + finalSpan + ']');
+      assert((span - previousSpan) * direction >= -1e-6,
+        'Coffee framing approaches its destination without a zoom-out/zoom-in reversal at ' + label + ' t=' + authored);
+      const matrix = projection(result), currentRimWidth = rimWidth(result, matrix);
+      assert(currentRimWidth <= previousRimWidth + .001,
+        'The visible cup rim cannot shrink too far and grow back at ' + label + ' t=' + authored);
+      const boundedTarget = shot.target.map((value, axis) => math.clamp(value,
+        Math.min(initial.shot.target[axis], destination.shot.target[axis]), Math.max(initial.shot.target[axis], destination.shot.target[axis])));
+      const content = cameras.contentViewport(result.frame, viewport);
+      const screenPoint = point => {
+        const q = M.point(matrix, point), w = matrix[3] * point[0] + matrix[7] * point[1] + matrix[11] * point[2] + matrix[15];
+        return [q[0] / w * width * .5, q[1] / w * content.contentHeight * .5];
+      };
+      const actualTarget = screenPoint(shot.target), expectedTarget = screenPoint(boundedTarget);
+      const targetExcursion = Math.hypot(actualTarget[0] - expectedTarget[0], actualTarget[1] - expectedTarget[1]);
+      // Preserve the incoming loading velocity; a subpixel settling movement is
+      // acceptable, whereas the previous distant pitcher displaced it visibly.
+      assert(targetExcursion <= 1,
+        'The entering pitcher cannot pull the camera target outside its transition by more than one pixel at ' + label + ' t=' + authored);
+      maximumTargetExcursion = Math.max(maximumTargetExcursion, targetExcursion);
+      samples.push({ authored, frame: result.frame, packet: result.packet, vector: vector(shot) }); previousSpan = span; previousRimWidth = currentRimWidth;
+    }
+    for (let i = 0; i <= 7; i++) {
+      const authored = settled + (firstPour - settled) * i / 7, { shot } = sample(authored);
+      vector(shot).forEach((value, axis) => assert(Math.abs(value - vector(destination.shot)[axis]) < 1e-6,
+        'Settled pouring composition cannot retreat while the pitcher arrives or tilts at ' + label + ' t=' + authored));
+    }
+    // Sample from both sides: a finite position alone would miss a velocity cusp.
+    for (const seam of [start, settled]) {
+      const step = .0001, left = vector(sample(seam - step).shot), center = vector(sample(seam).shot), right = vector(sample(seam + step).shot);
+      for (let axis = 0; axis < center.length; axis++) {
+        assert(Math.abs(right[axis] - left[axis]) < .05, 'Continuous coffee camera at ' + label + ' t=' + seam);
+        const before = (center[axis] - left[axis]) / step, after = (right[axis] - center[axis]) / step;
+        assert(Math.abs(after - before) < .035, 'Continuous coffee camera velocity at ' + label + ' t=' + seam + ' component=' + axis);
+      }
+    }
+    // A frame-count-based smoother can pass forward playback but fail seeking.
+    for (const previous of samples.slice().reverse()) assert.deepEqual(vector(cameras.sampleCamera(previous.frame, viewport, previous.packet.assembly)), previous.vector,
+      'Coffee camera is independent of sampling order at ' + label + ' t=' + previous.authored);
+    for (const authored of [4.05, 4.32, 4.56, 4.60, 4.62]) {
+      const result = sample(authored), { packet } = result, matrix = projection(result);
+      const pitcher = packet.commands.find(command => command.mesh === catalog.meshes.pitcher);
+      assert(pitcher, 'Production pitcher is present after arrival');
+      const bounds = pitcher.mesh.bounds;
+      for (const x of [bounds.min[0], bounds.max[0]]) for (const y of [bounds.min[1], bounds.max[1]]) for (const z of [bounds.min[2], bounds.max[2]]) {
+        const p = M.point(pitcher.m, [x, y, z]), q = M.point(matrix, p);
+        const w = matrix[3] * p[0] + matrix[7] * p[1] + matrix[11] * p[2] + matrix[15];
+        assert(w > 0 && Math.abs(q[0] / w) <= 1.001 && Math.abs(q[1] / w) <= 1.001,
+          'Stable pouring composition keeps the arrived pitcher inside the reserved viewport at ' + label + ' t=' + authored);
+      }
+    }
+    reports.push({ width, height, initialHalfSpan: initialSpan, settledHalfSpan: finalSpan,
+      maxTargetExcursionPixels: maximumTargetExcursion, transitionSamples: samples.length });
+  }
+  return { viewports: reports, noFramingOvershoot: true, noTargetExcursion: true, stableThroughFirstPour: true,
+    visibleRimWithoutRebound: true, continuousVelocity: true, deterministicSeek: true, arrivedPitcherFits: true };
+});
+
 if (!baseline) check('mobile-content-projection', () => {
   assert(catalog, 'Geometry catalog required');
   const math = registry.get('math'), { M } = math;
