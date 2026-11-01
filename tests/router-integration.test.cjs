@@ -258,6 +258,30 @@ test('a direct URL controls UI and document languages independently of saved pre
   assert.equal(german.state().language, 'de');
 });
 
+test('both downloads use the selected CV language and distinct screen/print files', async () => {
+  for (const lang of config.languages) {
+    const env = environment('cv/?lang=de&cvLang=' + lang);
+    const requests = [], downloads = [];
+    env.win.fetch = async url => {
+      requests.push(url);
+      return { ok: true, arrayBuffer: async () => new TextEncoder().encode('%PDF-1.7\nfixture').buffer };
+    };
+    const click = env.win.clickElement;
+    env.win.clickElement = (element, values) => {
+      if (element.download) downloads.push(element.download);
+      return click(element, values);
+    };
+    for (const [id, file] of [['cv-download', 'cv_' + lang + '.pdf'], ['cv-download-print', 'cv_' + lang + '_print.pdf']]) {
+      env.click(id);
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(requests.at(-1), new URL(file, config.documentOrigin).href);
+      assert.equal(downloads.at(-1), file);
+      assert.equal(env.doc.getElementById(id).disabled, false);
+    }
+    assert.equal(env.doc.getElementById('cv-download-print').textContent.trim(), 'Druck-PDF ↓');
+  }
+});
+
 test('changing UI language preserves an explicitly selected CV language, including equal-to-UI choices', () => {
   for (const documentLanguage of ['en', 'pl']) {
     const env = environment('cv/?lang=pl&cvLang=' + documentLanguage);
