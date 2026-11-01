@@ -17,18 +17,15 @@
     "cv": {
       "pl": {
         "html": "cv-html/cv_fixed_pl.html",
-        "pdf": "cv_pl.pdf",
-        "print": "cv_pl_print.pdf"
+        "pdf": "cv_pl.pdf"
       },
       "en": {
         "html": "cv-html/cv_fixed.html",
-        "pdf": "cv_en.pdf",
-        "print": "cv_en_print.pdf"
+        "pdf": "cv_en.pdf"
       },
       "de": {
         "html": "cv-html/cv_fixed_de.html",
-        "pdf": "cv_de.pdf",
-        "print": "cv_de_print.pdf"
+        "pdf": "cv_de.pdf"
       }
     },
     "score": {

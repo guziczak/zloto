@@ -258,9 +258,11 @@ test('a direct URL controls UI and document languages independently of saved pre
   assert.equal(german.state().language, 'de');
 });
 
-test('both downloads use the selected CV language and distinct screen/print files', async () => {
+test('the single CV download uses the selected language and the PDF shown in the preview', async () => {
   for (const lang of config.languages) {
     const env = environment('cv/?lang=de&cvLang=' + lang);
+    assert.equal(env.doc.getElementById('cv-view').querySelectorAll('.cv-download').length, 1,
+      'CV exposes one PDF download action');
     const requests = [], downloads = [];
     env.win.fetch = async url => {
       requests.push(url);
@@ -271,14 +273,16 @@ test('both downloads use the selected CV language and distinct screen/print file
       if (element.download) downloads.push(element.download);
       return click(element, values);
     };
-    for (const [id, file] of [['cv-download', 'cv_' + lang + '.pdf'], ['cv-download-print', 'cv_' + lang + '_print.pdf']]) {
-      env.click(id);
-      await new Promise(resolve => setImmediate(resolve));
-      assert.equal(requests.at(-1), new URL(file, config.documentOrigin).href);
-      assert.equal(downloads.at(-1), file);
-      assert.equal(env.doc.getElementById(id).disabled, false);
-    }
-    assert.equal(env.doc.getElementById('cv-download-print').textContent.trim(), 'Druck-PDF ↓');
+    env.win.navigator.onLine = true;
+    env.click('cv-tab-pdf');
+    await new Promise(resolve => setImmediate(resolve));
+    const previewURL = requests.at(-1);
+    assert.equal(previewURL, new URL(config.documents.cv[lang].pdf, config.documentOrigin).href);
+    env.click('cv-download');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(downloads.at(-1), 'cv_' + lang + '.pdf', 'Download uses the primary PDF in the selected CV language');
+    assert.equal(downloads.at(-1), new URL(previewURL).pathname.split('/').pop(), 'Download matches the preview document');
+    assert.equal(env.doc.getElementById('cv-download').disabled, false);
   }
 });
 

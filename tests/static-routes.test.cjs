@@ -152,8 +152,11 @@ test('ordinary links work without JavaScript and hosted originals remain availab
       if (relative === 'cv/') {
         for (const language of config.languages) {
           assert(links.includes(absoluteDocument(config.documents.cv[language].html)), 'ordinary ' + language + ' HTML CV fallback link');
-          assert(links.includes(absoluteDocument(config.documents.cv[language].pdf)), 'ordinary ' + language + ' PDF fallback link');
         }
+        const fallback = [...html.matchAll(/<noscript\b[^>]*>([\s\S]*?)<\/noscript>/gi)].map(match => match[1]).join('\n');
+        const fallbackPdfs = realLinks(fallback).filter(href => new URL(href, config.siteOrigin).pathname.endsWith('.pdf'));
+        assert.deepEqual(fallbackPdfs.sort(), config.languages.map(language => absoluteDocument(config.documents.cv[language].pdf)).sort(),
+          'Without JavaScript, each CV language has exactly one link to its primary PDF');
       }
       if (relative === 'score/') {
         assert(links.includes(absoluteDocument(config.documents.score.html)), 'ordinary score image link');

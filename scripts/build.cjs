@@ -193,11 +193,10 @@ function documentFallback(inputs, view) {
   if (view === 'cv') {
     for (const language of config.languages) {
       const documents = config.documents.cv[language];
-      if (!documents?.html || !documents?.pdf || !documents?.print) throw new Error('Missing original CV links for ' + language);
+      if (!documents?.html || !documents?.pdf) throw new Error('Missing original CV links for ' + language);
       content += '<li><span lang="' + escapeHTML(language) + '">' + escapeHTML(LANGUAGE_NAMES[language] || language.toUpperCase())
         + '</span>: <a href="' + escapeHTML(original(documents.html)) + '" hreflang="' + escapeHTML(language) + '">HTML</a> · '
-        + '<a href="' + escapeHTML(original(documents.pdf)) + '" hreflang="' + escapeHTML(language) + '">PDF</a> · '
-        + '<a href="' + escapeHTML(original(documents.print)) + '" hreflang="' + escapeHTML(language) + '">PDF do druku</a></li>';
+        + '<a href="' + escapeHTML(original(documents.pdf)) + '" hreflang="' + escapeHTML(language) + '">PDF</a></li>';
     }
   } else {
     content += '<li><a href="' + escapeHTML(original(config.documents.score.html)) + '">Otwórz oryginalny zapis nutowy</a></li>'
