@@ -41,6 +41,10 @@ h1 em{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing
 .hero-actions{display:flex;align-items:center;gap:26px;margin-top:clamp(24px,3.8vh,40px)}
 .button-main{display:inline-flex;align-items:center;justify-content:space-between;gap:45px;min-width:220px;padding:17px 27px;font-size:14px;color:#17130d;background:linear-gradient(112deg,#d4b477,#f4d88f 53%,#e2bd73);box-shadow:0 1px 0 #fff7d866 inset,0 8px 30px #0004;border:1px solid #eed29655;border-radius:2px;transition:filter .25s,transform .25s}.button-main:hover{filter:brightness(1.08);transform:translateY(-2px)}.button-main span{font-size:20px}
 .replay{font-size:12px;color:#d6d5cd;gap:12px;padding:6px 0;white-space:nowrap}.replay svg{border:1px solid #d5b77899;border-radius:50%;width:37px;height:37px;padding:11px;stroke:none;fill:#ead296}.replay:hover{color:#f6dfaa}
+/* Returning from the film keeps keyboard focus without a rectangular frame. */
+#replay:focus{outline:none}
+#replay:focus-visible{color:#ffe3a0;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+#replay:focus-visible svg{background:var(--gold);border-color:var(--gold);fill:#101415}
 #artifact-stage{grid-area:1/2;align-self:stretch;position:relative;z-index:1;padding:0;margin:0;min-height:0;width:100%;display:block}
 #artifact-slot{position:absolute;inset:0 8% 18px -3%;height:auto;width:auto;max-height:none;aspect-ratio:auto;touch-action:pan-y;cursor:grab;border-radius:0;outline-offset:-8px;background:transparent}
 #artifact-slot:before{display:none}#artifact-poster{inset:12% 10%;opacity:.65}
@@ -915,7 +919,6 @@ body:not(.intro) #intro-controls .playback-controls>button{min-width:40px;justif
 .live-trace{--trace-gold:#dcc08a;--trace-soft:#a2987e;--trace-dim:#78847e;box-sizing:border-box;color:#9ea59a;background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;z-index:31;overflow:visible;text-align:left;letter-spacing:0;padding:0;pointer-events:none}
 .live-trace *{box-sizing:border-box}
 .live-trace[data-mode=intro]{position:fixed;left:50%;bottom:var(--trace-dock-bottom,max(18px,env(safe-area-inset-bottom)));width:min(530px,calc(100vw - 36px));transform:translateX(-50%)}
-.live-trace[data-mode=page]{position:absolute;left:0;right:0;bottom:var(--trace-page-bottom,0px);width:100%;z-index:5}
 .live-trace-header{display:flex;align-items:center;gap:14px;min-height:28px;margin:0}
 .live-trace-object-button{appearance:none;border:0;border-radius:0;background:none;color:var(--trace-soft);font:inherit;display:flex;align-items:center;gap:9px;flex:1;min-width:0;min-height:28px;padding:0;text-align:left;cursor:pointer;letter-spacing:0;pointer-events:auto;touch-action:manipulation}
 .live-trace-object-button:hover .live-trace-name{color:#ebd4a4}
@@ -975,15 +978,6 @@ body:not(.intro) #intro-controls .playback-controls>button{min-width:40px;justif
 .live-trace-target-halo{fill:none;stroke:currentColor;stroke-width:1;stroke-opacity:.88;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .live-trace-target{fill:#ead7b0;stroke:none}
 .live-trace-target-label{font:10px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;fill:#dcc595;paint-order:stroke;stroke:#081311;stroke-opacity:.8;stroke-width:2.2px;stroke-linejoin:round}
-.live-trace[data-mode=page] .live-trace-header,.live-trace[data-mode=page] .live-trace-object-button,.live-trace[data-mode=page] .live-trace-toggle{min-height:24px}
-.live-trace[data-mode=page] .live-trace-name{font-size:10px}
-.live-trace[data-mode=page] .live-trace-echo{display:none}
-.live-trace[data-mode=page] .live-trace-excerpt{font-size:11px;line-height:16px}
-.live-trace[data-mode=page] .live-trace-bottom{min-height:18px}
-.live-trace[data-mode=page] .live-trace-value dt{font-size:8px}
-.live-trace[data-mode=page] .live-trace-value dd{font-size:10px}
-.live-trace[data-mode=page] .live-trace-toggle{font-size:9px}
-.live-trace[data-mode=page] .live-trace-body{bottom:calc(100% + 12px);height:min(202px,32svh)}
 @media(min-width:1100px){.live-trace[data-mode=intro]{width:min(530px,calc(100vw - 48px))}.live-trace[data-mode=intro] .live-trace-echo{left:38px}.live-trace[data-mode=intro] .live-trace-excerpt{font-size:12.5px}}
 @media(max-width:700px){.live-trace[data-mode=intro]{left:18px;right:18px;bottom:var(--trace-dock-bottom,max(14px,env(safe-area-inset-bottom)));width:auto;max-width:530px;margin:0;transform:none}.live-trace-header{gap:10px}.live-trace-object-button{gap:8px}.live-trace-name{font-size:10px;letter-spacing:.02em}.live-trace-status{font-size:7px}.live-trace-echo{display:none}.live-trace-excerpt{font-size:11.25px;line-height:17px}.live-trace-values{gap:19px}.live-trace-value dt{font-size:8px}.live-trace-value dd{font-size:10px}.live-trace-toggle{font-size:10px;gap:4px}.live-trace-body{bottom:calc(100% + 10px);height:min(194px,30svh)}.live-trace-provenance{font-size:7px}.live-trace-frame{font-size:7px}.live-trace-line{font-size:9.5px;line-height:17px;min-height:17px}.live-trace-details{gap:5px 14px}}
 @media(max-width:360px){.live-trace[data-mode=intro]{left:14px;right:14px}.live-trace-header{gap:8px}.live-trace-name{font-size:9.5px}.live-trace-excerpt{font-size:11px}.live-trace-values{gap:15px}.live-trace-toggle{font-size:8px}}
@@ -991,10 +985,9 @@ body:not(.intro) #intro-controls .playback-controls>button{min-width:40px;justif
 @media(prefers-reduced-motion:reduce){.live-trace-chevron{transition:none}.live-trace-excerpt-line.is-active{text-shadow:none}}
 @media print{.live-trace,.live-trace-tether{display:none!important}}
 
-/* Each exhibit layer owns a row: model, score, credit, live source, navigation.
-   Expanding the source grows the page instead of covering the model or music. */
+/* The exhibit flows directly from model to score, credit and navigation. */
 body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
-.hero{grid-template-rows:minmax(440px,1fr) auto auto auto auto;padding-bottom:0}
+.hero{grid-template-rows:minmax(440px,1fr) auto auto auto;padding-bottom:0}
 #exhibit-world{grid-area:1/1/2/-1;inset:calc(-1 * var(--head)) calc(-1 * var(--pad)) 0}
 #artifact-stage{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:360px;height:auto;padding:0 0 14px}
 #artifact-slot{position:relative;grid-area:1/1;inset:auto;width:100%;height:auto;min-height:280px;max-height:none;aspect-ratio:auto;outline-offset:-8px}
@@ -1006,27 +999,12 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 #page-score-slot{grid-area:2/1/3/-1;width:100%;height:132px;min-height:132px;--score-bleed:0px;margin:0;overflow:hidden;border-top:1px solid #d3c7a31c;background:#080a0a}
 #score-bridge.score-page{position:absolute;inset:0!important;width:100%!important;height:100%!important;transform:none!important;z-index:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
 .music-caption{grid-area:3/1/4/-1;padding:0 0 18px;background:#080a0a}
-#page-trace-slot{grid-area:4/1/5/-1;position:relative;min-width:0;background:#0c100f}
-#page-trace-slot:empty{display:none}
-.live-trace[data-mode=page]{position:relative;inset:auto;width:100%;transform:none;z-index:4;padding:14px 18px 16px;border:1px solid #d3c7a322;border-radius:4px;background:#0c100f;pointer-events:auto}
-.live-trace[data-mode=page] .live-trace-header{gap:14px;min-height:44px}
-.live-trace[data-mode=page] .live-trace-object-button,.live-trace[data-mode=page] .live-trace-toggle{min-height:44px}
-.live-trace[data-mode=page] .live-trace-name{font-size:11px}
-.live-trace[data-mode=page] .live-trace-toggle{font-size:11px;max-width:none;flex-shrink:0}
-.live-trace[data-mode=page] .live-trace-status{font-size:8px}
-.live-trace[data-mode=page] .live-trace-excerpt{font-size:12px;line-height:1.7;padding:2px 0 7px}
-.live-trace[data-mode=page] .live-trace-bottom{min-height:22px}
-.live-trace[data-mode=page] .live-trace-value dt{font-size:9px}
-.live-trace[data-mode=page] .live-trace-value dd{font-size:11px}
-.live-trace[data-mode=page] .live-trace-body{position:relative;inset:auto;height:clamp(210px,32svh,300px);margin:12px 0 0;padding-top:12px;border-top:1px solid #d3c7a322;pointer-events:auto}
-.live-trace[data-mode=page] .live-trace-line{font-size:11px;line-height:1.7;min-height:19px}
-.live-trace[data-mode=page] .live-trace-history{scroll-padding:8px}
-.hero-bottom{grid-area:5/1/6/-1;margin-top:20px;padding:18px 0 24px;min-height:64px;background:#080a0a}
+.hero-bottom{grid-area:4/1/5/-1;margin-top:20px;padding:18px 0 24px;min-height:64px;background:#080a0a}
 .icon-arrow{display:block;width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-@media(min-width:1800px){.hero{grid-template-rows:minmax(490px,1fr) auto auto auto auto}#page-score-slot{height:150px;min-height:150px}}
-@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(410px,1fr) auto auto auto auto}}
+@media(min-width:1800px){.hero{grid-template-rows:minmax(490px,1fr) auto auto auto}#page-score-slot{height:150px;min-height:150px}}
+@media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(410px,1fr) auto auto auto}}
 @media(max-width:700px){
- .hero{grid-template-rows:max-content auto auto auto auto auto;min-height:0;row-gap:0;padding-bottom:0}
+ .hero{grid-template-rows:max-content auto auto auto auto;min-height:0;row-gap:0;padding-bottom:0}
  .hero-copy{padding-bottom:16px}
  .hero-actions{flex-wrap:wrap;gap:10px 18px}
  #exhibit-world{grid-area:1/1/3/-1}
@@ -1036,13 +1014,7 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
  #page-score-slot{grid-area:3/1/4/-1;height:122px;min-height:122px}
  .music-caption{grid-area:4/1/5/-1;padding:2px 0 18px;min-height:64px}
  .music-caption-credit{font-size:10px;max-width:none}
- #page-trace-slot{grid-area:5/1/6/-1}
- .live-trace[data-mode=page]{padding:10px 12px 13px}
- .live-trace[data-mode=page] .live-trace-header{gap:9px}
- .live-trace[data-mode=page] .live-trace-name{font-size:10px;letter-spacing:0}
- .live-trace[data-mode=page] .live-trace-excerpt{font-size:11px;line-height:1.65}
- .live-trace[data-mode=page] .live-trace-body{height:240px}
- .hero-bottom{grid-area:6/1/7/-1;margin-top:18px;min-height:60px}
+ .hero-bottom{grid-area:5/1/6/-1;margin-top:18px;min-height:60px}
 }
 @media(max-width:360px){
  #artifact-stage{min-height:330px}
@@ -1063,7 +1035,7 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 <main class="site" id="site" hidden inert><section aria-labelledby="hero-heading" class="hero" id="top"><div aria-hidden="true" id="exhibit-world"></div><div class="hero-copy"><div class="eyebrow" data-l10n="n44">Ludzkie rzemiosło. Inteligentne systemy.</div><h1 data-l10n="n45" id="hero-heading" tabindex="-1">Przekuwam AI<br/><em data-l10n="n46">w wartość.</em></h1><p data-l10n="n47">Od pierwszego tokenu do działającego systemu.<br/>Inżynieria, która nie kończy się na obietnicach.</p><div class="hero-actions"><a class="button-main" data-l10n="n48" href="/zloto/#kontakt">Porozmawiajmy <svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a><button class="replay" data-l10n="n49" id="replay"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M6 3 16 10 6 17Z"></path></svg>Obejrzyj przemianę</button></div></div>
 <figure aria-label="Złoty odlew sygnetu Przesmyk" data-l10n="n50" id="artifact-stage"><div aria-describedby="artifact-help" aria-label="Model 3D sygnetu — obrót tylko wokół pionowej osi" data-l10n="n51" id="artifact-slot" role="group" tabindex="0"><div aria-hidden="true" id="artifact-poster"><svg aria-hidden="true" viewbox="-1.1 -1.12 2.2 2.24" xmlns="http://www.w3.org/2000/svg"><path d="M .20 -1 C -.25 -.99 -.69 -.72 -.85 -.29 C -1.03 .17 -.82 .66 -.32 1 L .02 .55 C -.29 .30 -.41 .02 -.28 -.24 C -.19 -.43 -.03 -.54 .23 -.61 L .57 -.67 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 -0.04963877 -0.00751729)"></path><path d="M .46 -.64 L .12 -.19 C .44 .02 .54 .28 .42 .51 C .32 .69 .17 .77 -.02 .82 L -.18 1 C .32 1.09 .78 .83 .93 .41 C 1.10 -.06 .87 -.40 .46 -.64 Z" fill="#cbb382" transform="matrix(0.92 0 0 0.92 0.06952518 0.01693544)"></path></svg></div></div><div aria-hidden="true" class="atelier-words">IDEAS<br/>SYSTEMS<br/>PEOPLE<br/>VALUE</div><figcaption class="artifact-caption"><span>PRZESMYK / 01</span><button aria-pressed="false" data-l10n="n52" id="artifact-toggle">Wstrzymaj obrót Ⅱ</button></figcaption><p class="artifact-help" data-l10n="n53" id="artifact-help">Przeciągnij w lewo lub w prawo albo użyj strzałek ← →, by obrócić sygnet.</p></figure>
 <div aria-hidden="true" id="page-score-slot"><span class="score-label" id="score-label">LUX IN TENEBRIS</span></div><div class="music-caption" id="music-caption"><div><span class="music-caption-title">Lux in tenebris</span><span class="music-caption-credit" data-l10n="score-credit">Łukasz Guziczak & Opus 4.6 · war. Fable 5</span></div><a class="music-score-link" id="score-open" href="/zloto/score/" data-score-open="html"><span data-l10n="score-open">Zobacz partyturę</span><svg class="icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><path d="M4 14 14 4M4 4h10v10"></path></svg></a></div>
-<div id="page-trace-slot"></div>
+
 <div class="hero-bottom"><div class="domains"><span data-l10n="n54">Systemy AI</span><span data-l10n="n55">Oprogramowanie</span><span data-l10n="n56">Automatyzacja</span></div><a data-l10n="n57" href="/zloto/#realizacje">Zobacz realizacje ↓</a></div></section>
 <section aria-label="Realizacje" class="portfolio-section projects" data-l10n="n58" id="realizacje"><span id="kompetencje"></span>
 <div class="portfolio-heading"><div class="eyebrow" data-l10n="n59">01 / Wybrane realizacje</div><div><h2 data-l10n="n60">Nie tylko możliwości.<br/><em data-l10n="n61">Działające rozwiązania.</em></h2><p class="section-intro" data-l10n="n62">Systemy w infrastrukturze klienta i własne produkty. Różne problemy, ta sama odpowiedzialność za rezultat.</p></div></div><article aria-labelledby="case-1-title" class="case">
@@ -1852,11 +1824,11 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    const upperT=Math.max(42,ranges.T.high+6),lowerT=Math.min(27,ranges.T.low-3);
    const upperB=Math.max(29,ranges.B.high+5),lowerB=Math.min(13,ranges.B.low-6);
    const units=(upperT-lowerT+upperB-lowerB+5)/2;
-   const amplitude=compact?2.8:Math.min(7,height*.034);
+   const amplitude=compact?4.0:Math.min(7,height*.034);
    const gap=Math.max(1.25,Math.min(compact?7.4:11,(height-2*amplitude-12)/units));
    const content=units*gap,pad=(height-content)/2;
    return {gap,amplitude,upperT,upperB,originT:pad,originB:pad+(upperT-lowerT+5)*gap/2,
-     head:Math.max(compact?68:82,width*(compact?.26:.23)),clef:width<600?16:30,
+     head:Math.max(compact?64:82,width*(compact?.22:.23)),clef:width<600?16:30,
      staffLines:{T:[30,32,34,36,38],B:[18,20,22,24,26]}};
  }
  function create(window,document,sound){
@@ -1914,13 +1886,13 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    }
    const noise=n=>{const f=Math.sin(n*127.1+17.7)*43758.5453;return f-Math.floor(f);};
    function burst(note,position){
-     const count=6,max=180;
+     const count=8,max=180;
      const at=effectTime-Math.max(0,position-note.t);
      for(let i=0;i<count;i++){
        const seed=note.i*23+i,angle=noise(seed)*Math.PI*2;
-       particles.push({staff:note.staff,step:note.step,at,life:.52+noise(seed+3)*.38,
-         vx:Math.cos(angle)*(2.5+noise(seed+7)*5.5)-3.6,vy:Math.sin(angle)*(2.8+noise(seed+9)*5.0),
-         size:.16+noise(seed+11)*.14,spin:noise(seed+4)*6.28,shape:i%3});
+       particles.push({staff:note.staff,step:note.step,at,life:.58+noise(seed+3)*.34,
+         vx:Math.cos(angle)*(3.4+noise(seed+7)*7.0)-4.3,vy:Math.sin(angle)*(3.4+noise(seed+9)*6.5),
+         size:.21+noise(seed+11)*.18,spin:noise(seed+4)*6.28,shape:i%3});
      }
      if(particles.length>max)particles.splice(0,particles.length-max);
      burstCount++;burstStaff[note.staff]++;
@@ -1971,9 +1943,9 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      const gateTop=Y(38,'T',m.head)-2.3*gap,gateBottom=Y(18,'B',m.head)+2.3*gap;
      const gate=g.createLinearGradient(0,gateTop,0,gateBottom);gate.addColorStop(0,'#e7c78600');gate.addColorStop(.15,'#e7c78699');gate.addColorStop(.85,'#e7c78699');gate.addColorStop(1,'#e7c78600');
      g.strokeStyle=gate;g.lineWidth=1;g.shadowBlur=reduced?0:4;g.shadowColor='#e9c576';line(m.head,gateTop,m.head,gateBottom);g.shadowBlur=0;
-     const rx=gap*.59,ry=gap*.41;
+     const rx=gap*.70,ry=gap*.48;
      const headX=n=>m.head+(n.t-pos)*pps+(n.headOffset||0)*rx*1.8;
-     const tip=(e,x)=>Y(e.beam?e.beam.extreme:e.down?e.low:e.high,e.staff,x)+(e.down?1:-1)*gap*3.1;
+     const tip=(e,x)=>Y(e.beam?e.beam.extreme:e.down?e.low:e.high,e.staff,x)+(e.down?1:-1)*gap*3.35;
      const first=lowerBound(prepared.events,pos-.002),until=pos+(W-m.head+20)/pps;
      g.save();g.beginPath();g.rect(m.head-.5,0,W-m.head,H);g.clip();
      for(let i=first;i<prepared.events.length&&prepared.events[i].t<=until;i++){
@@ -1986,7 +1958,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
          line(sx,start,sx,end);
          if(e.next){
            const nx=m.head+(e.next.t-pos)*pps,nsx=nx+(e.down?-rx:rx),ny=tip(e.next,nx);
-           g.lineWidth=gap*.33;g.lineCap='butt';line(sx,end,nsx,ny);
+           g.lineWidth=gap*.36;g.lineCap='butt';line(sx,end,nsx,ny);
            if(e.glyph.flags>1&&e.next.glyph.flags>1)line(sx,end+(e.down?-1:1)*gap*.62,nsx,ny+(e.down?-1:1)*gap*.62);
            g.lineWidth=1;g.lineCap='round';
          }else if(e.glyph.flags&&!e.beam){
@@ -2023,9 +1995,11 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      if(!reduced)for(const p of particles){
        const age=Math.max(0,effectTime-p.at),u=age/p.life;if(u>=1)continue;
        const travel=(1-Math.exp(-age*2.3))/2.3,x=m.head+p.vx*gap*travel,y=Y(p.step,p.staff,m.head)+p.vy*gap*travel+gap*1.9*age*age;
-       const size=Math.max(.65,p.size*gap)*(1-.4*u),a=Math.pow(1-u,1.6)*.86;
-       g.save();g.translate(x,y);g.rotate(p.spin+age*2);g.fillStyle=`rgba(247,212,139,${a})`;
+       const size=Math.max(.85,p.size*gap)*(1-.4*u),a=Math.pow(1-u,1.4)*.98;
+       g.save();g.translate(x,y);g.rotate(p.spin+age*2);g.fillStyle=`rgba(255,222,154,${a})`;
+       g.shadowColor='#f4d58b';g.shadowBlur=2.5*(1-u);
        if(p.shape===0){g.beginPath();g.moveTo(-size,0);g.lineTo(0,-size*.6);g.lineTo(size,0);g.lineTo(0,size*.6);g.closePath();g.fill();}
+       else if(p.shape===2){g.beginPath();g.ellipse(0,0,size*1.35,size*.36,0,0,Math.PI*2);g.fill();}
        else{g.beginPath();g.arc(0,0,size*.62,0,Math.PI*2);g.fill();}g.restore();
      }
    }
@@ -2301,7 +2275,7 @@ GuziczakModules.define('app/engine',[
   scope.on(window,'resize',()=>{clearTracePicking();dirty=true;clock.reanchor();schedule();});
   scope.on(document,'visibilitychange',()=>{if(document.hidden){clearTracePicking();lastWaterMs=null;wasPlaying=clock.state==='playing';if(wasPlaying)clock.pause();cancel();if(fx)fx.stop();}else{if(wasPlaying){clock.resume();wasPlaying=false;}clock.reanchor();dirty=true;schedule();}});
   const traceControls='a,button,input,select,textarea,[role="button"],[contenteditable],#intro-controls,#audio-panel,.live-trace';
-  const ignoreTracePointer=event=>event.defaultPrevented||event.target?.closest?.(traceControls)||routeSuspended||disposed||failed||document.hidden||!['intro','page'].includes(mode)||(mode==='page'&&!stage.slot.contains(event.target));
+  const ignoreTracePointer=event=>event.defaultPrevented||event.target?.closest?.(traceControls)||routeSuspended||disposed||failed||document.hidden||mode!=='intro';
   scope.on(document,'pointerdown',event=>{
    if(event.isPrimary===false||event.button!==0){tracePointer=null;return;}
    if(ignoreTracePointer(event))return;
@@ -8374,9 +8348,8 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         function hideTether() { tetherVisible = false; lastConnector = null; tether.setAttribute('hidden', ''); }
         function routeIsBlocked() { return routeBlocked || doc.body.classList.contains('route-cv') || doc.body.classList.contains('route-score'); }
         function updateVisibility() {
-            // The page source is part of the document flow. Scrolling its model
-            // offscreen pauses the capture; it must not collapse readable code.
-            const hidden = !ready || (mode === 'intro' && !visible) || suspended || !!doc.hidden || routeIsBlocked();
+            // Source annotations belong to the film; the portfolio has no trace panel.
+            const hidden = mode !== 'intro' || !ready || !visible || suspended || !!doc.hidden || routeIsBlocked();
             if (root.hidden !== hidden) { root.hidden = hidden; geometryDirty = true; }
             doc.body.classList.toggle('live-trace-visible-intro', !hidden && mode === 'intro');
             doc.body.classList.toggle('live-trace-visible-page', !hidden && mode === 'page');
@@ -8415,9 +8388,12 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
         }
         function mount(nextMode) {
             mode = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro'; root.dataset.mode = mode;
-            const parent = mode === 'page' ? doc.getElementById('page-trace-slot') || doc.body : doc.body;
-            if (parent && root.parentNode !== parent) parent.appendChild(root);
-            if (mode === 'page') clearFloatingLayout();
+            if (mode === 'intro') {
+                if (root.parentNode !== doc.body) doc.body.appendChild(root);
+            } else {
+                root.remove();
+                clearFloatingLayout();
+            }
             geometryDirty = true; paintControls(); updateVisibility();
         }
         function compactValue(value) {
@@ -8638,7 +8614,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
             frameMs = Number.isFinite(ms) ? ms : now();
             frame = { id: Number.isFinite(info.frameId) ? info.frameId : frameCount, time: info.time ?? info.authoredTime ?? info.authored, elapsed: info.elapsed, phase: info.phase };
             const next = nextMode === 'page' || nextMode === 'exhibit' ? 'page' : 'intro';
-            if (next !== mode || !root.parentNode) mount(next);
+            if (next !== mode || (next === 'intro' && !root.parentNode)) mount(next);
         }
         function emit(key, input = {}, options = {}) {
             if (destroyed || !frameOpen || suspended || !sources.has(key)) return;

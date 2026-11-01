@@ -935,7 +935,7 @@ if (!baseline) check('trace-layout-and-stable-connectors', () => {
   for (const target of [{ x: 200, y: 540 }, { x: -1, y: 100 }, { x: 100, y: 100, visible: false }])
     assert.equal(runtime.resolveTraceConnector({ rect, target, viewport }), null, 'Covered or unavailable targets do not get misleading leaders');
   const isolated = makeDom(), trace = runtime.create(isolated.win, isolated.doc);
-  const pageSlot = isolated.doc.createElement('div'); pageSlot.id = 'page-trace-slot'; isolated.doc.body.appendChild(pageSlot);
+  const traceRoot = isolated.doc.getElementById('live-trace');
   isolated.win.innerWidth = 390; isolated.win.innerHeight = 660;
   trace.setSceneLayout({ viewport, bounds: { left: 24, right: 366, top: 150, bottom: 420 }, safe: { left: 18, right: 18, top: 70, bottom: 16 } });
   function frame(ms, entries) {
@@ -971,50 +971,50 @@ if (!baseline) check('trace-layout-and-stable-connectors', () => {
     trace.endFrame({ audio: legacyAudioSnapshot() });
   }
   pageFrame(2100);
-  const traceRoot = isolated.doc.getElementById('live-trace');
   assert.equal(trace.diagnostics().layout, null, 'Entering the exhibit clears floating intro placement');
-  assert.equal(traceRoot.parentNode, pageSlot, 'Page source belongs to the dedicated document-flow slot');
+  assert.equal(traceRoot.parentNode, null, 'The exhibit does not mount a live source panel');
+  assert.equal(isolated.doc.getElementById('live-trace'), null, 'The removed page panel is absent from the document');
   assert(!traceRoot.style.left && !traceRoot.style.top, 'Intro screen coordinates cannot leak into page layout');
-  assert.equal(trace.diagnostics().visible, true, 'Idle exhibit still exposes its real live source');
-  assert.equal(trace.diagnostics().tether, false, 'Automatic exhibit selection adds no on-object label or reticle');
-  const objectButton = traceRoot.querySelector('.live-trace-object-button');
-  objectButton.dispatchEvent(new Event('click'));
-  assert.equal(objectButton.getAttribute('aria-pressed'), 'true');
-  assert.equal(trace.diagnostics().tether, true, 'An explicitly pinned exhibit retains its spatial pointer');
-  const toggle = traceRoot.querySelector('.live-trace-toggle'), content = traceRoot.querySelector('.live-trace-body');
-  toggle.dispatchEvent(new Event('click'));
-  assert.equal(toggle.getAttribute('aria-expanded'), 'true'); assert.equal(content.hidden, false);
+  assert.equal(traceRoot.hidden, true); assert.equal(trace.diagnostics().visible, false);
+  assert.equal(trace.diagnostics().tether, false, 'The exhibit has no source label or reticle');
+  trace.pin('exhibit', 'exhibit/signature');
+  assert.equal(trace.diagnostics().visible, false, 'A source selection cannot restore the removed page panel');
+  assert.equal(trace.diagnostics().tether, false, 'A pinned exhibit cannot restore its removed spatial pointer');
   trace.endFrame({ visible: false });
-  assert.equal(trace.diagnostics().visible, true, 'Scrolling the model offscreen cannot collapse its in-flow source');
-  assert.equal(traceRoot.dataset.paused, 'true', 'The retained source never claims a live offscreen capture');
-  assert.equal(content.hidden, false, 'An expanded source stays readable below the offscreen model');
+  isolated.win.dispatchEvent(new Event('scroll'));
+  assert.equal(trace.diagnostics().visible, false, 'Scrolling the model offscreen cannot restore its source panel');
+  assert.equal(traceRoot.parentNode, null);
   assert.equal(trace.diagnostics().tether, false, 'An offscreen model has no stale spatial pointer');
   isolated.win.dispatchEvent(new DetailEvent('guziczak:routechange', { detail: { view: 'cv' } }));
-  assert.equal(trace.diagnostics().visible, false, 'The in-flow panel still respects route suspension');
+  assert.equal(trace.diagnostics().visible, false, 'Document routes retain the hidden trace');
   isolated.win.dispatchEvent(new DetailEvent('guziczak:routechange', { detail: { view: 'home' } }));
   pageFrame(2200);
-  assert.equal(trace.diagnostics().visible, true); assert.equal(trace.diagnostics().tether, true);
-  assert.equal(traceRoot.dataset.paused, 'false', 'Returning to a rendered model restores the live status');
-  objectButton.dispatchEvent(new Event('click'));
-  assert.equal(objectButton.getAttribute('aria-pressed'), 'false'); assert.equal(trace.diagnostics().tether, false);
+  assert.equal(traceRoot.parentNode, null, 'Returning home cannot remount the removed source panel');
+  assert.equal(trace.diagnostics().visible, false); assert.equal(trace.diagnostics().tether, false);
+  trace.unpin();
   isolated.doc.documentElement.lang = 'de'; isolated.win.dispatchEvent(new DetailEvent('guziczak:languagechange'));
   assert.equal(traceRoot.getAttribute('aria-label'), 'Code live');
-  assert.equal(traceRoot.querySelector('.live-trace-name').textContent, 'Artefakt drehen');
+  assert.equal(traceRoot.parentNode, null, 'Localization cannot remount the removed source panel');
+  assert.equal(trace.diagnostics().visible, false); assert.equal(trace.diagnostics().tether, false);
   trace.beginFrame('intro', { time: 2 }, 2300);
   trace.emit('water', { velocity: .4 }, { objectId: 'water/surface', priority: 70 });
   trace.projectObject('water/surface', { x: 200, y: 300, visible: true }); trace.endFrame({});
   assert.equal(traceRoot.parentNode, isolated.doc.body, 'Replay restores the original cinematic overlay container');
+  assert.equal(trace.diagnostics().visible, true, 'The cinematic source remains available after page navigation');
   assert(trace.diagnostics().layout, 'Replay can restore its existing floating scene placement');
   assert.equal(trace.diagnostics().tether, true, 'Cinematic automatic object pointers remain available');
-  assert.equal(trace.diagnostics().expanded, false, 'Intro and page source expansion remain independent');
-  pageFrame(2400);
-  assert.equal(traceRoot.parentNode, pageSlot); assert.equal(trace.diagnostics().expanded, true);
-  assert.equal(trace.diagnostics().tether, false, 'Returning to an unpinned exhibit restores the clean model');
+  assert.equal(trace.diagnostics().expanded, false, 'Replay starts with its compact source presentation');
+  const toggle = traceRoot.querySelector('.live-trace-toggle'), content = traceRoot.querySelector('.live-trace-body');
+  toggle.dispatchEvent(new Event('click'));
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true'); assert.equal(content.hidden, false);
   const escape = new Event('keydown', { cancelable: true }); escape.key = 'Escape'; traceRoot.dispatchEvent(escape);
   assert.equal(content.hidden, true); assert.equal(toggle.getAttribute('aria-expanded'), 'false');
   assert.equal(isolated.doc.activeElement, toggle, 'Escape returns keyboard focus to the source control');
+  pageFrame(2400);
+  assert.equal(traceRoot.parentNode, null, 'Completing replay removes the source panel again');
+  assert.equal(trace.diagnostics().visible, false); assert.equal(trace.diagnostics().tether, false);
   trace.destroy();
-  return { responsiveFixtures: fixtures.length, boundedLeaders: true, exactMouthMarker: true, noteLabels: true, stableSelection: true, absentVoiceNeverLive: true, pagePlacementCleanup: true, pageFlowSlot: true, explicitExhibitPointer: true, offscreenSourceRetained: true, replayAndSourceControls: true };
+  return { responsiveFixtures: fixtures.length, boundedLeaders: true, exactMouthMarker: true, noteLabels: true, stableSelection: true, absentVoiceNeverLive: true, pagePlacementCleanup: true, pagePanelAbsent: true, pageTetherAbsent: true, hiddenAcrossRoutesAndLocalization: true, replayAndSourceControls: true };
 });
 
 if (!baseline) check('trace-ambient-execution-provenance', () => {
@@ -1071,7 +1071,7 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
   function inspect() {
     const diagnostics = trace.diagnostics();
     const rows = root.querySelectorAll('.live-trace-excerpt-line');
-    assert(rows.length > 0 && rows.length <= (diagnostics.mode === 'page' ? 1 : 2), 'Ambient code has a small, legible source excerpt');
+    assert(rows.length > 0 && rows.length <= 2, 'Ambient code has a small, legible source excerpt');
     assert.equal(rows.filter(row => row.classList.contains('is-active')).length, 1, 'One real instruction is visually emphasized');
     assert.equal(diagnostics.compactInstructions.length, rows.length, 'Displayed instructions retain their source spans');
     for (const [index, row] of rows.entries()) {
@@ -1134,12 +1134,15 @@ if (!baseline) check('trace-ambient-execution-provenance', () => {
   assert.equal(parsed.length, 1, 'A multi-line matrix composition remains one complete instruction');
   assert.equal(parsed[0].text, multiline.join('\n'), 'Multi-line extraction retains the complete transform and closing punctuation');
   assert.equal(parsed[0].number, 101); assert.equal(parsed[0].endNumber, 105);
-  frame('exhibit', { mode: 'page' }); inspect();
+  frame('exhibit', { mode: 'page' });
+  assert.equal(root.parentNode, null, 'Exhibit execution does not mount a source panel on the page');
+  assert.equal(trace.diagnostics().visible, false); assert.equal(trace.diagnostics().tether, false);
+  assert.equal(root.querySelectorAll('.live-trace-excerpt-line').filter(visibleNode).length, 0, 'Exhibit instructions have no visible page excerpt');
   trace.reset();
   assert.equal(trace.diagnostics().ambientEchoes.length, 0, 'Replay reset clears ambient execution history');
   assert.equal(root.querySelectorAll('.live-trace-echo-line').filter(visibleNode).length, 0, 'Replay reset clears visible ambient echoes');
   trace.destroy();
-  return { exactSourceText: true, completeInstructionSpans: true, shortCastCalls: true, multilineExtraction: true, introInstructions: 2, pageInstructions: 1, maximumEchoes: 1,
+  return { exactSourceText: true, completeInstructionSpans: true, shortCastCalls: true, multilineExtraction: true, introInstructions: 2, pagePanelAbsent: true, maximumEchoes: 1,
     echoExecutionFrames: true, pausedClockStable: true, pendingHasNoEcho: true, manualHistoryScroll: true, resetClears: true };
 });
 
