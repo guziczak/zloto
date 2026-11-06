@@ -344,6 +344,8 @@ body:is(.route-cv,.route-score) .site-nav a[aria-current=page]{color:var(--gold)
 @media(max-width:700px){#cv-view .cv-actions-bar{display:grid;grid-template-columns:1fr auto;gap:6px 16px}#cv-view .cv-downloads{grid-column:1/-1;display:grid;grid-template-columns:1fr}#cv-view .cv-download{max-width:none;justify-content:center;min-height:44px;font-size:11px;text-align:center}}
 .cv-document-panel{position:relative;flex:1;min-height:120px;margin:0 var(--pad);background:#111515;border-left:1px solid var(--line);border-right:1px solid var(--line);isolation:isolate}
 #cv-frame-host{height:100%;min-height:0}
+#cv-frame-host[data-format=html]{overflow:hidden}
+#cv-frame-host[data-format=html] .cv-frame{transform-origin:top left}
 .cv-frame{display:block;width:100%;height:100%;border:0;background:#fff;color-scheme:light}
 .cv-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:#0d1212;color:var(--muted);font-size:13px;z-index:2;gap:12px}
 .cv-loading::before{content:'';height:8px;width:8px;border-radius:50%;background:var(--gold)}
@@ -9030,7 +9032,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
  const resolutionBase=/^(?:https?|file):$/.test(initialURL.protocol)?initialURL:new URL('https://guziczak.github.io/');
  let mode='home',format='html',language=i18n.lang,documentLanguageExplicit=false,frameKey='',frameCount=0,frame=null;
  let returnSnapshot={x:0,y:0,focus:'hero-heading'},pendingTimer=0,scrollTask=0,downloadBusy=false;
- let documentController=null,documentRevision=0,objectURL=null;
+ let documentController=null,documentRevision=0,objectURL=null,stopFrameSizing=null;
  const documentCache=new Map(),documentScroll=new Map();
  const status=$('cv-status'),host=$('cv-frame-host'),loading=$('cv-loading');
  const langLinks=[...document.querySelectorAll('[data-site-language]')];
@@ -9100,8 +9102,29 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
  function setViewport(){
    document.documentElement.style.setProperty('--cv-viewport',(window.visualViewport?.height||innerHeight)+'px');
  }
+ function fitHTMLFrame(f){
+   // Keep the original A4 layout inside a narrow viewport; scroll within the frame.
+   const minWidth=794+10; // A4 page plus the document's styled scrollbar track.
+   let task=0,lastWidth=-1,lastHeight=-1,active=true;
+   function resize(){
+     task=0;
+     if(!active||frame!==f||mode!=='cv'||format!=='html')return;
+     const {width,height}=host.getBoundingClientRect();
+     if(width<=0||height<=0||(width===lastWidth&&height===lastHeight))return;
+     lastWidth=width;lastHeight=height;
+     const scale=Math.min(1,width/minWidth);
+     f.style.width=Math.max(minWidth,width)+'px';
+     f.style.height=height/scale+'px';
+     f.style.transform=scale<1?'scale('+scale+')':'';
+   }
+   // Observe the fixed host, not the scaled frame, and write outside the observer callback.
+   const observer=new ResizeObserver(()=>{if(active&&!task)task=requestAnimationFrame(resize);});
+   observer.observe(host);resize();
+   return ()=>{active=false;observer.disconnect();cancelAnimationFrame(task);};
+ }
  function unloadFrame(){
    clearTimeout(pendingTimer);pendingTimer=0;
+   stopFrameSizing?.();stopFrameSizing=null;
    if(documentController){documentController.abort();documentController=null;}
    documentRevision++;
    if(frame){
@@ -9116,7 +9139,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
    const style=doc.createElement('style');style.id='portfolio-cv-styles';
    style.textContent=`html{scroll-behavior:auto}body{margin-inline:auto}.cover__music{cursor:pointer}
      @media screen{
-       html{scrollbar-width:thin;scrollbar-color:#b79860 #0c1110}
+        html{scrollbar-width:thin;scrollbar-color:#b79860 #0c1110;-webkit-text-size-adjust:100%;text-size-adjust:100%}
        html::-webkit-scrollbar{width:10px;height:10px}
        html::-webkit-scrollbar-track,html::-webkit-scrollbar-corner{background:#0c1110}
        html::-webkit-scrollbar-thumb{background:#b79860;border:2px solid #0c1110;border-radius:8px}
@@ -9223,6 +9246,7 @@ GuziczakModules.define('runtime/trace', ['core/scope'], scopes => {
    }
    if(revision!==documentRevision)return;
    host.replaceChildren(f);
+    if(kind==='html')stopFrameSizing=fitHTMLFrame(f);
    // A cross-origin frame's load event does not prove successful rendering.
    clearTimeout(pendingTimer);pendingTimer=setTimeout(()=>{if(frame===f){loading.hidden=true;host.setAttribute('aria-busy','false');announce(words.slow);}},12000);
  }
