@@ -2055,7 +2055,7 @@ GuziczakModules.define('app/engine',[
   function commandScreen(command){
    if(!command||command.light<.001||!command.mesh?.bounds||!command.m)return null;
    if(screenCache.has(command.id))return screenCache.get(command.id);
-   const bounds=command.mesh.bounds,local=bounds.min.map((v,i)=>(v+bounds.max[i])*.5);
+   const bounds=command.mesh.bounds,local=command.mesh.focus?command.mesh.focus.slice():bounds.min.map((v,i)=>(v+bounds.max[i])*.5);
    // Mode 5 stores a normalized fill height. Its visible surface lies in this
    // authored mould plane, not halfway up the undeformed unit-height mesh.
    if(command.mode===5)local[1]=-.084;
@@ -3698,7 +3698,7 @@ GuziczakModules.define("geometry/builder", ["math", "config/materials"], (math, 
 });
 
 
-GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets", "config/materials", "geometry/reclaim", "geometry/rift", "geometry/refuge", "geometry/instrument"], (math, builder, assets, materials, reclaim, rift, refuge, instrumentGeometry) => {
+GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets", "config/materials", "geometry/reclaim", "geometry/rift", "geometry/refuge", "geometry/instrument", "config/casting"], (math, builder, assets, materials, reclaim, rift, refuge, instrumentGeometry, casting) => {
     'use strict';
     const { PI, TAU, clamp, mix, vadd, vsub, vmul, dot, cross, norm, M, C } = math;
     function createGeometry(gl, brandMeshes = null) {
@@ -3981,6 +3981,17 @@ GuziczakModules.define("geometry/catalog", ["math", "geometry/builder", "assets"
         });
         meshes.grain = build(b => { b.spindle([[-.010, .0], [-.005, .008], [.007, .007], [.012, 0]], 16, 5); });
         for(const name of ['feedBody','gateBaseA','gateBaseB','gateTipA','gateTipB'])meshes[name]=packedMesh(foundryData[name]);
+        // Both parts of the mark curve around empty space, so the centre of their bounds is not on the
+        // metal. Markers that point at a part use the point deepest inside its outline instead: in the
+        // mould frame for the molten surfaces, in the casting's own frame for the solids.
+        LOGO_POLYGONS.forEach((outline, part) => {
+            const inside = (x, y) => { let hit = false; for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) { const a = outline[i], b = outline[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) hit = !hit; } return hit; };
+            const depth = (x, y) => outline.reduce((d, a, i) => { const b = outline[(i + 1) % outline.length], ex = b[0] - a[0], ey = b[1] - a[1], u = clamp(((x - a[0]) * ex + (y - a[1]) * ey) / (ex * ex + ey * ey), 0, 1); return Math.min(d, Math.hypot(x - a[0] - u * ex, y - a[1] - u * ey)); }, Infinity);
+            let focus = outline[0], reach = -1;
+            for (let i = 0; i <= 40; i++) for (let j = 0; j <= 40; j++) { const x = -1.1 + 2.2 * i / 40, y = -1.12 + 2.24 * j / 40; if (!inside(x, y)) continue; const d = depth(x, y); if (d > reach) { reach = d; focus = [x, y]; } }
+            meshes['melt' + 'AB'[part]].focus = [focus[0] * casting.rest.scale, 0, casting.rest.z - casting.frame.originZ - focus[1] * casting.rest.scale];
+            meshes['signature' + 'AB'[part]].focus = [focus[0], focus[1], 0];
+        });
         meshes.spill = build(b => b.sphere(1, 21, 14, 20));
         // Compatibility repair: cold overflow used an undefined mesh in the input.
         // Reuse the SAME overflow geometry and its existing temperature-aware material.
@@ -5000,7 +5011,7 @@ void main(){
  }
  float castEdge=0.;
  if(id>11.5&&id<13.5){
-  // Two top inlets fill downwards into one keel. No circular G tracing.
+  // The reveal sweeps from the top of the mark down to its keel. It does not trace the outline.
   float progress=clamp((1.-q.y)*.50,0.,1.);
   if(progress>uReveal+.001)discard;
   castEdge=exp(-abs(uReveal-progress)*100.)*(1.-smoothstep(.990,1.,uReveal));

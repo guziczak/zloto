@@ -49,6 +49,13 @@ into the 3D signet, and as the packed foundry meshes in `assets.foundry` that th
 casts it in. `scripts/mark/mark.json` is the source for all three: the two SVG paths,
 the flattening density and the routes of the two pouring gates.
 
+The outline was traced from a 1254 px reference drawing and follows it to about one
+pixel. Three things were regularised on purpose: the three diagonal cuts share one
+angle (49.5°; drawn 49.0° to 50.0°), which makes the gate between the parts parallel
+(drawn, it narrows by about 1.5 px toward the outside), and the cut of the beak is
+exactly 45° (drawn 45.3°). The mark keeps the vertical extent of its predecessor and
+its bounding box is centred on x = 0.
+
 ```bash
 python3 scripts/mark/bake.py            # dry run: sizes, gates, derived constants
 python3 scripts/mark/bake.py --write    # rewrite the mark and assets in index.html
