@@ -94,6 +94,11 @@ function inside(p, polygon) {
 const centroid = points => points[0].map((_, axis) => points.reduce((sum, p) => sum + p[axis], 0) / points.length);
 const topVertices = name => vertices(decode(name), v => v.material === MOLTEN && v.p[1] > .5);
 function triangleArea(a, b, c) { return Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2; }
+const onTriangles = (p, triangles) => triangles.some(triangle => {
+  const sign = (a, b) => (p[0] - b[0]) * (a[1] - b[1]) - (a[0] - b[0]) * (p[1] - b[1]);
+  const d = [sign(triangle[0], triangle[1]), sign(triangle[1], triangle[2]), sign(triangle[2], triangle[0])];
+  return !(d.some(value => value < -1e-9) && d.some(value => value > 1e-9));
+});
 
 test('the favicon and the three inline marks are exactly the mark of scripts/mark/mark.json', () => {
   assert.equal(mark.paths.length, 2, 'The mark has two parts: A (crescent) and B (bar and bowl)');
@@ -151,11 +156,7 @@ test('the molten fill and the sand cavity are baked from the same outline', () =
   const floor = vertices(sand, v => v.material === CAVITY && v.n[1] > .999);
   const floorTriangles = [];
   for (let i = 0; i < floor.length; i += 3) floorTriangles.push(floor.slice(i, i + 3).map(v => [v.p[0], v.p[2]]));
-  const onFloor = p => floorTriangles.some(triangle => {
-    const sign = (a, b) => (p[0] - b[0]) * (a[1] - b[1]) - (a[0] - b[0]) * (p[1] - b[1]);
-    const d = [sign(triangle[0], triangle[1]), sign(triangle[1], triangle[2]), sign(triangle[2], triangle[0])];
-    return !(d.some(value => value < -1e-9) && d.some(value => value > 1e-9));
-  });
+  const onFloor = p => onTriangles(p, floorTriangles);
   ['melt0', 'melt1'].forEach((name, part) => {
     const top = vertices(decode(name), v => v.material === MOLTEN && v.p[1] > .5).map(v => [v.p[0], v.p[2]]);
     assert(top.length > 0, `${name} has a surface`);
@@ -183,6 +184,8 @@ test('each gate runs from the well to its casting and breaks where config/castin
   assert.equal(mark.gates.map(gate => `${gate.name}${gate.part}`).join(), 'A0,B1');
   const well = [liquid.config.wellX, liquid.config.wellZ];
   const feed = topVertices('feed').map(v => [v.p[0], v.p[2]]);
+  const feedTriangles = [];
+  for (let i = 0; i < feed.length; i += 3) feedTriangles.push(feed.slice(i, i + 3));
   const feedBody = vertices(decode('feedBody'), () => true).map(v => v.p);
   casting.joints.forEach((joint, part) => {
     const pivot = [joint.pivot[0], joint.pivot[2]], outline = assets.logo[part].map(toMould);
@@ -197,6 +200,18 @@ test('each gate runs from the well to its casting and breaks where config/castin
     const reach = Math.min(...feed.map(p => outlineDistance(p, outline)));
     assert(reach > 0 && reach < .004, `The molten runner reaches casting ${joint.name} (${reach})`);
     assert(feed.every(p => !inside(p, outline)), 'The runner does not overlap its casting');
+    // The baked runner is the route of mark.json: every step of it, up to the pivot, lies on molten metal.
+    const gate = mark.gates[part];
+    let walked = false;
+    for (let k = 0; k < last && !walked; k++) {
+      const from = route[k], to = route[k + 1], length = Math.hypot(to[0] - from[0], to[1] - from[1]);
+      const stop = k === last - 1 ? ((pivot[0] - from[0]) * (to[0] - from[0]) + (pivot[1] - from[1]) * (to[1] - from[1])) / length : length;
+      for (let step = 0; step <= stop; step += .01) {
+        const p = [from[0] + (to[0] - from[0]) * step / length, from[1] + (to[1] - from[1]) * step / length];
+        assert(onTriangles(p, feedTriangles), `Runner ${joint.name} follows its route at ${p.map(v => v.toFixed(3))}`);
+      }
+      walked = k === last - 1;
+    }
     // Cold pieces: feedBody -> gateBase (bends) -> fracture at the pivot -> gateTip (stays on the casting).
     const base = decode('gateBase' + joint.name);
     const baseAll = vertices(base, () => true).map(v => v.p);
@@ -204,6 +219,8 @@ test('each gate runs from the well to its casting and breaks where config/castin
       `gateBase${joint.name} continues the cold feeder`);
     const fracture = vertices(base, v => v.material === FRACTURE).map(v => [v.p[0], v.p[2]]);
     assert(fracture.length >= 6, `gateBase${joint.name} has a fracture face`);
+    const span = Math.max(...fracture.map(p => Math.max(...fracture.map(q => Math.hypot(p[0] - q[0], p[1] - q[1])))));
+    assert(Math.abs(span - gate.width) < 2e-3, `Gate ${joint.name} is as wide as mark.json says (${span.toFixed(4)})`);
     const baseCentre = centroid(fracture);
     assert(Math.hypot(baseCentre[0] - pivot[0], baseCentre[1] - pivot[1]) < 5e-4, `gateBase${joint.name} fractures at the pivot`);
     // The stub that stays on the casting is stored in the casting's own frame.

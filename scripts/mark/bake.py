@@ -292,8 +292,11 @@ def build(spec, report=False):
     # --- sand
     m = Mesh()
     for t in tri2d(blk.difference(rim)): m.up(t, 0.0, M_SAND)                                   # flat top incl. islands
-    cavb = cav.boundary
+    cavb = cav.boundary; rimb = rim.boundary
     def hy(p):
+        # A vertex on the rim outline meets the flat top at exactly 0 (after simplification it can sit a hair inside
+        # the nominal bevel width, which would open a crack); one on the cavity outline meets the wall.
+        if rimb.distance(Point(p[0], p[1])) < 1e-9: return 0.0
         dd = cavb.distance(Point(p[0], p[1])); return 0.0 if dd >= CHAMFER_W - 1e-6 else (-CHAMFER_D if dd < 1e-6 else -CHAMFER_D * (1 - dd / CHAMFER_W))
     for t in tri2d(rim.difference(cav)):                                                         # rim bevel, flat-shaded
         P3 = [np.array([p[0], hy(p), p[1]]) for p in (t[0], t[2], t[1])]
