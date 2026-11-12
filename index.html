@@ -4184,7 +4184,7 @@ void main(){
         float tongues=smoothstep(.25,.78,noise)*core*smoothstep(0.,.72,rim);
         float fireDensity=tongues*vCenterDensity.w*contact*burn;
         float steamOptical=steamDensity*segment*4.6*uLight;
-        float fireOptical=fireDensity*segment*1.15*uLight;
+        float fireOptical=fireDensity*segment*1.45*uLight;
         float stepOptical=steamOptical+fireOptical;
         float stepAlpha=1.-exp(-stepOptical),share=1./max(stepOptical,.000001);
         float contribution=transmission*stepAlpha;
@@ -7962,8 +7962,8 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
   const spread=1-Math.exp(-age/.22);
   const roll=.48+1.85*(1-Math.exp(-age/.40));
   const phase=TAU*noise(puff.seed,23)+i*2.399;
-  const radius=1.60*(.068+.128*spread)*(.95+.12*puff.drive)*puff.scale;
-  const ring=1.30*(.014+.155*spread)*(i===0?0:.80+.20*Math.sin(roll));
+  const radius=1.66*(.068+.128*spread)*(.95+.12*puff.drive)*puff.scale;
+  const ring=1.35*(.014+.155*spread)*(i===0?0:.80+.20*Math.sin(roll));
   // The first few frames remain below the electrical gap. The pressure packet
   // then rises and opens out; its upper and lower halves can straddle ignition.
   const lift=.012+.55*age+.72*Math.pow(1-Math.exp(-age/.35),2);
@@ -7973,10 +7973,14 @@ GuziczakModules.define('scene/instrument', ['math','geometry/instrument'], (math
   const z=Math.sin(phase+.24*age)*ring-Math.sin(puff.yaw)*drift;
   const y=tail?lift*(.50+.11*(i-5)):lift+curl;
   const size=tail?radius*(.50+.10*noise(puff.seed,i+8)):radius;
+  // Once alight the gas draws upward into a standing flame: taller, hardly wider.
+  // The head leads and tapers it. The white packet below the gap keeps its form.
+  const vertical=size*(tail?1.30:1.08)*(.16+.84*ease(.025,.22,age));
+  const flame=(i===0?1.05:tail?.80:.55)*ease(.10,.46,age);
   const fade=ease(0,.022,age)*(1-ease(tail?.22:.24,1,age/life));
   const density=fade*(tail?.36+.24*puff.drive:(i===0?1.05: .82)+.45*puff.drive);
-  return {center:[puff.origin[0]+x*(tail?.44:1),puff.origin[1]+y,puff.origin[2]+z*(tail?.44:1)],
-   radii:[size*(.88+.12*noise(puff.seed,i+3)),size*(tail?1.30:1.08)*(.16+.84*ease(.025,.22,age)),size],
+  return {center:[puff.origin[0]+x*(tail?.44:1),puff.origin[1]+y+.65*vertical*flame,puff.origin[2]+z*(tail?.44:1)],
+   radii:[size*(.88+.12*noise(puff.seed,i+3)),vertical*(1+flame),size],
    density,seed:(puff.seed+i*97)%4096,age,life,midi:puff.midi,onsetId:puff.key,
    kind:tail?'tail':i===0?'head':'curl',ignitionY:puff.ignitionY,fuel:1};
  }
