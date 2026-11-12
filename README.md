@@ -41,6 +41,29 @@ This keeps the existing engine and inline source display intact while fixing sta
 routing. They are reproducible output, not separately maintained copies. Splitting
 engine assets or rendering smaller document-only bundles is a separate change.
 
+## Brand mark
+
+The mark ("sygnet Przesmyk") is stored in the page three times: as 2D paths (favicon,
+header logo, no-WebGL poster), as the two polygons in `assets.logo` that are extruded
+into the 3D signet, and as the packed foundry meshes in `assets.foundry` that the intro
+casts it in. `scripts/mark/mark.json` is the source for all three: the two SVG paths,
+the flattening density and the routes of the two pouring gates.
+
+```bash
+python3 scripts/mark/bake.py            # dry run: sizes, gates, derived constants
+python3 scripts/mark/bake.py --write    # rewrite the mark and assets in index.html
+node scripts/build.cjs
+```
+
+This tool is not part of the build or of CI, and it is the only thing here with
+dependencies (Python 3.9+, numpy, shapely 2.1+). It is needed only when the outline or
+the gates change. Its foundry construction was reconstructed from the previously
+shipped meshes, whose generator was never in the repository. After a change, also
+update the outline-derived constants in authored code that the tool prints:
+`config/casting` gate pivots and park pose, and the `config/reclaim` stream roots.
+`tests/mark-parity.test.cjs` needs only Node and fails when the 2D paths, the 3D
+outline, the foundry meshes or the gate pivots stop describing the same shape.
+
 ## Build
 
 Use Node.js 20 or newer. There are no npm dependencies and no installation step.

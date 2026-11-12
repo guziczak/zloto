@@ -37,6 +37,8 @@ jobs:
         run: |
           node tests/casting-liquid.test.cjs
           node tests/foundry-clearance.test.cjs
+      - name: Check the brand mark in 2D, 3D and the foundry
+        run: node tests/mark-parity.test.cjs
       - name: Check pipe ignition
         run: node tests/ignition.test.cjs
       - name: Check exhibit quality and rotation

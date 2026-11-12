@@ -7,6 +7,7 @@ node tests/audio-regression.cjs index.html
 node tests/score-placement.test.cjs
 node tests/casting-liquid.test.cjs
 node tests/foundry-clearance.test.cjs
+node tests/mark-parity.test.cjs
 node tests/ignition.test.cjs
 node tests/exhibit-quality.test.cjs
 node tests/runtime-regression.cjs
@@ -16,6 +17,15 @@ The casting checks use the production liquid model and packed feeder mesh. They
 check the stream's arrival and cutoff, contact with the rising surface, and the
 settling/cooling behavior. This is a deterministic visual model, not a fluid
 solver or a physical foundry calculation.
+
+Mark parity checks tie the three stored forms of the brand mark to
+`scripts/mark/mark.json` and to each other: the favicon and inline SVG paths, the
+`assets.logo` polygons flattened from those paths, and the packed foundry meshes.
+Every outline vertex must lie on the molten surfaces and over the cavity floor, the
+cavity wall must follow the outline, and each gate mesh must fracture at the pivot
+that `config/casting` hinges its casting on. The baked arrival field must fill the
+mould before cooling starts. These are numeric relations read from the page; they do
+not show how the mark or the casting looks.
 
 Foundry clearance checks build the actual meshes and sample the moving flask,
 raised cartridge and released castings against all 66 pipe and igniter envelopes.
