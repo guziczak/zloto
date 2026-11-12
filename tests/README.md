@@ -68,7 +68,10 @@ rectangles and a recorded 2D canvas. The same canvas moves from the cinematic
 viewport into its own hero row and back on replay, while retaining source notes
 and the heard audio clock. Offscreen, suspended and hidden states stop rendering;
 returning to the slot cannot emit notes missed while it was out of view. Pause,
-reduced motion and the existing 180-particle cap are covered.
+reduced motion and the existing 180-particle cap are covered. The room above and
+below the two staves is fitted to the engraved ink: a beam beyond an extreme note
+must stay inside the padded strip, and a top note with a downward stem reserves
+no stem above it. These are layout numbers, not rendered pixels.
 
 Exhibit-quality checks exercise the real exhibit renderer with recorded GL calls.
 Opaque geometry uses at most four MSAA samples, chosen from the intersection of

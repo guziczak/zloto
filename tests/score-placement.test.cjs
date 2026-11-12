@@ -69,7 +69,7 @@ function fixture({ reduced = false, notes = sourceNotes } = {}) {
     for (const callback of pending) callback(ms);
     return layer.diagnostics();
   }
-  return { win, doc, root, canvas, slot, header, layer, frame,
+  return { win, doc, root, canvas, slot, header, layer, frame, score: modules.get('audio/score'),
     introTime: modules.get('config/sequence').cues.scoreIn[1],
     draws: () => draws, pending: () => callbacks.size,
     scroll: () => win.dispatchEvent(new Event('scroll')),
@@ -83,14 +83,14 @@ function fixture({ reduced = false, notes = sourceNotes } = {}) {
 }
 
 function assertSourceNotes(snapshot, notes = sourceNotes) {
-  assert.equal(snapshot.pps, 66);
+  assert.equal(snapshot.pps, 80);
   assert.equal(snapshot.notes, notes.length);
   assert(snapshot.painted.length > 0, 'The actual renderer painted source notes');
   for (const note of snapshot.painted) {
     assert(notes.some(source => source[0] / 1000 === note.t && source[2] === note.midi),
       'Reparenting cannot introduce generated notes');
-    assert(Math.abs(note.x - note.headX - (note.t - snapshot.position) * 66) < 1e-6,
-      'Both placements keep the same audio playhead and 66 px/s spacing');
+    assert(Math.abs(note.x - note.headX - (note.t - snapshot.position) * 80) < 1e-6,
+      'Both placements keep the same audio playhead and 80 px/s spacing');
   }
 }
 
@@ -205,8 +205,29 @@ test('dense visible chords retain the existing particle budget in the page slot'
     const sounding = f.frame(1120, 1.02);
     assert.equal(sounding.bursts, notes.length); assert.equal(sounding.particles, 180);
     assert(sounding.burstStaff.T > 0 && sounding.burstStaff.B > 0);
-    assert.equal(f.root.parentNode, f.slot); assert.equal(sounding.pps, 66);
+    assert.equal(f.root.parentNode, f.slot); assert.equal(sounding.pps, 80);
     f.slot.rect.y = 900; f.scroll(); f.frame(1136, 1.036);
     assert.equal(f.layer.diagnostics().particles, 0); assert.equal(f.pending(), 0);
+  } finally { f.destroy(); }
+});
+
+test('outer staff room covers the engraved ink, including a beam beyond an extreme note', () => {
+  // Three sixteenths beamed with one extreme note: the beam lies a full stem (3.35 staff spaces,
+  // 6.7 diatonic steps) beyond that note's head.
+  const notes = [
+    [1000, 125, 60, 100], [1125, 125, 60, 100], [1250, 125, 60, 100], [1375, 125, 96, 100],
+    [1000, 125, 59, 90], [1125, 125, 59, 90], [1250, 125, 59, 90], [1375, 125, 24, 90]
+  ];
+  const f = fixture({ notes });
+  try {
+    const { diat, prepareScore, staffMetrics } = f.score, sections = [{ at: 0, bpm: 120 }], stem = 6.7;
+    const { ranges } = prepareScore({ notes, sections }), high = diat(96), low = diat(24);
+    assert(ranges.T.top >= high + stem && ranges.B.bottom <= low - stem, 'A beam is ink of its staff');
+    const m = staffMetrics(390, 122, ranges, true), y = (step, origin, upper) => origin + (upper - step) * m.gap / 2;
+    assert(y(high + stem, m.originT, m.upperT) >= m.originT && y(low - stem, m.originB, m.upperB) <= 122 - m.originT,
+      'Both beams stay inside the padded strip');
+    const plain = prepareScore({ notes: sourceNotes, sections }).ranges;
+    assert(plain.T.top < diat(76) + stem, 'A top note whose stem points down reserves no stem above it');
+    f.layer.finish(); assert.equal(f.frame(1000, .9).painted.length, notes.length);
   } finally { f.destroy(); }
 });

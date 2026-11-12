@@ -1005,12 +1005,12 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 #artifact-toggle{min-height:44px;padding:10px 12px;font-size:11px;color:#d9c29c;background:#d9c29c08;border:1px solid #d9c29c26;border-radius:3px;text-shadow:none}
 #artifact-toggle:hover{background:#d9c29c12;border-color:#d9c29c55}
 .artifact-help{display:none}
-#page-score-slot{grid-area:2/1/3/-1;width:100%;height:132px;min-height:132px;--score-bleed:0px;margin:0;overflow:hidden;border-top:1px solid #d3c7a31c;background:#080a0a}
+#page-score-slot{grid-area:2/1/3/-1;width:100%;height:136px;min-height:136px;--score-bleed:0px;margin:0;overflow:hidden;border-top:1px solid #d3c7a31c;background:#080a0a}
 #score-bridge.score-page{position:absolute;inset:0!important;width:100%!important;height:100%!important;transform:none!important;z-index:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
 .music-caption{grid-area:3/1/4/-1;padding:0 0 18px;background:#080a0a}
 .hero-bottom{grid-area:4/1/5/-1;margin-top:20px;padding:18px 0 24px;min-height:64px;background:#080a0a}
 .icon-arrow{display:block;width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-@media(min-width:1800px){.hero{grid-template-rows:minmax(490px,1fr) auto auto auto}#page-score-slot{height:150px;min-height:150px}}
+@media(min-width:1800px){.hero{grid-template-rows:minmax(490px,1fr) auto auto auto}#page-score-slot{height:154px;min-height:154px}}
 @media(min-width:701px) and (max-width:1050px){.hero{grid-template-rows:minmax(410px,1fr) auto auto auto}}
 @media(max-width:700px){
  .hero{grid-template-rows:max-content auto auto auto auto;min-height:0;row-gap:0;padding-bottom:0}
@@ -1020,7 +1020,7 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
  #artifact-stage{grid-area:2/1/3/-1;min-height:clamp(350px,49svh,430px);margin-top:8px;padding-bottom:16px}
  #artifact-slot{min-height:280px}
  .artifact-caption{padding-top:8px;min-height:52px}
- #page-score-slot{grid-area:3/1/4/-1;height:122px;min-height:122px}
+ #page-score-slot{grid-area:3/1/4/-1;height:126px;min-height:126px}
  .music-caption{grid-area:4/1/5/-1;padding:2px 0 18px;min-height:64px}
  .music-caption-credit{font-size:10px;max-width:none}
  .hero-bottom{grid-area:5/1/6/-1;margin-top:18px;min-height:60px}
@@ -1028,7 +1028,7 @@ body.intro.live-trace-visible-intro #score-bridge{visibility:hidden!important}
 @media(max-width:360px){
  #artifact-stage{min-height:330px}
  #artifact-slot{min-height:260px}
- #page-score-slot{height:114px;min-height:114px}
+ #page-score-slot{height:118px;min-height:118px}
  .music-caption{flex-wrap:wrap;gap:2px 12px}
  .music-score-link{max-width:none;font-size:10px}
 }
@@ -1788,7 +1788,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
     This is a visualizer, not a generated accompaniment or a second transport. */
  function prepareScore(score){
    const notes=engraved(score).filter(n=>n.v>0).sort((a,b)=>a.t-b.t||a.m-b.m);
-   const ranges={T:{low:28,high:40},B:{low:16,high:27}},events=[];
+   const ranges={T:{low:28,high:40,top:-Infinity,bottom:Infinity},B:{low:16,high:27,top:-Infinity,bottom:Infinity}},events=[];
    for(const staff of ['T','B']){
      const lineNotes=notes.filter(n=>(n.m>=60?'T':'B')===staff),rows=[];
      for(const n of lineNotes){
@@ -1817,6 +1817,9 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      for(const e of rows){
        e.notes.sort((a,b)=>a.step-b.step);let previous=null;
        for(const n of e.notes){n.headOffset=previous&&n.step-previous.step===1&&!previous.headOffset?(e.down?-1:1):0;previous=n;}
+       // Outermost ink of the staff in diatonic steps: heads with accidentals, stems with their beams.
+       const room=ranges[staff],tip=e.glyph.whole?e.high:(e.beam?e.beam.extreme:e.down?e.low:e.high)+(e.down?-7.1:7.1);
+       for(const n of e.notes){room.top=Math.max(room.top,n.step+(n.accidental?2.4:1),tip);room.bottom=Math.min(room.bottom,n.step-(n.accidental?2:1),tip);}
        events.push(e);
      }
    }
@@ -1830,8 +1833,9 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    const out=[];for(let i=lowerBound(notes,previous+1e-8);i<notes.length&&notes[i].t<=position;i++)out.push(notes[i]);return out;
  }
  function staffMetrics(width,height,ranges,compact=false){
-   const upperT=Math.max(42,ranges.T.high+6),lowerT=Math.min(27,ranges.T.low-3);
-   const upperB=Math.max(29,ranges.B.high+5),lowerB=Math.min(13,ranges.B.low-6);
+   // Outer room is the ink actually engraved, not a worst-case stem: unused room only shrinks the staff.
+   const upperT=Math.max(42,ranges.T.top??ranges.T.high+6),lowerT=Math.min(27,ranges.T.low-3);
+   const upperB=Math.max(29,ranges.B.high+5),lowerB=Math.min(13,ranges.B.bottom??ranges.B.low-6);
    const units=(upperT-lowerT+upperB-lowerB+5)/2;
    const amplitude=compact?4.0:Math.min(7,height*.034);
    const gap=Math.max(1.25,Math.min(compact?7.4:11,(height-2*amplitude-12)/units));
@@ -1895,13 +1899,13 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    }
    const noise=n=>{const f=Math.sin(n*127.1+17.7)*43758.5453;return f-Math.floor(f);};
    function burst(note,position){
-     const count=8,max=180;
+     const count=10,max=180;
      const at=effectTime-Math.max(0,position-note.t);
      for(let i=0;i<count;i++){
        const seed=note.i*23+i,angle=noise(seed)*Math.PI*2;
        particles.push({staff:note.staff,step:note.step,at,life:.58+noise(seed+3)*.34,
-         vx:Math.cos(angle)*(3.4+noise(seed+7)*7.0)-4.3,vy:Math.sin(angle)*(3.4+noise(seed+9)*6.5),
-         size:.21+noise(seed+11)*.18,spin:noise(seed+4)*6.28,shape:i%3});
+         vx:Math.cos(angle)*(4.1+noise(seed+7)*8.4)-5.15,vy:Math.sin(angle)*(4.1+noise(seed+9)*7.8),
+         size:.23+noise(seed+11)*.20,spin:noise(seed+4)*6.28,shape:i%3});
      }
      if(particles.length>max)particles.splice(0,particles.length-max);
      burstCount++;burstStaff[note.staff]++;
@@ -1929,7 +1933,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
    function drawPage(pos){
      g.clearRect(0,0,W,H);painted=[];
       const compact=true,m=metrics=staffMetrics(W,pageHeight||H,prepared.ranges,compact),gap=m.gap;
-      const yPad=(H-(pageHeight||H))/2,pps=66;
+      const yPad=(H-(pageHeight||H))/2,pps=80;
      const curve=x=>m.amplitude*(Math.sin(x/W*Math.PI*2-.55+waveTime*.26)+.28*Math.sin(x/W*Math.PI*1.2+.8-waveTime*.17));
      const Y=(step,staff,x)=>yPad+(staff==='T'?m.originT:m.originB)+((staff==='T'?m.upperT:m.upperB)-step)*gap*.5+curve(x);
      const line=(x,y,a,b)=>{g.beginPath();g.moveTo(x,y);g.lineTo(a,b);g.stroke();};
@@ -1981,16 +1985,16 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
        }
        for(const n of actual){
          const nx=headX(n),y=Y(n.step,n.staff,nx),lo=n.staff==='T'?30:18,hi=n.staff==='T'?38:26;
-         for(let step=hi+2;step<=n.step;step+=2)line(nx-rx-2,Y(step,n.staff,nx),nx+rx+2,Y(step,n.staff,nx));
-         for(let step=lo-2;step>=n.step;step-=2)line(nx-rx-2,Y(step,n.staff,nx),nx+rx+2,Y(step,n.staff,nx));
+         for(let step=hi+2;step<=n.step;step+=2)line(nx-rx-2.4,Y(step,n.staff,nx),nx+rx+2.4,Y(step,n.staff,nx));
+         for(let step=lo-2;step>=n.step;step-=2)line(nx-rx-2.4,Y(step,n.staff,nx),nx+rx+2.4,Y(step,n.staff,nx));
          if(n.accidental){
            const ax=nx-rx-gap*.8;g.lineWidth=.8;
            if(n.accidental==='natural'){
-             line(ax-1.2,y-gap,ax-1.2,y+gap*.42);line(ax+1.2,y-gap*.4,ax+1.2,y+gap);
-             line(ax-1.2,y-gap*.1,ax+1.2,y-gap*.34);line(ax-1.2,y+gap*.38,ax+1.2,y+gap*.14);
+             line(ax-1.45,y-gap,ax-1.45,y+gap*.42);line(ax+1.45,y-gap*.4,ax+1.45,y+gap);
+             line(ax-1.45,y-gap*.1,ax+1.45,y-gap*.34);line(ax-1.45,y+gap*.38,ax+1.45,y+gap*.14);
            }else{
-             line(ax-1.4,y-gap,ax-1.4,y+gap);line(ax+1.4,y-gap*1.16,ax+1.4,y+gap*.84);
-             line(ax-3,y-gap*.28,ax+3,y-gap*.5);line(ax-3,y+gap*.5,ax+3,y+gap*.28);
+             line(ax-1.7,y-gap,ax-1.7,y+gap);line(ax+1.7,y-gap*1.16,ax+1.7,y+gap*.84);
+             line(ax-3.65,y-gap*.28,ax+3.65,y-gap*.5);line(ax-3.65,y+gap*.5,ax+3.65,y+gap*.28);
            }
            g.lineWidth=1;
          }
@@ -2004,7 +2008,8 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      if(!reduced)for(const p of particles){
        const age=Math.max(0,effectTime-p.at),u=age/p.life;if(u>=1)continue;
        const travel=(1-Math.exp(-age*2.3))/2.3,x=m.head+p.vx*gap*travel,y=Y(p.step,p.staff,m.head)+p.vy*gap*travel+gap*1.9*age*age;
-       const size=Math.max(.85,p.size*gap)*(1-.4*u),a=Math.pow(1-u,1.4)*.98;
+       // A spark of an outermost note fades out just before the strip's top or bottom edge instead of being cut by it.
+       const size=Math.max(.85,p.size*gap)*(1-.4*u),a=Math.pow(1-u,1.4)*.98*clamp((Math.min(y,H-y)-3)/5,0,1);
        g.save();g.translate(x,y);g.rotate(p.spin+age*2);g.fillStyle=`rgba(255,222,154,${a})`;
        g.shadowColor='#f4d58b';g.shadowBlur=2.5*(1-u);
        if(p.shape===0){g.beginPath();g.moveTo(-size,0);g.lineTo(0,-size*.6);g.lineTo(size,0);g.lineTo(0,size*.6);g.closePath();g.fill();}
@@ -2025,7 +2030,7 @@ GuziczakModules.define('audio/score', ['core/scope','math','config/sequence'], (
      setScene(time){sceneTime=time;page=false;phaseOpacity=ease(...sequence.cues.scoreIn,time);schedule();},
      finish(){page=true;phaseOpacity=1;lastMs=null;wake();},
      reset(){sceneTime=0;page=false;phaseOpacity=0;lastCrossing=null;particles=[];lastMs=null;style('opacity','0');wake();},
-      diagnostics(){return {clock:'audio-output',paused,reduced,suspended,pps:66,width:W,height:H,position:lastPosition,revision,notes:prepared.notes.length,
+      diagnostics(){return {clock:'audio-output',paused,reduced,suspended,pps:80,width:W,height:H,position:lastPosition,revision,notes:prepared.notes.length,
        trebleNotes:prepared.counts.treble,bassNotes:prepared.counts.bass,staffCount:2,clefs:['treble','bass'],frames,painted,opacity:Number(root.style.opacity),page,layoutHeight:pageHeight,placementMix,placement:mode,footerLift,finaleFocus,
        waveTime,curveSample:metrics?metrics.amplitude*(Math.sin(-.55+waveTime*.26)+.28*Math.sin(.8-waveTime*.17)):0,playhead:metrics?.head||0,
        particles:particles.length,bursts:burstCount,burstStaff:{...burstStaff},recentBursts:recentBursts.slice(),renderer:'golden-grand-staff',canvasId:cv.id};},
