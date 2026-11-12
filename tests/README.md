@@ -21,11 +21,16 @@ solver or a physical foundry calculation.
 Mark parity checks tie the three stored forms of the brand mark to
 `scripts/mark/mark.json` and to each other: the favicon and inline SVG paths, the
 `assets.logo` polygons flattened from those paths, and the packed foundry meshes.
-Every outline vertex must lie on the molten surfaces and over the cavity floor, the
-cavity wall must follow the outline, and each gate mesh must fracture at the pivot
-that `config/casting` hinges its casting on. The baked arrival field must fill the
-mould before cooling starts. These are numeric relations read from the page; they do
-not show how the mark or the casting looks.
+The 2D marks must be exactly the two paths, with nothing else in them. Every outline
+vertex must lie on the molten surfaces and over the cavity floor, the molten surfaces
+must cover each part once, and the cavity wall must follow the outline. Each gate
+route must start in the well and pass through the pivot that `config/casting` hinges
+its casting on; the molten runner must stop just short of its casting, and the cold
+feeder, bending neck, fracture face and remaining stub must join there. Each casting
+must start filling at its own gate, the slowest point must arrive at `arrivalMax`, and
+the mould must be full when the scene reports it. Both overflow streams must start
+inside the cast metal. These are numeric relations read from the page; they do not
+show how the mark or the casting looks.
 
 Foundry clearance checks build the actual meshes and sample the moving flask,
 raised cartridge and released castings against all 66 pipe and igniter envelopes.

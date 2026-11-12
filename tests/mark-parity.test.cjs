@@ -70,6 +70,8 @@ function flatten(d, steps) {
       current = p3;
     }
   }
+  // A path may return to its first point explicitly; the polygon stores it once.
+  if (out.length > 1 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < 1e-9) out.pop();
   return out.map(([x, y]) => [x, -y]);
 }
 const signedArea = polygon => polygon.reduce((sum, p, i) => {
@@ -90,21 +92,23 @@ function inside(p, polygon) {
   return result;
 }
 const centroid = points => points[0].map((_, axis) => points.reduce((sum, p) => sum + p[axis], 0) / points.length);
-const pathData = markup => [...markup.matchAll(/<path\b[^>]*?\bd="([^"]+)"[^>]*>/g)].map(match => match[1]);
+const topVertices = name => vertices(decode(name), v => v.material === MOLTEN && v.p[1] > .5);
+function triangleArea(a, b, c) { return Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2; }
 
-test('the favicon and the three inline marks draw the paths of scripts/mark/mark.json', () => {
+test('the favicon and the three inline marks are exactly the mark of scripts/mark/mark.json', () => {
   assert.equal(mark.paths.length, 2, 'The mark has two parts: A (crescent) and B (bar and bowl)');
-  const inline = html.match(/<svg aria-hidden="true" viewbox="-1\.1 -1\.12 2\.2 2\.24"[^>]*>.*?<\/svg>/g) || [];
-  assert.equal(inline.length, 3, 'flying mark, header logo and the no-WebGL poster');
-  for (const svg of inline) {
-    assert.deepEqual(pathData(svg), mark.paths);
-    assert(!/transform=/.test(svg), 'Paths are stored in final coordinates');
-  }
+  assert.equal(mark.viewBox, '-1.1 -1.12 2.2 2.24', 'The 3D layout assumes this frame');
+  // Paths are stored in final coordinates: nothing but two filled paths, no transform.
+  const inline = `<svg aria-hidden="true" viewbox="${mark.viewBox}" xmlns="http://www.w3.org/2000/svg">`
+    + mark.paths.map(d => `<path d="${d}" fill="${mark.fill}"></path>`).join('') + '</svg>';
+  const found = [...html.matchAll(/id="(flying-mark|header-logo|artifact-poster)">(<svg\b[^>]*>.*?<\/svg>)/g)];
+  assert.equal(found.map(match => match[1]).sort().join(), 'artifact-poster,flying-mark,header-logo');
+  for (const [, id, svg] of found) assert.equal(svg, inline, `#${id} draws the mark`);
   const favicon = html.match(/<link href="data:image\/svg\+xml,([^"]+)" rel="icon"/);
   assert(favicon, 'The favicon is an inline SVG');
-  const decoded = decodeURIComponent(favicon[1]);
-  assert.deepEqual(pathData(decoded), mark.paths);
-  assert(decoded.includes(`viewBox="${mark.viewBox}"`));
+  assert.equal(decodeURIComponent(favicon[1]),
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}" role="img" aria-label="GUZICZAK \u2014 sygnet ${mark.name}">`
+    + mark.paths.map(d => `<path d="${d}" fill="${mark.fill}"/>`).join('') + '</svg>');
 });
 
 test('the 3D outline is exactly those paths, flattened', () => {
@@ -121,6 +125,23 @@ test('the 3D outline is exactly those paths, flattened', () => {
     ...assets.logo[1].map(p => outlineDistance(p, assets.logo[0])));
   // Each cavity wall stands .014 mould units off its casting; closer parts would share one cavity.
   assert(gap * scale > .06, `The two castings keep a sand wall between them (${(gap * scale).toFixed(4)})`);
+  // geometry/builder insets each outline by the bevel before capping the solid. Next to a sharp
+  // corner a short edge can come out reversed, which folds the bevelled cap over itself.
+  const bevel = registry.get('geometry/brand').spec.bevel;
+  assets.logo.forEach((outline, part) => {
+    const count = outline.length;
+    const inset = outline.map((p, i) => {
+      const a = outline[(i + count - 1) % count], c = outline[(i + 1) % count];
+      const e = [p[0] - a[0], p[1] - a[1]], f = [c[0] - p[0], c[1] - p[1]], el = Math.hypot(...e), fl = Math.hypot(...f);
+      const n = [-e[1] / el, e[0] / el], m = [-f[1] / fl, f[0] / fl], d = Math.max(.12, 1 + n[0] * m[0] + n[1] * m[1]);
+      return [p[0] + bevel * (n[0] + m[0]) / d, p[1] + bevel * (n[1] + m[1]) / d];
+    });
+    inset.forEach((p, i) => {
+      const j = (i + 1) % count, outer = [outline[j][0] - outline[i][0], outline[j][1] - outline[i][1]];
+      const kept = ((inset[j][0] - p[0]) * outer[0] + (inset[j][1] - p[1]) * outer[1]) / Math.hypot(...outer);
+      assert(kept > .004, `part ${part} edge ${i} survives the ${bevel} bevel (${kept.toFixed(5)} left)`);
+    });
+  });
 });
 
 test('the molten fill and the sand cavity are baked from the same outline', () => {
@@ -149,44 +170,79 @@ test('the molten fill and the sand cavity are baked from the same outline', () =
     }
     // Only the mouth of the gate has no wall next to the casting.
     assert(near >= assets.logo[part].length * .9, `The cavity wall follows part ${part} (${near} vertices)`);
-    for (const q of top) assert(inside(q, assets.logo[part].map(toMould)) || outlineDistance(q, assets.logo[part].map(toMould)) < 2e-5,
-      `${name} stays within part ${part}`);
+    const outline = assets.logo[part].map(toMould);
+    for (const q of top) assert(inside(q, outline) || outlineDistance(q, outline) < 2e-5, `${name} stays within part ${part}`);
+    let covered = 0;
+    for (let i = 0; i < top.length; i += 3) covered += triangleArea(top[i], top[i + 1], top[i + 2]);
+    assert(Math.abs(covered - Math.abs(signedArea(outline))) < 1e-5, `${name} covers part ${part} exactly once (${covered})`);
   });
 });
 
-test('each gate breaks where config/casting hinges its casting', () => {
+test('each gate runs from the well to its casting and breaks where config/casting hinges it', () => {
   assert.equal(casting.joints.map(joint => joint.name).join(), 'A,B');
+  assert.equal(mark.gates.map(gate => `${gate.name}${gate.part}`).join(), 'A0,B1');
+  const well = [liquid.config.wellX, liquid.config.wellZ];
+  const feed = topVertices('feed').map(v => [v.p[0], v.p[2]]);
+  const feedBody = vertices(decode('feedBody'), () => true).map(v => v.p);
   casting.joints.forEach((joint, part) => {
     const pivot = [joint.pivot[0], joint.pivot[2]], outline = assets.logo[part].map(toMould);
     const neck = outlineDistance(pivot, outline);
     assert(!inside(pivot, outline) && neck > .015 && neck < .045, `Gate ${joint.name} breaks a short neck away from its casting (${neck})`);
     assert(!inside(pivot, assets.logo[1 - part].map(toMould)), 'A gate cannot end in the other casting');
-    const base = vertices(decode('gateBase' + joint.name), v => v.material === FRACTURE).map(v => [v.p[0], v.p[2]]);
-    assert(base.length >= 6, `gateBase${joint.name} has a fracture face`);
-    const baseCentre = centroid(base);
-    assert(Math.hypot(baseCentre[0] - pivot[0], baseCentre[1] - pivot[1]) < .004, `gateBase${joint.name} fractures at the pivot`);
+    // The authored route in mark.json starts in the pouring well and passes through the pivot.
+    const route = mark.gates[part].path, last = route.length - 1;
+    assert(Math.hypot(route[0][0] - well[0], route[0][1] - well[1]) < .05, `Gate ${joint.name} starts in the well`);
+    assert(segmentDistance(pivot, route[last - 1], route[last]) < 1e-3, `Gate ${joint.name} hinges on its route`);
+    // Molten runner: stops just short of its casting and never enters the other one.
+    const reach = Math.min(...feed.map(p => outlineDistance(p, outline)));
+    assert(reach > 0 && reach < .004, `The molten runner reaches casting ${joint.name} (${reach})`);
+    assert(feed.every(p => !inside(p, outline)), 'The runner does not overlap its casting');
+    // Cold pieces: feedBody -> gateBase (bends) -> fracture at the pivot -> gateTip (stays on the casting).
+    const base = decode('gateBase' + joint.name);
+    const baseAll = vertices(base, () => true).map(v => v.p);
+    assert(baseAll.some(p => feedBody.some(q => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < 1e-4)),
+      `gateBase${joint.name} continues the cold feeder`);
+    const fracture = vertices(base, v => v.material === FRACTURE).map(v => [v.p[0], v.p[2]]);
+    assert(fracture.length >= 6, `gateBase${joint.name} has a fracture face`);
+    const baseCentre = centroid(fracture);
+    assert(Math.hypot(baseCentre[0] - pivot[0], baseCentre[1] - pivot[1]) < 5e-4, `gateBase${joint.name} fractures at the pivot`);
     // The stub that stays on the casting is stored in the casting's own frame.
     const tip = decode('gateTip' + joint.name);
     const tipCentre = centroid(vertices(tip, v => v.material === FRACTURE).map(v => [v.p[0], v.p[1]]));
-    assert(Math.hypot(tipCentre[0] - joint.localPivot[0], tipCentre[1] - joint.localPivot[1]) < .004 / scale,
+    assert(Math.hypot(tipCentre[0] - joint.localPivot[0], tipCentre[1] - joint.localPivot[1]) < 5e-4 / scale,
       `gateTip${joint.name} fractures at the local pivot`);
-    const reach = Math.min(...vertices(tip, () => true).map(v => outlineDistance([v.p[0], v.p[1]], assets.logo[part])));
-    assert(reach < .004, `gateTip${joint.name} is attached to its casting (${reach})`);
+    const attached = Math.min(...vertices(tip, () => true).map(v => outlineDistance([v.p[0], v.p[1]], assets.logo[part])));
+    assert(attached < .004, `gateTip${joint.name} is attached to its casting (${attached})`);
   });
 });
 
-test('the baked arrival field finishes filling before the metal cools', () => {
-  const well = [liquid.config.wellX, liquid.config.wellZ];
+test('overflow streams start on the cast metal', () => {
+  const streams = registry.get('config/reclaim').streams;
+  assert.equal(streams.map(stream => stream.id).join(), 'left,right');
+  streams.forEach((stream, part) => {
+    const outline = assets.logo[part].map(toMould), root = stream.points[0];
+    assert(inside(root, outline), `The ${stream.id} stream rises from casting ${'AB'[part]}`);
+    const depth = outlineDistance(root, outline);
+    assert(depth >= .04, `The ${stream.id} root sits inside the metal, not on its edge (${depth})`);
+  });
+});
+
+test('each casting fills from its own gate and the mould is full when the scene reports it', () => {
   let last = 0;
-  for (const name of ['feed', 'melt0', 'melt1']) {
-    const top = vertices(decode(name), v => v.material === MOLTEN && v.p[1] > .5);
+  for (const v of topVertices('feed')) assert(Number.isFinite(v.uv[0]) && v.uv[0] >= 0);
+  ['melt0', 'melt1'].forEach((name, part) => {
+    const top = topVertices(name), pivot = casting.joints[part].pivot;
+    let first = top[0];
     for (const v of top) {
-      assert(v.uv[0] >= 0 && Number.isFinite(v.uv[0]));
-      // Metal cannot arrive sooner than the straight line from the well allows.
-      if (name !== 'feed') assert(v.uv[0] > .5 * Math.hypot(v.p[0] - well[0], v.p[2] - well[1]), `${name} fills from its gate`);
+      assert(Number.isFinite(v.uv[0]) && v.uv[0] > 0);
+      if (v.uv[0] < first.uv[0]) first = v;
       last = Math.max(last, v.uv[0]);
     }
-  }
+    // Metal enters at the gate mouth; a field seeded anywhere else means the cavities are connected.
+    const mouth = Math.hypot(first.p[0] - pivot[0], first.p[2] - pivot[2]);
+    assert(mouth < .08, `${name} starts filling at gate ${casting.joints[part].name} (${mouth})`);
+  });
+  assert(Math.abs(last - mark.arrivalMax) < 1e-5, `The slowest point arrives at mark.json's arrivalMax (${last})`);
   const full = liquid.arrivalAt(last) + liquid.config.fill;
   assert(full <= 11.38 + 1e-3, `The mould is full at ${full.toFixed(3)} s, when the scene reports it filled`);
   assert(full < liquid.config.coolStart);

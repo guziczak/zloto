@@ -16,15 +16,18 @@ scripts/mark/mark.json is the single source for all three. This tool regenerates
     python3 scripts/mark/bake.py --write    # also rewrite index.html, then run: node scripts/build.cjs
 
 It is NOT part of the build or of CI and it is the only thing in the repository with dependencies:
-Python 3.9+, numpy and shapely >= 2.1 (constrained Delaunay). Triangulations may differ between
+Python 3.10+, numpy and shapely >= 2.1 (constrained Delaunay). Triangulations may differ between
 shapely/GEOS versions, so the baked bytes are not guaranteed to be reproducible bit for bit; the
 relations that matter are asserted by tests/mark-parity.test.cjs, which needs nothing but Node.
 
-After changing the outline or the gates, also update the outline-derived constants that live in
-authored code (this tool prints the values and checks the current ones):
+Some outline-derived constants live in authored code and are NOT rewritten by this tool. It reads
+them from the page, prints the value each should have and exits with status 2 if one is out of date:
   - config/casting  joints[*].pivot / localPivot   = fracture point of each gate
   - config/casting  park.z / park.yaw              = both centroids on the centre line of the front plank
-  - config/reclaim  streams[*].points[0]           = overflow roots inside the filled mark
+  - config/reclaim  streams[*].points[0]           = overflow roots, which must lie inside the filled
+                                                     mark (reported with their depth; chosen by hand)
+
+The viewBox is the frame the 3-D layout code assumes (2.2 x 2.24 around the origin); it is fixed.
 
 Conventions. mark.json paths are SVG path data (absolute M/L/C/Z only) in the mark's viewBox, y down.
 assets.logo is the same outline flattened at `segmentsPerCubic` uniform parameter steps per cubic,
@@ -42,6 +45,8 @@ import numpy as np
 import shapely
 from shapely.geometry import Polygon, MultiPolygon, Point, LineString, LinearRing, box
 from shapely.ops import unary_union
+if not hasattr(shapely, 'constrained_delaunay_triangles'):
+    raise SystemExit('scripts/mark/bake.py needs shapely >= 2.1 (found %s): pip install "shapely>=2.1"' % shapely.__version__)
 
 # ---- constants recovered from the shipped asset / page config -------------------------------------------------------
 S, REST_Z, REST_Y = 0.79, 0.20, -0.0838            # config/casting rest
@@ -249,11 +254,19 @@ def build(spec, report=False):
         full = np.vstack([path[:-1], H + d * 0.03])
         stroke = LineString(full).buffer(w / 2, cap_style='flat', join_style='round', quad_segs=16)
         strokes.append(stroke)
+        # A runner may meet only its own casting, and only at its mouth. Anywhere closer than a full sand wall
+        # (two cavity offsets and both rim bevels) the cavities would merge and metal would cross.
+        wall = CLEAR_PART + CLEAR_FEED + 2 * CHAMFER_W
+        for k, other in enumerate(PP):
+            reach = stroke if k != g['part'] else stroke.difference(Point(*H).buffer(0.1))
+            if not reach.is_empty and reach.distance(other) < wall:
+                raise SystemExit('gate %s: its runner passes %.3f from casting %d; it needs %.3f of sand'
+                                 % (g['name'], reach.distance(other), k, wall))
         loc = lambda c, al, pv=pivot, d=d, n=n: pv + n * c + d * al
         frac = [loc(c, al) for c, al in FRACTURE]
         down = Polygon([*frac, loc(0.05, 0.0033), loc(0.05, 0.3), loc(-0.05, 0.3), loc(-0.05, -0.0033)])     # downstream of the fracture
         slab = Polygon([loc(-w / 2 - 0.02, -NECK), loc(w / 2 + 0.02, -NECK), loc(w / 2 + 0.02, 0.3), loc(-w / 2 - 0.02, 0.3)])  # everything past the neck cut
-        frames[g['name']] = dict(d=d, n=n, pivot=pivot, H=H, w=w, down=down, slab=slab, part=g['part'], stroke=stroke)
+        frames[g['name']] = dict(d=d, n=n, pivot=pivot, axis=pivot - n * float((pivot - path[-2]) @ n), H=H, w=w, down=down, slab=slab, part=g['part'], stroke=stroke)
         info['gates'][g['name']] = dict(part=g['part'], pivot=[float(pivot[0]), REST_Y, float(pivot[1])],
             localPivot=[float(pivot[0] / S), float((REST_Z - pivot[1]) / S), 0.0], hit=H.tolist(), axis=d.tolist(),
             pivot_to_outline=float((H - pivot) @ d), pivot_off_axis=float((pivot - path[-2]) @ n))
@@ -322,7 +335,8 @@ def build(spec, report=False):
         on_frac = lambda a, b, fl=fl: M_FRACTURE if fl.distance(Point(*((np.asarray(a) + np.asarray(b)) / 2))) < 1e-6 and fl.distance(Point(*a)) < 1e-6 else M_GOLD
         out['gateBase' + name] = prism(base, Y_BOT, Y_TOP, on_frac, MOULD3, weight).array()
         part = PP[f['part']]
-        rect = lambda hw, a0, a1: Polygon([pv + n * -hw + d * a0, pv + n * hw + d * a0, pv + n * hw + d * a1, pv + n * -hw + d * a1])
+        ax = f['axis']       # the stub continues the runner, so it is centred on the runner axis like gateBase (the pivot is rounded)
+        rect = lambda hw, a0, a1: Polygon([ax + n * -hw + d * a0, ax + n * hw + d * a0, ax + n * hw + d * a1, ax + n * -hw + d * a1])
         neck = rect(w / 2, -0.02, 0.3).intersection(f['down']).difference(part.buffer(COLLAR_OUT, join_style='mitre'))
         neck = min(polys(neck), key=lambda p: p.distance(Point(*pv)))
         band = part.buffer(COLLAR_OUT, join_style='mitre').difference(part.buffer(-COLLAR_IN, join_style='mitre'))
@@ -339,7 +353,7 @@ def build(spec, report=False):
     out = {k: out[k] for k in order if k in out}
     info.update(feedOutline=F.tolist(), cavity=ring(cav).tolist(), rimOuter=ring(rim).tolist(), rimHoles=[ring(r).tolist() for r in rim.interiors],
                 counts={k: int(v.size // 27) for k, v in out.items()}, chars={k: int(v.size * 4 // 3 * 4) for k, v in out.items()})
-    info['fillEnd'] = 9.34 + 0.57 * max(float(out[k].reshape(-1, 9)[:, 6].max()) for k in ('melt0', 'melt1', 'feed')) + 0.76   # must stay < coolStart 11.62
+    info['fillEnd'] = 9.34 + 0.57 * max(float(out[k].reshape(-1, 9)[:, 6].max()) for k in ('melt0', 'melt1', 'feed')) + 0.76   # scene/cast-liquid arrival, travel, fill
     info['arrival'] = {k: [float(out[k].reshape(-1, 9)[:, 6].min()), float(out[k].reshape(-1, 9)[:, 6].max())] for k in ('melt0', 'melt1', 'feed')}
     return out, info
 
@@ -372,6 +386,13 @@ def flatten(d, n):
     return [[round(x, 6), round(-y, 6)] for x, y in P]
 def signed_area(P):
     P = np.asarray(P, float); return 0.5 * float(np.sum(P[:, 0] * np.roll(P[:, 1], -1) - np.roll(P[:, 0], -1) * P[:, 1]))
+BEVEL = 0.018                  # geometry/brand: the signet's bevel inset
+def bevel_margin(P, bevel=BEVEL):
+    """Shortest edge of the inset polygon geometry/builder extrudeLogo makes: each edge loses bevel * tan(turn / 2) at
+    both ends. At zero or below, the inset edge flips and the bevelled cap intersects itself (sharp corner, short edge)."""
+    P = np.asarray(P, float); e = np.roll(P, -1, 0) - P; L = np.hypot(e[:, 0], e[:, 1]); a = np.arctan2(e[:, 1], e[:, 0])
+    turn = (a - np.roll(a, 1) + math.pi) % (2 * math.pi) - math.pi
+    m = L - bevel * (np.tan(turn / 2) + np.tan(np.roll(turn, -1) / 2)); k = int(np.argmin(m)); return float(m[k]), k
 def inline_svg(mark):
     paths = ''.join('<path d="%s" fill="%s"></path>' % (d, mark['fill']) for d in mark['paths'])
     return '<svg aria-hidden="true" viewbox="%s" xmlns="http://www.w3.org/2000/svg">%s</svg>' % (mark['viewBox'], paths)
@@ -382,21 +403,39 @@ def favicon_href(mark):
 
 # ---- outline-derived constants that live in authored code ----------------------------------------------------------------
 RAIL = (1.1625, 1.3775)        # config/casting frame.railMinZ / railMaxZ: the front plank the castings are parked on
-def derived(logo, info):
+FILL_REPORTED = 11.38          # scene/signature and scene/state report the mould as filled at this time
+ROOT_DEPTH = 0.04              # an overflow sheet starts on metal: its root sits at least this far inside its part
+NUM = r'(-?(?:\d+\.?\d*|\.\d+))'
+JOINT_RE = r"name:'%s',pivot:\[" + NUM + ',' + NUM + ',' + NUM + r"\]"
+PARK_RE = re.compile(r'z:frame\.originZ\+' + NUM + ',yaw:' + NUM)
+ROOT_RE = r"\{id:'%s',[^{}]*?points:\[\[" + NUM + ',' + NUM + r'\]'
+def constants(html, logo, info):
+    """Compare the constants in the page's authored code with what this outline needs.  -> (lines, stale?)"""
+    lines = []; stale = False
+    def row(ok, text):
+        nonlocal stale; stale = stale or not ok; lines.append(('ok      ' if ok else 'UPDATE  ') + text)
+    for name, g in info['gates'].items():
+        x, _, z = g['pivot']; want = "pivot:[%.3f,-.0838,%.3f],localPivot:[%.3f/.79,(.20%+.3f)/.79,0]" % (x, z, x, -z)
+        m = re.search(JOINT_RE % name, html)
+        ok = bool(m) and abs(float(m.group(1)) - x) < 5e-4 and abs(float(m.group(3)) - z) < 5e-4
+        row(ok, 'config/casting joints[%s]  %s' % (name, want))
     c = [np.asarray(Polygon(p).centroid.coords[0]) for p in logo]
     yaw = math.atan2(c[0][1] - c[1][1], c[1][0] - c[0][0])
     z = (RAIL[0] + RAIL[1]) / 2 - S * (-math.sin(yaw) * c[0][0] - math.cos(yaw) * c[0][1])
-    lines = []
-    for name, g in info['gates'].items():
-        x, _, zz = g['pivot']
-        lines.append("joints[%s]  pivot:[%.3f,-.0838,%.3f]  localPivot:[%.3f/.79,(.20%+.3f)/.79,0]" % (name, x, zz, x, -zz))
-    lines.append('park        z:frame.originZ+%.4f  yaw:%.4f' % (z, yaw))
-    lines.append('fill ends   %.3f s (must stay below cast-liquid coolStart 11.62)' % info['fillEnd'])
-    return lines
+    m = PARK_RE.search(html)
+    row(bool(m) and abs(float(m.group(1)) - z) < 5e-4 and abs(float(m.group(2)) - yaw) < 5e-4,
+        'config/casting park        z:frame.originZ+%.4f,yaw:%.4f' % (z, yaw))
+    for part, stream in enumerate(('left', 'right')):
+        m = re.search(ROOT_RE % stream, html); poly = Polygon(logo2mould(logo[part]))
+        if not m: row(False, 'config/reclaim %s stream root not found' % stream); continue
+        root = Point(float(m.group(1)), float(m.group(2))); depth = poly.exterior.distance(root) if poly.contains(root) else -poly.distance(root)
+        row(depth >= ROOT_DEPTH, 'config/reclaim %-5s root [%s,%s] is %.3f inside part %s (at least %.2f)' % (stream, m.group(1), m.group(2), depth, 'AB'[part], ROOT_DEPTH))
+    return lines, stale
 
 # ---- page patching ----------------------------------------------------------------------------------------------------------
+VIEWBOX = '-1.1 -1.12 2.2 2.24'
 ASSETS_PREFIX = 'GuziczakModules.define("assets", [], () => ('
-INLINE_RE = re.compile(r'<svg aria-hidden="true" viewbox="-1\.1 -1\.12 2\.2 2\.24" xmlns="http://www\.w3\.org/2000/svg">(?:<path [^>]*></path>)+</svg>')
+INLINE_RE = re.compile(r'(id="(?:flying-mark|header-logo|artifact-poster)">)<svg\b[^>]*>.*?</svg>')
 FAVICON_RE = re.compile(r'(<link href=")data:image/svg\+xml,[^"]+(" rel="icon" type="image/svg\+xml"/>)')
 def patch_page(html, mark, logo, foundry):
     lines = html.split('\n'); hits = [i for i, l in enumerate(lines) if l.startswith(ASSETS_PREFIX)]
@@ -404,8 +443,8 @@ def patch_page(html, mark, logo, foundry):
     payload = json.dumps({'logo': logo, 'foundry': foundry}, separators=(',', ':'))
     lines[hits[0]] = ASSETS_PREFIX + payload + '));'
     html = '\n'.join(lines)
-    html, n = INLINE_RE.subn(lambda _m: inline_svg(mark), html)
-    if n != 3: raise SystemExit('expected 3 inline marks, replaced %d' % n)
+    html, n = INLINE_RE.subn(lambda m: m.group(1) + inline_svg(mark), html)
+    if n != 3: raise SystemExit('expected the inline marks #flying-mark, #header-logo and #artifact-poster, replaced %d' % n)
     html, n = FAVICON_RE.subn(lambda m: m.group(1) + favicon_href(mark) + m.group(2), html)
     if n != 1: raise SystemExit('expected 1 favicon, replaced %d' % n)
     return html
@@ -418,21 +457,34 @@ def main():
     ap.add_argument('--write', action='store_true', help='rewrite the page in place (default: dry run)')
     args = ap.parse_args()
     mark = json.load(open(args.mark, encoding='utf8'))
+    if mark['viewBox'] != VIEWBOX: raise SystemExit('the viewBox is fixed at "%s": the 3-D layout code assumes that frame' % VIEWBOX)
     logo = [flatten(d, mark['segmentsPerCubic']) for d in mark['paths']]
+    if len(logo) != 2: raise SystemExit('the mark has exactly two parts: A and B')
     for i, p in enumerate(logo):
         if signed_area(p) <= 0: raise SystemExit('path %d must run counter-clockwise on screen' % i)
+        margin, edge = bevel_margin(p)
+        if margin < 0.004:
+            raise SystemExit('path %d: the bevel inset leaves %.4f of edge %d; a curve ends too close to a sharp corner '
+                             '(lengthen its last cubic or lower segmentsPerCubic)' % (i, margin, edge))
     out, info = build({'logo': logo, 'gates': mark['gates'], 'arrivalMax': mark.get('arrivalMax')})
     foundry = {k: b64(v) for k, v in out.items()}
     print('outline   : %s points, areas %s, gap %.4f' % ([len(p) for p in logo], [round(signed_area(p), 4) for p in logo], Polygon(logo[0]).distance(Polygon(logo[1]))))
     print('foundry   : %s' % ', '.join('%s %d' % (k, v) for k, v in info['counts'].items()), '(triangles); %d base64 chars' % sum(len(v) for v in foundry.values()))
-    print('arrival   : %s, scale %.4f' % ({k: [round(a, 3) for a in v] for k, v in info['arrival'].items()}, info['arrivalScale']))
-    for line in derived(logo, info): print('constants : ' + line)
-    if info['fillEnd'] >= 11.62: raise SystemExit('the fill would still be running when cooling starts; lower arrivalMax')
+    print('arrival   : %s, scale %.4f; the mould is full at %.3f s' % ({k: [round(a, 3) for a in v] for k, v in info['arrival'].items()}, info['arrivalScale'], info['fillEnd']))
+    if info['fillEnd'] > FILL_REPORTED + 1e-3:
+        raise SystemExit('the scene reports the mould as filled at %.2f s but this fill ends at %.3f s; lower arrivalMax' % (FILL_REPORTED, info['fillEnd']))
     html = open(args.page, encoding='utf8').read(); new = patch_page(html, mark, logo, foundry)
-    print('page      : %d -> %d bytes%s' % (len(html.encode('utf8')), len(new.encode('utf8')), '' if args.write else ' (dry run, nothing written)'))
-    if args.write and new != html:
+    lines, stale = constants(new, logo, info)
+    for line in lines: print('constants : ' + line)
+    same = new == html
+    print('page      : %s (%d -> %d bytes)' % ('already up to date' if same else 'differs from this bake' + ('' if args.write else '; dry run, nothing written'),
+                                             len(html.encode('utf8')), len(new.encode('utf8'))))
+    if args.write and not same:
         with open(args.page, 'w', encoding='utf8', newline='') as f: f.write(new)
         print('wrote     : %s  -> now run: node scripts/build.cjs && npm run check' % os.path.relpath(args.page, root))
+    if stale:
+        print('constants marked UPDATE are authored code: edit them in index.html by hand, then run this again')
+        sys.exit(2)
 
 if __name__ == '__main__':
     main()

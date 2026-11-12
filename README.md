@@ -56,13 +56,21 @@ node scripts/build.cjs
 ```
 
 This tool is not part of the build or of CI, and it is the only thing here with
-dependencies (Python 3.9+, numpy, shapely 2.1+). It is needed only when the outline or
+dependencies (Python 3.10+, numpy, shapely 2.1+). It is needed only when the outline or
 the gates change. Its foundry construction was reconstructed from the previously
-shipped meshes, whose generator was never in the repository. After a change, also
-update the outline-derived constants in authored code that the tool prints:
-`config/casting` gate pivots and park pose, and the `config/reclaim` stream roots.
-`tests/mark-parity.test.cjs` needs only Node and fails when the 2D paths, the 3D
-outline, the foundry meshes or the gate pivots stop describing the same shape.
+shipped meshes, whose generator was never in the repository, and the baked bytes can
+differ between shapely versions.
+
+Three kinds of outline-derived constants stay in authored code and are not rewritten:
+the `config/casting` gate pivots and park pose, and the `config/reclaim` stream roots.
+The tool reads them from the page, prints the pivots and park pose this outline needs
+and how deep each stream root lies inside its part, and exits with status 2 while any
+of them is out of date. The stream roots are chosen by hand.
+
+`tests/mark-parity.test.cjs` needs only Node. It fails when the 2D marks, the 3D
+outline, any of the nine foundry meshes, the gate pivots, the gate routes in
+`mark.json` or the stream roots stop describing the same shape. It does not check the
+park pose (the foundry clearance checks do) or how anything looks.
 
 ## Build
 
