@@ -691,6 +691,13 @@ body:not(.intro):not(.route-cv):not(.route-score) #header{
  position:sticky;top:var(--chrome-top,0px);z-index:72;background:#080a0a;
  border-bottom:1px solid transparent;transition:background .2s,border-color .2s,box-shadow .2s;
 }
+/* Unscrolled, the header is clear while the live exhibit stands directly below it: the scene and
+   its text-side shade continue underneath, so the halo closes behind the navigation. An open menu
+   keeps the header solid; :where leaves the specificity equal to the scrolled rule below. */
+@media screen and (min-width:701px) and (forced-colors:none){
+ body.exhibit-ready:not(.intro):not(.route-cv):not(.route-score):where(:not(.menu-open)) #header{background:transparent}
+ body.exhibit-ready:not(.intro) .hero:before{top:calc(-1 * var(--head))}
+}
 body.header-scrolled:not(.intro):not(.route-cv):not(.route-score) #header{
  background:#080c0b;border-bottom-color:#d4b77b2a;box-shadow:0 8px 30px #0003;
 }
@@ -6466,9 +6473,10 @@ GuziczakModules.define('render/atelier-shaders',['world/water-drive'],(drive)=>{
   c+=vec3(.37,.19,.050)*foot*(.26+wisps*3.8);
   float angle=atan(a.y,a.x),rad=length(a/vec2(1.,1.01));
   float arc=smoothstep(.10,.23,abs(angle))*(1.-smoothstep(3.70,3.86,mod(angle+PI*2.,PI*2.)));
-  float aa=max(fwidth(rad),.0016),ring=1.-smoothstep(.0,aa*1.15,abs(rad-1.26));
+  // The halo's apex rises behind the page header; this radius keeps it clear of the navigation text.
+  float aa=max(fwidth(rad),.0016),ring=1.-smoothstep(.0,aa*1.15,abs(rad-1.22));
   float light=.10+.30*smoothstep(-.5,1.2,a.y)+.8*exp(-pow((angle-.76)*18.,2.));
-  c+=vec3(.62,.31,.065)*ring*arc*light+vec3(.012,.006,.0017)*exp(-abs(rad-1.26)*90.)*arc;
+  c+=vec3(.62,.31,.065)*ring*arc*light+vec3(.012,.006,.0017)*exp(-abs(rad-1.22)*90.)*arc;
   color=vec4(c,0);
  }`;
  const waterFS=`#version 300 es
