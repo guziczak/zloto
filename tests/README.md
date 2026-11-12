@@ -35,6 +35,10 @@ show how the mark or the casting looks.
 Foundry clearance checks build the actual meshes and sample the moving flask,
 raised cartridge and released castings against all 66 pipe and igniter envelopes.
 They cover arrival, seating, extraction, support on the front plank, pickup and departure.
+While each casting is levered out, its outline is sampled at both faces and mid depth:
+it may dip at most .02 into the sand beside its own cavity, and the two castings must
+never overlap. This guards the hand-tuned pry angles; it is a point-sampled bound, not
+a collision solver.
 The water terrain is checked against the same moving frame and casting footprint
 used by rendering. These numeric checks complement visual review of the actual
 shaders; they do not establish browser rendering or performance by themselves.

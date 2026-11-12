@@ -241,6 +241,48 @@ test('castings begin at their real gate joints and rest with their mass over the
   }
 });
 
+test('castings are levered out without ploughing through the sand or through each other', () => {
+  const half = .08, scale = casting.rest.scale, restZ = casting.rest.z - casting.frame.originZ;
+  const inside = (x, y, polygon) => {
+    let hit = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const a = polygon[i], b = polygon[j];
+      if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) hit = !hit;
+    }
+    return hit;
+  };
+  const toEdge = (x, y, polygon) => Math.min(...polygon.map((a, i) => segmentDistance([x, y, 0], [...a, 0], [...polygon[(i + 1) % polygon.length], 0])));
+  // Each solid is sampled along its outline on both faces and at mid depth.
+  const solids = logo.map(polygon => polygon.flatMap((a, i) => {
+    const b = polygon[(i + 1) % polygon.length], steps = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / .025));
+    return Array.from({ length: steps }, (_, k) => [a[0] + (b[0] - a[0]) * k / steps, a[1] + (b[1] - a[1]) * k / steps])
+      .flatMap(point => [-half, 0, half].map(z => [...point, z]));
+  }));
+  const cavities = logo.map(polygon => polygon.map(([x, y]) => [x * scale, restZ - y * scale]));
+  let sand = 0, overlap = 0;
+  for (const time of sampleTimes(casting.phase.coolEnd, casting.phase.travelEnd, .01)) {
+    const placement = motion.sample(time), pieces = castMotion.sample(time).pieces;
+    const inverse = pieces.map(piece => registry.get('math').inverse4(piece.pose));
+    pieces.forEach((piece, index) => {
+      for (const local of solids[index]) {
+        const world = M.point(piece.pose, local);
+        const other = M.point(inverse[1 - index], world);
+        if (Math.abs(other[2]) < half && inside(other[0], other[1], logo[1 - index]))
+          overlap = Math.max(overlap, Math.min(half - Math.abs(other[2]), toEdge(other[0], other[1], logo[1 - index])));
+        // Mould frame: sand top at y = 0 inside the timber. Below it, a casting may only be in its own cavity.
+        const mould = [world[0] - placement.x, world[1] - placement.y, world[2] - placement.z];
+        if (Math.abs(mould[0]) > 1.103 || mould[2] < -1.242 || mould[2] > 1.1625 || mould[1] >= 0) continue;
+        if (!inside(mould[0], mould[2], cavities[index]))
+          sand = Math.max(sand, Math.min(-mould[1], toEdge(mould[0], mould[2], cavities[index])));
+      }
+    });
+  }
+  assert.equal(overlap, 0, 'The two castings never pass through each other');
+  // The cavity wall stands .014 off the casting and opens to .038 at the rim, so a tilted edge may dip
+  // this far past its own outline while it is pried loose; more means the lever sweeps through sand.
+  assert(sand < .02, `A casting dips ${sand.toFixed(4)} into the sand beside its cavity while it is levered out`);
+});
+
 test('the water terrain and metal footprint follow the same moving mould as rendering', () => {
   for (const time of sampleTimes(7.67, 17.54, .01)) {
     const placement = motion.sample(time);
