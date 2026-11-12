@@ -5175,6 +5175,9 @@ void main(){
  vec3 light=vec3(0,-.8,.6)-p;float dd=dot(light,light);
  c+=brdf(n,v,normalize(light),base,metal,max(rough,.28),vec3(1.05,.47,.10)*(1.+uEnergy*3.)/(.5+dd));
  if(id<.5){c+=env(reflect(-v,n),.07)*(.013+.065*pow(1.-nv,5.));}
+ // The badge leans toward the deck and would mirror only the unlit floor of the studio.
+ // Its downward reflections get the deck's warm bounce of the key light, until its own heat takes over.
+ if(id>26.5&&id<27.5)c+=base*vec3(.26,.24,.20)*smoothstep(.10,.70,-reflect(-v,n).y)*(1.-uBadgeHeat);
  if(p.y<-.1&&p.y> -1.65){occ*=1.-.19*exp(-length(p.xz)*4.);}
  if(uMode>1.5&&uMode<2.5)occ*=.82+.18*smoothstep(.15,.9,length(q.xz));
  if(uMode>3.5&&uMode<4.5){vec2 uv=gl_FragCoord.xy/uResolution;vec3 rr=texture(uLiquidMirror,uv+vec2(n.x,-n.z)*.015).rgb;c=c*.57+rr*mix(vec3(.52),base,.65)*.74;}
